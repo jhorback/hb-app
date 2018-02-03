@@ -1,0 +1,30 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+
+<dom-module id="hb-app">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      [hidden] { display: none; }
+    </style>
+    <h1>HB App</h1>
+  </template>
+
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbApp extends Polymer.Element {
+      static get is() { return 'hb-app'; }
+      static get properties() {
+        return {
+          
+        };
+      }      
+    }
+
+    window.customElements.define(HbApp.is, HbApp);
+  </script>
+</dom-module>

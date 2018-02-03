@@ -1,0 +1,29 @@
+{
+  "entrypoint": "index.html",
+  "shell": "src/ipt-app/ipt-app.html",
+  "sources": [
+    "src/**/*"
+   ],
+  "extraDependencies": [
+    "bower_components/webcomponentsjs/*"
+  ],
+  "lint": {
+    "rules": [
+      "polymer-2"
+    ]
+  },
+  "builds": [{
+    "xxxpreset": "es5-bundled",
+    "name": "default",
+    "bundle": {
+        "xxxsourcemaps": true,
+        "js": { "minify": false, "compile": false },
+        "css": { "minify": false },
+        "html": { "minify": false },
+        "bundle": true,
+        "addServiceWorker": false,
+        "addPushManifest": false,
+        "insertPrefetchLinks": false
+    }
+  }]
+}

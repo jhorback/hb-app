@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>ipt-app test</title>
+
+    <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../../bower_components/web-component-tester/browser.js"></script>
+    <script src="../../../bower_components/test-fixture/test-fixture-mocha.js"></script>
+    
+    <link rel="import" href="../ipt-app.html">
+  </head>
+  <body>
+
+    <test-fixture id="BasicTestFixture">
+      <template>
+        <ipt-app></ipt-app>
+      </template>
+    </test-fixture>
+
+    <test-fixture id="ChangedPropertyTestFixture">
+      <template>
+        <ipt-app prop1="new-prop1"></ipt-app>
+      </template>
+    </test-fixture>
+
+    <script>
+      describe('ipt-app', _ => {
+
+        it('instantiates the element with default properties', function() {
+          var element = fixture('BasicTestFixture');
+          expect(element.prop1).to.equal('ipt-app');
+        });
+
+        it('can set a property on the element', function() {
+          // Create a test fixture
+          var element = fixture('ChangedPropertyTestFixture');
+          expect(element.prop1).to.equal('new-prop1');
+        });
+
+      });
+    </script>
+
+
+  </body>
+</html>
