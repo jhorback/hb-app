@@ -1,5 +1,5 @@
 {
-  "name": "ipt",
+  "name": "hb-app",
   "version": "0.1.0",
   "scripts": {
       "polybuild": "polymer build",

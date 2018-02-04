@@ -1,4 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="hb-doc-routing.html">
 
 <dom-module id="hb-app">
   <template>
@@ -9,6 +12,15 @@
       [hidden] { display: none; }
     </style>
     <h1>HB App</h1>
+    <a href="[[rootPath]]">Root</a>
+    <app-location route="{{route}}"></app-location>
+    <app-route
+      route="[[route]]"
+      pattern="[[rootPath]]"
+      tail="{{routeTail}}"
+    ></app-route>
+    <hb-doc-routing route="[[routeTail]]"></hb-doc-routing>
+    <a href="[[rootPath]]/art/1">Art / 1</a>
   </template>
 
   <script>
@@ -20,9 +32,25 @@
       static get is() { return 'hb-app'; }
       static get properties() {
         return {
-          
+          route: {
+            type: Object
+          },
+          routeTail: {
+            type: Object
+          }     
         };
-      }      
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        const { path } = this.route;
+        
+        if (path.substring(0, path.length - 1) === this.rootPath) {
+          window.history.replaceState({}, null, `${this.rootPath}/art/1`);
+          window.dispatchEvent(new CustomEvent('location-changed'));
+          console.log("On root path... navigate to default doc");
+        }
+      }
     }
 
     window.customElements.define(HbApp.is, HbApp);

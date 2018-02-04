@@ -1,6 +1,6 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/ipt-app/ipt-app.html",
+  "shell": "src/hb-app/hb-app.html",
   "sources": [
     "src/**/*"
    ],
