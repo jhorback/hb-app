@@ -1,12 +1,15 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
 <link rel="import" href="../hb-app/hb-doc-routing.html">
+<link rel="import" href="hb-art.html">
+<link rel="import" href="hb-art-data.html">
 
 <dom-module id="hb-art-route">
   <template>
     <app-route
         route="[[route]]"
         pattern="/art/:uid"
+        data="{{routeData}}"
         active="{{routeActive}}"
         tail="{{routeTail}}"
     ></app-route>
@@ -17,6 +20,8 @@
             active: [[routeActive]]
         </div>    
         <hb-doc-routing route="[[routeTail]]"></hb-doc-routing>
+        <hb-art-data doc="{{art}}"></hb-art-data>
+        <hb-art art="[[art]]" uid="[[routeData.uid]]"></hb-art>
     </template>
 
   </template>
