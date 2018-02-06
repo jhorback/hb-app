@@ -5,7 +5,13 @@
  attached or detached from the dom.
 
  ## Status
+ __1/19/2018 - Compleite - 15 passing tests__ 
+ ** Fixed listening on parent by switching out parentElement for parentNode
+ ** listenAt can now be the id of a child element. See note below.
+
+
  __9/13/2017 - Complete - 11 passing tests__
+
 
  ## Basic usage
  When "some-dom-event" is dispatched, the "_someHandler" method gets called;
@@ -65,22 +71,34 @@
   }
   ```
 
+  ## Multiple event maps
+  If any mixin or class uses the EventMap, all subclass and mixin event maps
+  will be merged.
+  
+  The event maps higher in the chain will take precident.
 
+
+// test that sub class event handlers get called
+// test that if a parent class overrides the event, that one gets called instead
 
   @polymer
   @mixinFunction
 */
 let EventMap = (superclass) => class extends superclass {
-  ready () {
-    super.ready();
-    this.__eventMapHandlers = {};
-  }
   /**
    * Adds event listeners.
    */
 	connectedCallback() {
 		super.connectedCallback();
+
+    // keep the map from being processed more than once.
+    // Could happen if the EventMap is mixed in more than
+    // once on a single class
+    if (this.__eventMapProcessed === true) {
+      return;
+    }
     this._bindEvents();
+    this.__eventMapProcessed = true;    
 	}
   /**
    * Detaches event listners.
@@ -88,11 +106,45 @@ let EventMap = (superclass) => class extends superclass {
   disconnectedCallback() {
     super.disconnectedCallback();
     this._unbindEvents();
+    delete this.__eventMapProcessed;
   }
 
   _bindEvents() {
+    // verify that the eventmap included twice does not stop too early
+    const getAllEvents = _ => {
+      let klass = this.constructor;
+      let eventMaps = [];
+
+      while(klass !== Polymer.Element) {        
+        if (klass.events) {
+          let events = klass.events;
+
+          // support eventsListenAt
+          if (klass.eventsListenAt) {
+            const listenAt = klass.eventsListenAt;
+            events = Object.keys(events).reduce((newEvents, eventName) => { 
+              if (typeof events[eventName] === "string") {
+                const handler = events[eventName];
+                newEvents[eventName] = {listenAt, handler};
+              } else {
+                newEvents[eventName] = events[eventName]
+              }
+              return newEvents;
+            }, {});
+          }
+
+          eventMaps.unshift(events);
+        }
+        klass = Object.getPrototypeOf(klass.prototype.constructor);        
+      }
+
+      return eventMaps.length > 0 ?
+        Object.assign(...eventMaps) : null;
+    }
     
-    let events = this.constructor.events;
+   
+    const events = getAllEvents();
+    
     if (!events) {
       return;
     }
@@ -109,17 +161,22 @@ let EventMap = (superclass) => class extends superclass {
       }
 
       let handler = (event) => {
-        event.stopPropagation();
+        if (!detail.nsp)  {
+          event.stopPropagation();
+        }
         this[detail.handler](event);
       };
 
-      let listenAt = (detail.listenAt) === "window" ? window :
-        (detail.listenAt) === "parent" ? this.parentElement : this;
-      
-      if (!listenAt){
-        console.warn("Event map could not listen at", detail.listenAt, "- changing to listen at window");
-        listenAt = window;
+      const listenAt = (detail.listenAt) === "window" ? window :
+        (detail.listenAt) === "parent" ? this.parentNode : this;
+
+      if (detail.listenAt && (detail.listenAt !== "window" && detail.listenAt !== "parent")) {
+        throw new Error(`EventMap could not set up a listener at ${detail.listenAt}`);
       }
+
+      if (!listenAt) {
+        throw new Error(`EventMap could not set up a listener at ${detail.listenAt}`); // jch! add test
+      }      
 
       this.__eventMapHandlers[key] =  {
         listenAt: listenAt,
