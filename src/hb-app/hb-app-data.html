@@ -1,0 +1,39 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../EventMap.html">
+<script>
+/**
+    * @customElement
+    * @polymer
+    */
+class HbAppData extends EventMap(Polymer.Element) {
+    static get is() { return 'hb-app-data'; }
+
+    static get properties() {
+        return {
+            system: {
+                type: Object,
+                notify: true
+            }
+        };
+    }
+
+    static get eventsListenAt() {
+        return "parent";
+    }
+    
+    // static get events() {
+    //     return {
+    //         "request-art": "_requestArt"
+    //     };
+    // }
+
+    // _requestArt(event) {
+    //     console.log("getting art. id:", event.detail.uid);
+    //     this.doc = {
+    //         title: "Hb Art Title"
+    //     };
+    // }
+}
+
+window.customElements.define(HbAppData.is, HbAppData);
+</script>
