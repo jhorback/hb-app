@@ -16,13 +16,14 @@ class HbArtData extends EventMap(Polymer.Element) {
             }
         };
     }
+
+    static get eventsListenAt() {
+        return "parent";
+    }
     
     static get events() {
         return {
-            "request-art": {
-                listenAt: "parent",
-                handler: "_requestArt"
-            }
+            "request-art": "_requestArt"
         };
     }
 
