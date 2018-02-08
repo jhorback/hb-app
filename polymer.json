@@ -2,7 +2,8 @@
   "entrypoint": "index.html",
   "shell": "src/hb-app/hb-app.html",
   "sources": [
-    "src/**/*"
+    "src/**/*",
+    "manifest.json"
    ],
   "extraDependencies": [
     "bower_components/webcomponentsjs/*"
@@ -13,17 +14,17 @@
     ]
   },
   "builds": [{
-    "xxxpreset": "es5-bundled",
+    "xxxpreset": "es6-bundled",
     "name": "default",
     "bundle": {
-        "xxxsourcemaps": true,
+        "sourcemaps": true,
         "js": { "minify": false, "compile": false },
-        "css": { "minify": false },
-        "html": { "minify": false },
-        "bundle": true,
+        "css": { "minify": true },
+        "html": { "minify": true },
+        "bundle": false,
         "addServiceWorker": false,
-        "addPushManifest": false,
-        "insertPrefetchLinks": false
+        "addPushManifest": true,
+        "insertPrefetchLinks": true
     }
   }]
 }
