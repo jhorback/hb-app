@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "harbor-staging"
+    "default": "harbor-staging",
+    "habor-staging": "harbor-staging"
   }
 }

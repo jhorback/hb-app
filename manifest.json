@@ -1,7 +1,7 @@
 {
-  "name": "ipt",
-  "short_name": "ipt",
-  "description": "iplayten.com",
+  "name": "harbor",
+  "short_name": "hb",
+  "description": "harbor web application",
   "start_url": "/",
   "display": "standalone"
 }
