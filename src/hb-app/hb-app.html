@@ -1,6 +1,8 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/app-route/app-location.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-storage-ref.html">
 <link rel="import" href="hb-doc-routing.html">
 
 <dom-module id="hb-app">
@@ -11,6 +13,25 @@
       }
       [hidden] { display: none; }
     </style>
+
+    <firebase-app
+      auth-domain="harbor-staging.firebaseapp.com"
+      database-url="https://harbor-staging.firebaseio.com"
+      api-key="AIzaSyDWh26rJrV-cdL43DB8BSW4YVrxe5st7d8"
+      storage-bucket="harbor-staging.appspot.com"
+      messaging-sender-id="926265757745"
+      project-id="harbor-staging"
+      app="{{fbApp}}">
+    </firebase-app>
+
+    <firebase-storage-ref
+      path="images/104_IMG_0073_170913CK04_P0659_Ul (1).jpg"      
+      download-url="{{downloadUrl}}">
+    </firebase-storage-ref>
+
+    <img src="[[downloadUrl]]" style="max-width:200px"/>
+
+
     <h1>HB App</h1>
     <a href="[[rootPath]]">Root</a>
     <app-location route="{{route}}"></app-location>
@@ -36,12 +57,19 @@
           route: {
             type: Object
           },
+
           routeTail: {
             type: Object
           },
+
           routeActive: {
             type: Boolean
-          } 
+          },
+
+          fbApp: {
+            type: Object,
+            observer: "_fbAppChanged"
+          }
         };
       }
 
@@ -52,6 +80,26 @@
        */
       _getRootRoute(route, routeTail) {
         return this.routeActive ? this.routeTail : this.route;
+      }
+
+      _fbAppChanged() {
+        if (!this.fbApp) {
+          return;
+        }
+
+        // const storageRef = firebase.storage().ref();
+        // const imagesRef = storageRef.child("images");
+        // const image = imagesRef.child("104_IMG_0073_170913CK04_P0659_Ul (1).jpg");
+        // image.getDownloadURL().then(url => {
+        //   console.log(url);
+        //   debugger;
+        // });
+        // debugger;
+
+      }
+
+      _getTestStoragePath() {
+        return encodeURI("images/104_IMG_0073_170913CK04_P0659_Ul (1).jpg");
       }
     }
 
