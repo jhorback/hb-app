@@ -1,8 +1,8 @@
 {
-    const href = window.location.href;      
-    if (href.indexOf("/components/hb-app") > -1) {
-        window.Polymer = {
-        rootPath: href.substring(href.indexOf("/components/hb-app"), href.lastIndexOf("/")) 
-        };
-    }
+    const href = window.location.href;
+    const indexOfComponents = href.indexOf("/components/hb-app");
+    const rootPath = indexOfComponents > -1 ?
+        href.substring(indexOfComponents, href.lastIndexOf("/")) :
+        window.location.origin;
+    window.Polymer = { rootPath};
 }

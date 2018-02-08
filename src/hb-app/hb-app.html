@@ -18,8 +18,9 @@
       route="[[route]]"
       pattern="[[rootPath]]"
       tail="{{routeTail}}"
+      active="{{routeActive}}"
     ></app-route>
-    <hb-doc-routing route="[[routeTail]]"></hb-doc-routing>
+    <hb-doc-routing route="[[_getRootRoute(route, routeTail)]]"></hb-doc-routing>
     <a href="[[rootPath]]/art/1">Art / 1</a>
   </template>
 
@@ -37,19 +38,20 @@
           },
           routeTail: {
             type: Object
-          }     
+          },
+          routeActive: {
+            type: Boolean
+          } 
         };
       }
 
-      connectedCallback() {
-        super.connectedCallback();
-        const { path } = this.route;
-        
-        if (path.substring(0, path.length - 1) === this.rootPath) {
-          window.history.replaceState({}, null, `${this.rootPath}/art/1`);
-          window.dispatchEvent(new CustomEvent('location-changed'));
-          console.log("On root path... navigate to default doc");
-        }
+      /**
+       * Depending on the serving location the root route can be
+       * the route tail if the rootPath is matches the pattern.
+       * Otherwise just pass down the current route.
+       */
+      _getRootRoute(route, routeTail) {
+        return this.routeActive ? this.routeTail : this.route;
       }
     }
 
