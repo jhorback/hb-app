@@ -2,7 +2,9 @@
 <link rel="import" href="../../bower_components/app-route/app-location.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-storage-ref.html">
+<link rel="import" href="hb-app-data.html">
 <link rel="import" href="hb-doc-routing.html">
 
 <dom-module id="hb-app">
@@ -11,7 +13,6 @@
       :host {
         display: block;
       }
-      [hidden] { display: none; }
     </style>
 
     <firebase-app
@@ -21,28 +22,27 @@
       storage-bucket="harbor-staging.appspot.com"
       messaging-sender-id="926265757745"
       project-id="harbor-staging"
-      app="{{fbApp}}">
+      on-app-changed="_firebaseAppChanged">
     </firebase-app>
 
-    <firebase-storage-ref
-      path="images/104_IMG_0073_170913CK04_P0659_Ul (1).jpg"      
-      download-url="{{downloadUrl}}">
-    </firebase-storage-ref>
+    <firebase-auth
+      id="auth"
+      user="{{user}}"
+      provider="google">
+    </firebase-auth>
 
-    <img src="[[downloadUrl]]" style="max-width:200px"/>
+    <template is="dom-if" if="[[!isInitialized]]">
+      Application initializing...
+    </template>
 
-
-    <h1>HB App</h1>
-    <a href="[[rootPath]]">Root</a>
-    <app-location route="{{route}}"></app-location>
-    <app-route
-      route="[[route]]"
-      pattern="[[rootPath]]"
-      tail="{{routeTail}}"
-      active="{{routeActive}}"
-    ></app-route>
+    <template is="dom-if" if="[[isInitialized]]">
+        <hb-app-data
+        app="{{app}}"
+        app-ready="{{appReady}}">
+      </hb-app-data>      
+    </template>
+    
     <hb-doc-routing route="[[_getRootRoute(route, routeTail)]]"></hb-doc-routing>
-    <a href="[[rootPath]]/art/1">Art / 1</a>
   </template>
 
   <script>
@@ -66,11 +66,29 @@
             type: Boolean
           },
 
-          fbApp: {
-            type: Object,
-            observer: "_fbAppChanged"
+          isInitialized: {
+            type: Boolean,
+            value: false
+          },
+
+          user: {
+            type: Object
+          },
+
+          app: {
+            type: Object
           }
         };
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        window.auth = this.$.auth;
+        
+      }
+
+      signIn() {
+        this.$.auth.signInWithPopup();
       }
 
       /**
@@ -82,27 +100,46 @@
         return this.routeActive ? this.routeTail : this.route;
       }
 
-      _fbAppChanged() {
-        if (!this.fbApp) {
-          return;
-        }
-
-        // const storageRef = firebase.storage().ref();
-        // const imagesRef = storageRef.child("images");
-        // const image = imagesRef.child("104_IMG_0073_170913CK04_P0659_Ul (1).jpg");
-        // image.getDownloadURL().then(url => {
-        //   console.log(url);
-        //   debugger;
-        // });
-        // debugger;
-
-      }
-
-      _getTestStoragePath() {
-        return encodeURI("images/104_IMG_0073_170913CK04_P0659_Ul (1).jpg");
+      _firebaseAppChanged(event) {
+        const {value: app} = event.detail;
+        this.isInitialized = !!app;
       }
     }
 
     window.customElements.define(HbApp.is, HbApp);
   </script>
 </dom-module>
+
+<!--  TEST CODE
+<div>
+    App is ready? [[appReady]]
+    Home: [[app.homeDoc.docId]]
+  </div>
+  <div>
+    User isAnonymous: [[user.isAnonymous]]<br>
+    Name: [[user.displayName]]
+    Email: [[user.email]]
+    < <img src="[[user.photoURL]]" hidden$="[[!user]]" width="20"> >
+    <div hidden$="[[user]]" on-click="signIn">
+      Sign In
+    </div>
+  </div>
+
+  <firebase-storage-ref
+    path="images/104_IMG_0073_170913CK04_P0659_Ul (1).jpg"      
+    download-url="{{downloadUrl}}">
+  </firebase-storage-ref>
+  <img src="[[downloadUrl]]" style="max-width:200px"/>
+
+
+  <h1>HB App</h1>
+  <a href="[[rootPath]]">Root</a>
+  <app-location route="{{route}}"></app-location>
+  <app-route
+    route="[[route]]"
+    pattern="[[rootPath]]"
+    tail="{{routeTail}}"
+    active="{{routeActive}}"
+  ></app-route>
+  <a href="[[rootPath]]/art/1">Art / 1</a>
+-->

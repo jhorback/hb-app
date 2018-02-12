@@ -1,18 +1,29 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../EventMap.html">
+<!-- <link rel="import" href="../../bower_components/polymerfire/firebase-firestore-script.html"> -->
+<link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
+<link rel="import" href="EventMap.html">
 <script>
 /**
-    * @customElement
-    * @polymer
-    */
-class HbAppData extends EventMap(Polymer.Element) {
+ * @customElement
+ * @polymer
+ */
+class HbAppData extends EventMap(
+    Polymer.FirestoreMixin(Polymer.Element)
+) {
     static get is() { return 'hb-app-data'; }
 
     static get properties() {
         return {
-            system: {
+            app: {
                 type: Object,
-                notify: true
+                notify: true,
+                doc: "system/app"
+            },
+            
+            appReady: {
+                type: Boolean,
+                notify: true,
+                value: false
             }
         };
     }
@@ -23,15 +34,16 @@ class HbAppData extends EventMap(Polymer.Element) {
     
     // static get events() {
     //     return {
-    //         "request-art": "_requestArt"
+    //         "request-app-data": "_requestAppData"
     //     };
     // }
 
-    // _requestArt(event) {
-    //     console.log("getting art. id:", event.detail.uid);
-    //     this.doc = {
-    //         title: "Hb Art Title"
-    //     };
+    // _requestAppData(event) {
+    //     const db = firebase.firestore();
+    //     db.doc("system/app").onSnapshot(doc => {
+    //         this.set("app", doc.data());
+    //         this.set("appReady", true);
+    //     });
     // }
 }
 
