@@ -2,8 +2,6 @@
 <link rel="import" href="../../bower_components/app-route/app-location.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-storage-ref.html">
 <link rel="import" href="hb-app-data.html">
 <link rel="import" href="hb-doc-routing.html">
 
@@ -25,24 +23,28 @@
       on-app-changed="_firebaseAppChanged">
     </firebase-app>
 
-    <firebase-auth
-      id="auth"
-      user="{{user}}"
-      provider="google">
-    </firebase-auth>
+
+    <app-location route="{{route}}"></app-location>
+    <app-route
+      route="[[route]]"
+      pattern="/components/hb-app"
+      tail="{{routeTail}}"
+      active="{{routeActive}}"
+    ></app-route>
 
     <template is="dom-if" if="[[!isInitialized]]">
       Application initializing...
     </template>
 
-    <template is="dom-if" if="[[isInitialized]]">
-        <hb-app-data
-        app="{{app}}"
-        app-ready="{{appReady}}">
-      </hb-app-data>      
+    <template is="dom-if" if="[[isInitialized]]">       
+        <hb-doc-routing route="[[_getRootRoute(route, routeTail)]]"></hb-doc-routing>      
+    </template>
+
+    <template is="dom-if" if="[[_showHomePage(route, isInitialized)]]">
+        SHOW HOME PAGE
+        <a href="[[rootPath]]/art/1">ART LINK</a>
     </template>
     
-    <hb-doc-routing route="[[_getRootRoute(route, routeTail)]]"></hb-doc-routing>
   </template>
 
   <script>
@@ -69,35 +71,26 @@
           isInitialized: {
             type: Boolean,
             value: false
-          },
-
-          user: {
-            type: Object
-          },
-
-          app: {
-            type: Object
           }
         };
       }
 
       connectedCallback() {
         super.connectedCallback();
-        window.auth = this.$.auth;
-        
-      }
-
-      signIn() {
-        this.$.auth.signInWithPopup();
+        window.auth = this.$.auth;        
       }
 
       /**
-       * Depending on the serving location the root route can be
-       * the route tail if the rootPath is matches the pattern.
-       * Otherwise just pass down the current route.
+       * Determine the starting route differently
+       * if we are in the "components" directory
        */
       _getRootRoute(route, routeTail) {
         return this.routeActive ? this.routeTail : this.route;
+        return root;
+      }
+
+      _showHomePage(route, isInitialized) {
+        return isInitialized && window.location.href === `${this.rootPath}/`;
       }
 
       _firebaseAppChanged(event) {
@@ -111,6 +104,14 @@
 </dom-module>
 
 <!--  TEST CODE
+
+      <firebase-auth
+      id="auth"
+      user="{{user}}"
+      provider="google">
+    </firebase-auth>
+
+
 <div>
     App is ready? [[appReady]]
     Home: [[app.homeDoc.docId]]
@@ -134,12 +135,6 @@
 
   <h1>HB App</h1>
   <a href="[[rootPath]]">Root</a>
-  <app-location route="{{route}}"></app-location>
-  <app-route
-    route="[[route]]"
-    pattern="[[rootPath]]"
-    tail="{{routeTail}}"
-    active="{{routeActive}}"
-  ></app-route>
+  
   <a href="[[rootPath]]/art/1">Art / 1</a>
 -->
