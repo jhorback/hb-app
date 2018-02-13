@@ -2,7 +2,7 @@
 <link rel="import" href="../../bower_components/app-route/app-location.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
-<link rel="import" href="hb-app-data.html">
+<link rel="import" href="hb-home.html">
 <link rel="import" href="hb-doc-routing.html">
 
 <dom-module id="hb-app">
@@ -41,12 +41,10 @@
     </template>
 
     <template is="dom-if" if="[[_showHomePage(route, isInitialized)]]">
-        SHOW HOME PAGE
-        <a href="[[rootPath]]/art/1">ART LINK</a>
+        <hb-home  route="[[_getRootRoute(route, routeTail)]]"></hb-home>
     </template>
     
   </template>
-
   <script>
     /**
      * @customElement
