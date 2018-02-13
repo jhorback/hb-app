@@ -1,13 +1,19 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
+<link rel="import" href="hb-page-layout.html">
+
 <dom-module id="hb-home">
     <template>
         <div hidden$="[[appReady]]">
             Loading Home
         </div>
-        <div hidden$="[[!_showNoHome(appReady, app)]]">
-            No Home Page
-        </div>
+        <template is="dom-if" if="[[_showNoHome(appReady, app)]]" restamp>
+            <hb-page-layout>
+                There is no home page<br>
+                Another line
+            </hb-page-layout>
+        </template>
+        
     </template>
     <script>
     /**

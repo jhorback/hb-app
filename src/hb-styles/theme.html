@@ -1,64 +1,68 @@
 <custom-style>
-    <style>
-       /**
-        * ----------------------
-        * IPT Pallete
-        * ----------------------
-        * Grey: #5c666f
-        * Dark Orange: #e36a2a
-        * Light Orange: #f89e1e
-        * Yellow: #fec70c
-        * ----------------------
-        */
-        html {
-            --brand-green: #009688; /* --paper-teal-600 */
-            --brand-orange: #F4511E; /*--paper-deep-orange-600*/
-        }
-
-        html body {
-            /*
-             * Material Design variables
-             */
-            --primary-background-color: #fff;
-            --primary-text-color: #000;
-            --secondary-text-color: var(--paper-grey-500);
-            --disabled-text-color: var(--paper-grey-400);
-            --divider-color: var(--paper-grey-300);
-            --error-color: var(--paper-deep-orange-a700);
-
-            --primary-color: var(--brand-green);            
-            --light-primary-color: var(--paper-indigo-100);
-            --dark-primary-color: var(--paper-indigo-700);
-            
-            --accent-color: var(--brand-orange);
-            --light-accent-color: var(--paper-pink-a100);
-            --dark-accent-color: var(--paper-pink-a400);
-
-            /*
-             * Ipt variables
-             */
-            --ipt-header-background-color: var(--brand-green);
-            --ipt-header-color: #FFF;
-        }
-
-        html.dark-theme body {
-            --primary-background-color: var(--paper-grey-900);
-            --primary-text-color: #FFF;           
-            --secondary-text-color: var(--paper-grey-300);
-            --disabled-text-color: var(--paper-grey-500);
-            --divider-color: var(--paper-grey-700);
-            --primary-body-color: var(--paper-grey-700);
-
-            --primary-header-color: var(--brand-green);
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Roboto', 'Noto', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            color: var(--primary-text-color);
-            background-color: var(--primary-body-color);
-        }
-    </style>
-</custom-style>
+        <style>
+            html, body {
+                height: 100%;
+            }
+    
+            html body {
+                /*
+                 * ----------------------
+                 * DataScan Brand Colors
+                 * ----------------------
+                 * Grey: #5c666f
+                 * Dark Orange: #e36a2a
+                 * Light Orange: #f89e1e
+                 * Yellow: #fec70c
+                 * ----------------------
+                 */
+    
+                /*
+                 Material Design base variables
+                 */
+                --primary-background-color: #fff;
+                --primary-text-color: #000;
+                --secondary-text-color: var(--paper-grey-600);
+                --disabled-text-color: var(--paper-grey-400);
+                --divider-color: var(--paper-grey-300);
+                --primary-color: #e36a2a;
+                --error-color: var(--paper-deep-orange-a700);
+    
+                /*
+                 * Ai - additional variables
+                 */
+                --primary-body-color: var(--paper-grey-100);
+                --primary-header-color: var(--paper-grey-600);
+                --primary-toolbar-color: var(--paper-grey-400);
+                --icon-button-color: var(--paper-grey-700);
+                --item-color: var(--paper-grey-200);
+                --logo-head-color: #4a4b55;
+            }
+    
+            html.dark-theme body {
+                --primary-background-color: #000;
+                --primary-text-color: #fff;
+                --secondary-text-color: var(--paper-grey-300);
+                --disabled-text-color: var(--paper-grey-500);
+                --divider-color: var(--paper-grey-800);
+    
+                --primary-body-color: var(--paper-grey-700);
+                --primary-header-color: var(--paper-grey-600);
+                --primary-toolbar-color: var(--paper-grey-800);
+                --icon-button-color: var(--paper-grey-100);
+                --item-color: var(--paper-grey-900);
+                --logo-head-color: #ddd;
+            }
+    
+            body {
+                margin: 0;
+                font-family: 'Roboto', 'Noto', sans-serif;
+                -webkit-font-smoothing: antialiased;
+                color: var(--primary-text-color);
+                background: var(--primary-body-color);
+    
+                --paper-progress-active-color: var(--primary-color);
+                --paper-progress-container-color: var(--divider-color);
+            }
+        </style>
+    </custom-style>
     
