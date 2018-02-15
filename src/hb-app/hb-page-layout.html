@@ -17,27 +17,10 @@
 
 <dom-module id="hb-page-layout">
     <template>
+        <style include="hb-page-layout-shared-styles"></style>
         <style>
-            :host {
-                display: block;
-                height: 100%;
-
-                @apply --paper-font-common-base;
-            }
-
-            app-drawer-layout:not([narrow]) [drawer-toggle] {
-                display: none;
-            }
-
-            app-drawer-layout,
-            app-header-layout,
-            xxxai-menu {
-                height: 100%;
-            }
-
             app-header {
-                background-color: var(--primary-header-color);
-                color: var(--dark-theme-text-color);
+                
             }
         </style>
 
