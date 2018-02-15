@@ -17,12 +17,12 @@
     <hb-config config="{{config}}"></hb-config>
 
     <firebase-app
-      auth-domain="harbor-staging.firebaseapp.com"
-      database-url="https://harbor-staging.firebaseio.com"
-      api-key="AIzaSyDWh26rJrV-cdL43DB8BSW4YVrxe5st7d8"
-      storage-bucket="harbor-staging.appspot.com"
-      messaging-sender-id="926265757745"
-      project-id="harbor-staging"
+      auth-domain="[[config.firebase.authDomain]]"
+      database-url="[[config.firebase.databaseUrl]]"
+      api-key="[[config.firebase.apiKey]]"
+      storage-bucket="[[config.firebase.storageBucket]]"
+      messaging-sender-id="[[config.firebase.messagingSenderId]]"
+      project-id="[[config.firebase.projectId]]"
       on-app-changed="_firebaseAppChanged">
     </firebase-app>
 
