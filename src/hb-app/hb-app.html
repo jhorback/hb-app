@@ -3,6 +3,7 @@
 <link rel="import" href="../../bower_components/app-route/app-route.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
 <link rel="import" href="hb-home.html">
+<link rel="import" href="hb-config.html">
 <link rel="import" href="hb-doc-routing.html">
 
 <dom-module id="hb-app">
@@ -12,6 +13,8 @@
         display: block;
       }
     </style>
+
+    <hb-config config="{{config}}"></hb-config>
 
     <firebase-app
       auth-domain="harbor-staging.firebaseapp.com"
@@ -54,6 +57,10 @@
       static get is() { return 'hb-app'; }
       static get properties() {
         return {
+          config: {
+            type: Object
+          },
+
           route: {
             type: Object
           },
@@ -75,7 +82,7 @@
 
       connectedCallback() {
         super.connectedCallback();
-        window.auth = this.$.auth;        
+        document.querySelector("html").classList.add(this.config.theme);
       }
 
       /**

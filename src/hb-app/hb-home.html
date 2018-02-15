@@ -1,16 +1,61 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
 <link rel="import" href="hb-page-layout.html">
+<link rel="import" href="hb-config.html">
 
 <dom-module id="hb-home">
     <template>
+         <style>
+            :host {
+                display: block;
+                height: 100%;
+            }
+
+            [slot="app-toolbar"] a {
+                color: inherit;
+            }
+
+            main {
+                padding: 16px 0;
+            }
+
+            [main-title] {
+                font-size: inherit;
+                font-weight: inherit;
+            }
+
+            @media all and (min-width: 641px) {
+                main {
+                    padding: 32px 64px;
+                }
+            }
+        </style>
         <div hidden$="[[appReady]]">
             Loading Home
         </div>
         <template is="dom-if" if="[[_showNoHome(appReady, app)]]" restamp>
+            <hb-config config="{{config}}"></hb-config>
             <hb-page-layout>
+                <div slot="title">
+                    <h1 main-title>[[config.applicationTitle]]</h1>
+                </div>
+                <main>
                 There is no home page<br>
                 Another line
+                NEED MAIN HERE?<br>
+                asdf<br>
+                asdf<br>
+                asdf<br>
+                asdf<br>
+                asdf<br>
+                asdf<br>
+                asdf<br>
+                asdf<br>
+                asdf<br>
+                asdf<br>
+                asdf<br>
+                asdf<br>
+                </main>
             </hb-page-layout>
         </template>
         
@@ -64,7 +109,6 @@
 
             this.home = document.createElement(docType);
             this.home.docId = docId;
-            this.home.setAttribute("docId", docId);
             this.home.route = this.route;
             this.shadowRoot.appendChild(this.home);            
         }

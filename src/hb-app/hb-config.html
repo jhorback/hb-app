@@ -1,0 +1,27 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../hb/hb.config.html">
+
+<script>
+/**
+    * @customElement
+    * @polymer
+    */
+class HbConfig extends Polymer.Element {
+    static get is() { return 'hb-config'; }
+    static get properties() {
+        return {
+            config: {
+                type: Object,
+                notify: true
+            }
+        };
+    }
+
+    constructor() {
+        super();
+        this.config = hb.config.current();
+    }
+}
+
+window.customElements.define(HbConfig.is, HbConfig);
+</script>

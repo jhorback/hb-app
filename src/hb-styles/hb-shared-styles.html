@@ -7,27 +7,17 @@
 <link rel="import" href="../bower_components/paper-styles/paper-styles-classes.html">
 -->
 
-<dom-module id="ipt-pages-shared-styles">
-    <template>
-         <style>
-            .primary-header {
-                @apply --primary-header;
-            }
-            [hidden] {
-                display: none !important;
-            }
-        </style>
-    </template>
-</dom-module>
-
-<!-- Mixins -->
 <custom-style>
     <style>
-        html body {
-            --primary-header: {
-                background-color: var(--ipt-header-background-color);
-                color: var(--ipt-header-color);
-            };
+        paper-toast {
+            display: flex;
+            align-items: center;
+        }
+
+        paper-toast paper-button {
+            flex: 1;
+            margin: 0 0 0 20px;
+            color: var(--primary-color);
         }
     </style>
 </custom-style>

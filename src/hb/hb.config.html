@@ -1,0 +1,27 @@
+<script>
+var hb = window.hb || {};
+
+hb.config = {
+    "https://harbor-staging.firebaseapp.com": {
+        theme: "",
+        applicationTitle: "Harbor"
+    },
+
+    "bjroyster": {
+        theme: "bjroyster",
+        applicationTitle: "BJ Royster Art"
+    },
+
+    default: "bjroyster",
+    //default: "https://harbor-staging.firebaseapp.com",
+   
+    /**
+     * Use the config that matches the current domain
+     * or the default config.
+     */
+    current: () => {
+        const config = hb.config[location.origin];
+        return config ? config : hb.config[hb.config.default];
+    }
+};
+</script>
