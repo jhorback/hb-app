@@ -1,7 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
-<link rel="import" href="hb-page-layout.html">
-<link rel="import" href="hb-config.html">
+<link rel="import" href="hb-no-home-page.html">
 
 <dom-module id="hb-home">
     <template>
@@ -34,29 +33,7 @@
             Loading Home
         </div>
         <template is="dom-if" if="[[_showNoHome(appReady, app)]]" restamp>
-            <hb-config config="{{config}}"></hb-config>
-            <hb-page-layout>
-                <div slot="title">
-                    <h1 main-title>[[config.applicationTitle]]</h1>
-                </div>
-                <main>
-                There is no home page<br>
-                Another line
-                NEED MAIN HERE?<br>
-                asdf<br>
-                asdf<br>
-                asdf<br>
-                asdf<br>
-                asdf<br>
-                asdf<br>
-                asdf<br>
-                asdf<br>
-                asdf<br>
-                asdf<br>
-                asdf<br>
-                asdf<br>
-                </main>
-            </hb-page-layout>
+            <hb-no-home-page></hb-no-home-page>
         </template>
         
     </template>
