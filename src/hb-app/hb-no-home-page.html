@@ -1,4 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="hb-page-layout.html">
 <link rel="import" href="hb-config.html">
 
@@ -6,7 +8,30 @@
     <template>
         <style include="hb-page-layout-shared-styles"></style>
         <style>
+            :host {
+                --message-text-color: rgba(255,255,255, 0.9);
+            }
 
+            .message {
+                cursor: default;
+                margin: .5rem;
+                xwidth: 100%;
+                padding: 4rem 1rem;                
+                text-align: center;
+                background: rgba(0, 0, 0, 0.6);
+                border-radius: 3px;
+            }
+
+            .message .text {
+                font-size: 2rem;
+                color: var(--message-text-color);                
+            }
+
+            .message paper-button {
+                margin-top: 2em;
+                font-weight: normal;
+                color: var(--message-text-color);          
+            }
         </style>
         <hb-config config="{{config}}"></hb-config>
 
@@ -15,7 +40,7 @@
                 MENU CONTENT
             </app-drawer>
             <app-header-layout>
-                <app-header slot="header" reveals condenses effects="waterfall">
+                <app-header slot="header" fixed effects="waterfall">
                     <app-toolbar>
                         <paper-icon-button icon="hb:menu" drawer-toggle></paper-icon-button>
                         <div main-title>
@@ -25,6 +50,17 @@
                 </app-header>
                 <main>
                 <!-- main content -->
+                    <div class="message">
+                        <div class="text">
+                            Coming soon...
+                        </div>
+                    </div>
+                    <div class="message">
+                        <div class="text">
+                            No home
+                        </div>
+                        <paper-button on-tap="addHome">Add the home page</paper-button>
+                    </div>
                 </main>
             </app-header-layout>
         </app-drawer-layout> 
@@ -42,7 +78,9 @@
             };
         }
 
-        
+        addHome(event) {
+            alert("ADD");
+        }
     
     }
     
