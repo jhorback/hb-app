@@ -3,6 +3,7 @@
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="hb-page-layout.html">
 <link rel="import" href="hb-config.html">
+<link rel="import" href="hb-current-user.html">
 
 <dom-module id="hb-no-home-page">
     <template>
@@ -34,6 +35,7 @@
             }
         </style>
         <hb-config config="{{config}}"></hb-config>
+        <hb-current-user user="{{user}}"></hb-current-user>
 
         <app-drawer-layout id="drawerLayout" force-narrow>
             <app-drawer id="drawer" slot="drawer">
@@ -50,12 +52,12 @@
                 </app-header>
                 <main>
                 <!-- main content -->
-                    <div class="message">
+                    <div class="message" hidden$="[[user.permissions.isSiteAdmin]]">
                         <div class="text">
                             Coming soon...
                         </div>
                     </div>
-                    <div class="message">
+                    <div class="message" hidden$="[[!user.permissions.isSiteAdmin]]">
                         <div class="text">
                             No home
                         </div>
@@ -70,16 +72,23 @@
      * @customElement
      * @polymer
      */
-    class HbNoHomePage extends Polymer.FirestoreMixin(Polymer.Element) {
+    class HbNoHomePage extends Polymer.Element {
         static get is() { return 'hb-no-home-page'; }
     
         static get properties() {
             return {
+                user: {
+                    observer: "_userChanged"
+                }
             };
         }
 
         addHome(event) {
             alert("ADD");
+        }
+
+        _userChanged(...args) {
+            console.log("USER CHANGED", this.user);            
         }
     
     }

@@ -1,0 +1,63 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+
+<dom-module id="hb-current-user">
+  <template>
+    <firebase-auth user="{{authUser}}"></firebase-auth>
+  </template>
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbCurrentUser extends Polymer.FirestoreMixin(Polymer.Element) {
+      static get is() { return 'hb-current-user'; }
+      static get properties() {
+            return {
+                uid: {
+                    type: String,
+                    value: "anonymous"
+                },
+
+                authUser: {
+                    type: Object,
+                    observer: "_authUserChanged"
+                },
+
+                dbUser: {
+                    type: Object,
+                    doc: "users/{uid}",
+                    live: true,
+                    observer: "_dbUserChanged"
+                },
+
+                user: {
+                    type: Object,
+                    notify: true,
+                    value: {
+                        uid: "anonymous",
+                        displayName: null,
+                        permissions: {
+                            isSysAdmin: false,
+                            isSiteAdmin: false,
+                            isAuthor: false
+                        }
+                    }
+                }
+            };
+        }
+
+        _authUserChanged() {
+            this.uid = this.authUser ? this.authUser.uid : this.uid;
+            this.user = Object.assign({}, this.user, this.authUser);
+        } 
+
+        _dbUserChanged() {
+            this.user = Object.assign({}, this.user, this.dbUser);
+        }
+    }
+
+    window.customElements.define(HbCurrentUser.is, HbCurrentUser);
+  </script>
+</dom-module>
