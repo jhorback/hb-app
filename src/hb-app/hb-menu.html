@@ -1,0 +1,107 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="hb-config.html">
+<link rel="import" href="hb-current-user.html">
+
+<dom-module id="hb-menu">
+    <template>
+        <style>
+            :host {
+                display: block;
+                height: 100%;
+            }
+
+            .flex-container {
+                display: flex;
+                flex-direction: column;
+                height: 100%;                
+            }
+
+            app-toolbar {
+                margin: 0;
+            }
+
+            .bottom-bar {
+                margin-top: auto;
+                @apply --paper-font-body2;
+                cursor: default;
+            }
+
+            .sign-in-text {
+                opacity: 0.6;
+            }
+
+            .avatar {
+                display: inline-block;
+                box-sizing: border-box;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-size: contain;
+            }
+
+            hr.divider {
+                display: block;
+                height: 1px;
+                min-height: 1px;
+                max-height: 1px;
+                background-color: var(--paper-divider-color, #000);
+                opacity: 0.12;
+                @apply --paper-divider;
+            }
+
+        </style>
+        <hb-config config="{{config}}"></hb-config>
+        <hb-current-user user="{{user}}"></hb-current-user>        
+        <div class="flex-container">
+            <app-toolbar>
+                [[config.applicationTitle]]
+            </app-toolbar>
+            <div class="bottom-bar">
+                <hr class="divider"/>
+                <paper-icon-item on-tap="signOut" hidden$="[[user.isAnonymous]]">
+                    <div class="avatar" slot="item-icon"
+                        style="background-image: url([[user.photoURL]]);"
+                    ></div>
+                    <div class="sign-in-text">[[user.displayName]]</div>
+                </paper-icon-item>
+                <paper-icon-item on-tap="signIn"hidden$="[[!user.isAnonymous]]">
+                    <div class="avatar" slot="item-icon"
+                        style="background-image: url([[importPath]]/assets/google.svg);"
+                    ></div>
+                    <div class="sign-in-text">Sign in with Google</div>
+                </paper-icon-item>
+            </div>       
+        </div>
+        
+    </template>
+    <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbMenu extends Polymer.Element {
+        static get is() { return 'hb-menu'; }
+    
+        static get properties() {
+            return {
+                user: {
+                    type: Object
+                }
+            };
+        }
+
+        signIn() {
+            this.shadowRoot.dispatchEvent(new CustomEvent("user-sign-in"));
+        }
+    
+        signOut() {
+            this.shadowRoot.dispatchEvent(new CustomEvent("user-sign-out"));
+        }
+    }
+    
+    window.customElements.define(HbMenu.is, HbMenu);
+    </script>
+            
+</dom-module>

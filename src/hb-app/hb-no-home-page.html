@@ -1,7 +1,16 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
-<link rel="import" href="hb-page-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../hb-styles/hb-styles.html">
+<link rel="import" href="hb-menu.html">
 <link rel="import" href="hb-config.html">
 <link rel="import" href="hb-current-user.html">
 
@@ -39,7 +48,7 @@
 
         <app-drawer-layout id="drawerLayout" force-narrow>
             <app-drawer id="drawer" slot="drawer">
-                MENU CONTENT
+                <hb-menu></hb-menu>
             </app-drawer>
             <app-header-layout>
                 <app-header slot="header" fixed effects="waterfall">
