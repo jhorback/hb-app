@@ -1,11 +1,15 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../hb-styles/hb-styles.html">
 <link rel="import" href="hb-config.html">
 <link rel="import" href="hb-current-user.html">
 
 <dom-module id="hb-menu">
     <template>
+        <style include="hb-page-layout-shared-styles"></style>        
         <style>
             :host {
                 display: block;
@@ -22,10 +26,31 @@
                 margin: 0;
             }
 
+            a,
+            a:visited  {
+                color: inherit;
+                text-decoration: none;
+            }
+
             .bottom-bar {
                 margin-top: auto;
                 @apply --paper-font-body2;
                 cursor: default;
+            }
+
+            .paper-font-body2 {
+                @apply --paper-font-body2;
+            }
+
+            .paper-font-body1 {
+                @apply --paper-font-body1;
+            }
+
+            paper-icon-item:focus,
+            paper-icon-item:hover,
+            paper-item:hover {
+                cursor: pointer;
+                background: var(--item-color);
             }
 
             .sign-in-text {
@@ -53,11 +78,40 @@
 
         </style>
         <hb-config config="{{config}}"></hb-config>
-        <hb-current-user user="{{user}}"></hb-current-user>        
+        <hb-current-user user="{{user}}"></hb-current-user>
         <div class="flex-container">
-            <app-toolbar>
-                [[config.applicationTitle]]
-            </app-toolbar>
+            <app-header>
+                <app-toolbar></app-toolbar>
+                <app-toolbar>                                
+                    <div main-title>[[config.applicationTitle]]</div>
+                </app-toolbar>
+            </app-header>
+            <div>               
+                <a href="[[rootPath]]/" tabindex="-1">
+                    <paper-icon-item>
+                        <iron-icon icon="hb:home" item-icon slot="item-icon"></iron-icon>
+                        <span class="paper-font-body2">Home</span>
+                    </paper-icon-item>
+                </a>
+                <a href="[[rootPath]]/" tabindex="-1">
+                    <paper-icon-item>
+                        <span class="paper-font-body2">Another item</span>
+                    </paper-icon-item>
+                </a>
+                <a href="[[rootPath]]/" tabindex="-1">
+                    <paper-icon-item>
+                        <iron-icon icon="hb:add" item-icon slot="item-icon"></iron-icon>
+                        <span class="paper-font-body2">Add menu item</span>
+                    </paper-icon-item>
+                </a>
+                <hr class="divider"/>
+                <a href="[[rootPath]]/" tabindex="-1">
+                    <paper-icon-item>
+                        <iron-icon icon="hb:settings" item-icon slot="item-icon"></iron-icon>
+                        <span class="paper-font-body2">Settings</span>
+                    </paper-icon-item>
+                </a>
+            </div>
             <div class="bottom-bar">
                 <hr class="divider"/>
                 <paper-icon-item on-tap="signOut" hidden$="[[user.isAnonymous]]">
@@ -72,9 +126,12 @@
                     ></div>
                     <div class="sign-in-text">Sign in with Google</div>
                 </paper-icon-item>
-            </div>       
+            </div>
         </div>
         
+
+
+
     </template>
     <script>
     /**
