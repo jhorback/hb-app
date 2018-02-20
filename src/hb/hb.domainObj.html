@@ -1,0 +1,93 @@
+<script>
+var hb = window.hb || {};
+
+
+/**
+ * Base class for all domain objects.
+ */
+hb.domainObj  = class {
+    static get is() { 
+        throw new Error("doc.is not defined");
+    }
+
+    constructor({db, dbPath}) {
+        this.db = db;
+        this.dbPath = dbPath;
+        this.docRef = db.doc(dbPath);
+        this._listenersToAdd = [];
+    }
+    
+    /**
+     *
+     * @example
+     * ```
+     * this.update(doc => {
+     *      return Object.assign({}, doc, {title: "Title changed"});
+     * });
+     * ```
+     */
+    update(update) {        
+        return this.docRef.get().then(event => {
+            const doc = event.data();
+            const newDoc = update(doc);
+            this._addReferences(newDoc);
+            this.docRef.update(newDoc);
+        }).then(_ => this._addReferencedBy());
+    }
+
+    _addReferences(doc) {
+        // add references using _listenersToAdd
+    }
+
+    _addReferencedBy() {
+        // load all objects and add references to them
+        // needs to be a promise
+    }
+
+    addEventListener(event, dbPath, is, reason) {
+        _listenersToAdd.push({event, dbPath, is, reason});
+        /*
+        // will update both this.data.references and referenced.data.referencedBy
+        // the trick here is that updating the current referene needs to happen befor the update call in update
+        // but the reference added needs to load the other object
+        // 
+        addReference(domainObj.reference(event), reason)
+        referencedBy: [{
+            dbPath: "doc/gallery-1",
+            is: "hb-art-gallery-doc",
+            events: {"thumbnail-changed": "reason", "description-changed": "reason"}
+        }]
+        references: [{
+            dbPath: "artwork/artwork-1",
+            is: "hb-art-doc",
+            events: {"thumbnail-changed": "reason", "description-changed": "reason"}
+        }]
+        */
+    }
+}
+
+/**
+ * Base class for document objects.
+ */
+hb.doc = class extends hb.domainObj {
+     
+
+     static get referenceEvents() {
+         return {
+             thumbnailChanged: "thumbnail-changed",
+             descriptionChanged: "description-changed",
+         };
+     }
+
+    constructor({db, docId}) {
+        super({db, dbPath: `doc/${docId}`})
+    }
+}
+
+
+hb["hb-doc"] = class extends hb.doc {
+    static get is() { return "hb-doc"; }
+
+}
+
+</script>

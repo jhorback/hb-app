@@ -2,6 +2,8 @@
 var hb = window.hb || {};
 
 hb.config = {
+    version: "v0.5",
+
     "https://harbor-staging.firebaseapp.com": {
         theme: "",
         applicationTitle: "Harbor",
@@ -28,7 +30,6 @@ hb.config = {
             messagingSenderId: "926265757745",
             projectId: "harbor-staging"
         }
-
     },
 
     default: "bjroyster",
@@ -39,8 +40,10 @@ hb.config = {
      * or the default config.
      */
     current: () => {
-        const config = hb.config[location.origin];
-        return config ? config : hb.config[hb.config.default];
+        let config = hb.config[location.origin];
+        config = config || hb.config[hb.config.default];
+        config.version = hb.config.version;
+        return config;
     }
 };
 </script>
