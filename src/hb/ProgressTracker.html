@@ -1,0 +1,67 @@
+<script>
+class ProgressTracker {
+	constructor(onUpdate) {
+		this.onUpdate = onUpdate;
+		this.steps = [];
+		this.totalSteps = 0;
+	}
+
+	addLayer(layerDescription, totalSteps) {
+        let currentLayerStep = 0;
+		this.totalSteps = this.totalSteps + totalSteps;
+		this.notify();
+		return {
+            addSteps: (count) => {
+                this.totalSteps = this.totalSteps + count;
+                totalSteps = totalSteps + count;
+                this.notify();                
+            },
+			next: (stepDescription) => {
+                if (currentLayerStep === totalSteps) {
+                   console.warn(`Total steps reached for layer ${layerDescription}: ${stepDescription}`);
+                   return;
+                }
+				this.steps.push(`${layerDescription}: ${stepDescription}`);
+                currentLayerStep = currentLayerStep + 1;
+				this.notify();
+			}
+		};
+	}
+
+	notify() {
+		const {steps, totalSteps:max} = this;
+		const description = steps[steps.length - 1];
+		const value = steps.length;
+        const percentage = Math.round((value / max) * 100);
+		this.onUpdate({
+			max,
+			value,
+			description,
+            percentage
+		});
+   }
+
+   get description() {
+      return this.steps.join(", ");
+    }
+}
+
+// var tracker = new ProgressTracker(update => {
+//   console.clear();
+//   console.log(update);
+// });
+
+// var layer1 = tracker.addLayer("Doing something", 5);
+// layer1.next("Here we go");
+// layer1.next("Again");
+
+// var layer2 = tracker.addLayer("New layer", 2);
+// layer2.next("here");
+// layer1.next("again...");
+// layer2.next("qwer");
+// layer2.addSteps(1);
+// layer2.next("here we go again");
+// layer2.next("would cause a warning and not update the descriptions or counts");
+
+// console.log(tracker.description);
+</script>
