@@ -14,71 +14,96 @@ hb.domainObj  = class {
         this.db = db;
         this.dbPath = dbPath;
         this.docRef = db.doc(dbPath);
-        this._listenersToAdd = [];
+        this._listenersToHandle = [];
+        this._eventsToHandle = [];
     }
     
     /**
-     *
-     * @example
-     * ```
-     * this.update(doc => {
-     *      return Object.assign({}, doc, {title: "Title changed"});
-     * });
-     * ```
+     * Supports api method updates
+     * @param update
+     * A method that recieves its document which can make changes to
+     * and return the document.
+     * The method can make calls to dispatchEvent, addEventListener, and  removeEventListener.
+     * @returns Object
+     * The document data to update.
      */
     update(update) {        
         return this.docRef.get().then(event => {
             const doc = event.data();
-            const newDoc = update(doc);
-            this._addReferences(newDoc);
-            this.docRef.update(newDoc);
-        }).then(_ => this._addReferencedBy());
+            let newDoc = update(doc);
+            newDoc = this._updateReferences(newDoc);
+            return this.docRef.update(newDoc)
+                .then(_ => this._updateReferencedBy(newDoc))
+                .then(doc => this._handleEvents(doc));
+        });
     }
 
-    _addReferences(doc) {
-        // add references using _listenersToAdd
+    _updateReferences(doc) {
+        // syncronous 
+        // add references using _listenersToHandle
+        // return the doc
     }
 
-    _addReferencedBy() {
-        // load all objects and add references to them
+    _updateReferencedBy(doc) {
         // needs to be a promise
+        // load all objects and add references to them
+        // then clear the _listenersToHandle
+        // return the new doc
+    }
+
+    _handleEvents(doc) {
+        if (!doc.referencedBy) {
+            return Promise.resolve();
+        }
+
+        // notify objects of a reference change
+        Object.keys(doc.referencedBy).forEach(key => {
+            const reference = doc.referencedBy[key];
+            const staticDomainObj = hb[reference.is];
+            const domainObjEvents = staticDomainObj.events;
+
+
+            // if the doc does not exist then remove the reference
+
+            // test first if the document has anything to update
+
+            // if reference.events.keys match any domainObjEvents then we need to load that document
+            const docRef = this.db.doc(key);
+            const domainObj = new hb[reference.is](this.db);
+            docRef.get(event => {
+                const referenceDoc = event.data();
+                // call each event handler -> which could add to _eventsToHandle
+                domainObj[handler](doc);
+                // now domainObj may have _eventsToHandle
+
+                // this means this method should be on the document handleEvents OR _handleEvents
+                docRef.update(referenceDoc);
+
+            });
+            // after all events are fired call
+            // domainObj._handleEvents();
+
+
+        });        
+    }
+
+    dispatchEvent(event) {
+        this._eventsToHandle.push(event);
     }
 
     addEventListener(event, dbPath, is, reason) {
-        _listenersToAdd.push({event, dbPath, is, reason});
-        /*
-        // will update both this.data.references and referenced.data.referencedBy
-        // the trick here is that updating the current referene needs to happen befor the update call in update
-        // but the reference added needs to load the other object
-        // 
-        addReference(domainObj.reference(event), reason)
-        referencedBy: [{
-            dbPath: "doc/gallery-1",
-            is: "hb-art-gallery-doc",
-            events: {"thumbnail-changed": "reason", "description-changed": "reason"}
-        }]
-        references: [{
-            dbPath: "artwork/artwork-1",
-            is: "hb-art-doc",
-            events: {"thumbnail-changed": "reason", "description-changed": "reason"}
-        }]
-        */
+        _listenersToHandle.push({add: true, event, dbPath, is, reason});
+    }
+
+    removeEventListener(event, dbPath, is, reason) {
+        _listenersToHandle.push({remove: true, event, dbPath, is, reason});
     }
 }
 
 /**
  * Base class for document objects.
  */
-hb.doc = class extends hb.domainObj {
-     
-
-     static get referenceEvents() {
-         return {
-             thumbnailChanged: "thumbnail-changed",
-             descriptionChanged: "description-changed",
-         };
-     }
-
+hb.doc = class extends hb.domainObj {     
     constructor({db, docId}) {
         super({db, dbPath: `doc/${docId}`})
     }
@@ -88,6 +113,31 @@ hb.doc = class extends hb.domainObj {
 hb["hb-doc"] = class extends hb.doc {
     static get is() { return "hb-doc"; }
 
+    static get eventsReson() {
+        return "artwork";
+    }
+
+    static get events() {
+        return {
+            "thumbnail-changed": "_arworkThumbnailChanged",
+            "description-changed": {
+                reason: "artwork",
+                handler: "_artworkDescriptionChanged"
+            },
+            "something-happened": {
+                reson: "",
+                handler: "_somethingHappened"
+            }
+        };
+    }
+
+    _arworkThumbnailChanged(doc, refDoc) {
+        // update and return doc
+        // should this return wether or not anything was changed?
+        //      could do this by returning a falsy value other than a promise.
+        //      this would allow the shortcutting of the update call as well as the _handleEvents call
+        // call this.dispatchEvent if needed
+    }
 }
 
 </script>
