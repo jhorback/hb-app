@@ -4,7 +4,7 @@
 /**
  * Base class for all domain objects.
  */
-hb.domainObj  = class {
+hb.DomainObj  = class {
     static get is() { 
         throw new Error("doc.is not defined");
     }
@@ -128,7 +128,7 @@ hb.domainObj  = class {
 
     /**
      * Matches any events in this._eventsToHandle to items in the referencedBy
-     * For every document, load the domainObj and then call handle events on that domainObj.
+     * For every document, load the DomainObj and then call handle events on that DomainObj.
      */
     _dispatchEvents(doc) {
         if (!doc.referencedBy) {

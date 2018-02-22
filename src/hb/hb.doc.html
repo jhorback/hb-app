@@ -1,9 +1,9 @@
-<link rel="import" href="hb.domainObj.html">
+<link rel="import" href="hb.DomainObj.html">
 <script>
 /**
  * Base class for doc documents
  */
-hb.doc = class extends hb.domainObj {     
+hb.doc = class extends hb.DomainObj {     
     constructor({db, docId}) {
         super({db, dbPath: `doc/${docId}`})
     }

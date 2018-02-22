@@ -10,15 +10,23 @@
     <script src="../../../bower_components/web-component-tester/browser.js"></script>
     <script src="../../../bower_components/test-fixture/test-fixture-mocha.js"></script>
     
-    <link rel="import" href="../hb.domainObj.html">
+    <link rel="import" href="../hb.DomainObj.html">
   </head>
   <body>
 
     <script>
-      describe("hb.domainObj", () => {
+      describe("hb.DomainObj", () => {
 
-        it("Exists", () => {
-          expect(hb.domainObj).not.to.be.null;
+        it("exists", () => {
+          expect(hb.DomainObj).not.to.be.null;
+        });
+
+        it("can be created", () => {
+          var obj = new hb.DomainObj();
+        });
+
+        it("forces is to exist", () => {
+
         });
 
       });
