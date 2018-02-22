@@ -1,4 +1,5 @@
 <link rel="import" href="hb.html">
+<link rel="import" href="ProgressTracker.html">
 <script>
 /**
  * Base class for all domain objects.
@@ -12,7 +13,11 @@ hb.domainObj  = class {
         this.db = db;
         this.dbPath = dbPath;
         this.docRef = db.doc(dbPath);
+        
+        // [{add: true, event, dbPath, is, scope}]
         this._listenersToHandle = [];
+        
+        //[event-name]
         this._eventsToHandle = [];
     }
     
@@ -22,24 +27,96 @@ hb.domainObj  = class {
      * A method that recieves its document which can make changes to
      * and return the document.
      * The method can make calls to dispatchEvent, addEventListener, and  removeEventListener.
+     * @param progressTracker
+     * An optional ProgressTracker to listen for the progress of the update.
      * @returns Object
      * The document data to update.
+     * If the return value is falsy, no updates will occur.
      */
-    update(update) {        
+    update(update, progressTracker = new ProgressTracker()) {
+        var progressLayer = progressTracker.addLayer("Update", 5);
+        progressLayer.next("Loading document");
+        
         return this.docRef.get().then(event => {
+            progressLayer.next("Updating");
+
             const doc = event.data();
             let newDoc = update(doc);
+           
             newDoc = this._updateReferences(newDoc);
-            return this.docRef.update(newDoc)
-                .then(_ => this._updateReferencedBy(newDoc))
-                .then(doc => this._handleEvents(doc));
+            if (!newDoc) {
+                progressLayer.done("No updates needed");
+                return Promise.resolve();
+            }
+
+            this.docRef.update(newDoc).then(_ => {
+                progressLayer.next("Updating references");
+                return this._updateReferencedBy(newDoc);
+            }).then(doc => {
+                progressLayer.next("Dispatching events");
+                return this._dispatchEvents(doc)
+            }).then(_ => {
+                progressLayer.done("Document updated");
+            }).catch(error => {
+                progressLayer.error(error);
+            });          
         });
     }
 
+    /**
+     * A syncronous method which adds or removes
+     * references using _listenersToHandle
+     * @param doc
+     * The document to update.
+     * @returns Object - The updated doc.
+     */
     _updateReferences(doc) {
-        // syncronous 
-        // add references using _listenersToHandle
-        // return the doc
+        // _listenersToHandle: [{add: true, event, dbPath, is, scope}]
+        // references: {
+        //     "doc/gallery-1": {
+        //         is: "hb-art-gallery-doc",
+        //         events: {
+        //             "": ["description-changed"]
+        //             "artwork": ["thumbnail-changed"]
+        //         }
+        //     }
+        // }
+        doc.references = doc.references || {};
+
+        this._listenersToHandle.forEach(listener => {
+
+            if (listener.add === true) {
+                const reference = doc.references[listener.dbPath] || {};
+                const events = reference.events || {};
+                const scope = events[listener.scope || ""] || [];
+                // make sure the event is added just once
+                if (scope.includes(listener.event) === false) {
+                    scope.push(listener.event);        
+                }
+                // rebuild the reference
+                events[listener.scope] = scope;
+                reference.is = listener.is;                
+                reference.events = events;                
+                doc.references[listener.dbPath] = reference;
+
+            } else if (listener.remove === true) {
+                const reference = doc.references[listener.dbPath];
+                if (reference) {                    
+                    // if event is null, remove all for the dbPath
+                    if (!listener.event) {
+                        delete doc.references[listener.dbPath];
+                    // remove the specified event
+                    } else if (reference.events) {
+                        const scope = reference.events[listener.scope || ""];
+                        if (scope) {
+                            scope.splice(scope.indexOf(listner.event), 1);
+                        }
+                    }
+                }
+            }
+            
+        });
+        return doc;
     }
 
     _updateReferencedBy(doc) {
@@ -49,7 +126,11 @@ hb.domainObj  = class {
         // return the new doc
     }
 
-    _handleEvents(doc) {
+    /**
+     * Matches any events in this._eventsToHandle to items in the referencedBy
+     * For every document, load the domainObj and then call handle events on that domainObj.
+     */
+    _dispatchEvents(doc) {
         if (!doc.referencedBy) {
             return Promise.resolve();
         }
@@ -85,16 +166,38 @@ hb.domainObj  = class {
         });        
     }
 
+    /**
+     * Loads the doc then calls the event handlers for each event.
+     * The handlers return the new doc if they require an update.
+     * If an update is required, save the doc and then call _dispatchEvents.
+     * @param events
+     * The key is the scope and the value is an array of
+     * events to listen for.
+     * {
+	 *   "": ["description-changed"]
+	 *	 "artwork": ["thumbnail-changed"]
+	 *	}
+     */
+    _handleEvents(refDoc, events) {
+        this.docRef.get().then(event => {
+            const doc = event.data();
+
+            // for each event call the handler
+            // if there is a change then
+            // save the doc and then call _dispatchEvents
+        });
+    }
+
     dispatchEvent(event) {
         this._eventsToHandle.push(event);
     }
 
-    addEventListener(event, dbPath, is, reason) {
-        _listenersToHandle.push({add: true, event, dbPath, is, reason});
+    addEventListener(event, dbPath, is, scope) {
+        _listenersToHandle.push({add: true, event, dbPath, is, scope});
     }
 
-    removeEventListener(event, dbPath, is, reason) {
-        _listenersToHandle.push({remove: true, event, dbPath, is, reason});
+    removeEventListener(event, dbPath, is, scope) {
+        _listenersToHandle.push({remove: true, event, dbPath, is, scope});
     }
 }
 </script>
