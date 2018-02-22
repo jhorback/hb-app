@@ -1,4 +1,4 @@
-# &lt;ipt&gt;
+# &lt;hb&gt;
 
  * This application uses Node, Polymer, and Firebase. 
  * Install these before running tasks.
