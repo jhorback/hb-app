@@ -10,6 +10,7 @@ class ProgressTracker {
         let currentLayerStep = 0;
 		this.totalSteps = this.totalSteps + totalSteps;
 		this.notify();
+		
 		return {
             addSteps: (count) => {
                 this.totalSteps = this.totalSteps + count;
