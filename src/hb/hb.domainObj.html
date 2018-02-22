@@ -83,38 +83,45 @@ hb.DomainObj  = class {
         // }
         doc.references = doc.references || {};
 
-        this._listenersToHandle.forEach(listener => {
+        const addListener = (listener) => {
+            const reference = doc.references[listener.dbPath] || {};
+            const events = reference.events || {};
+            const scopeName = listener.scope || "";
+            const scope = events[scopeName] || [];
+            // make sure the event is added just once
+            if (scope.includes(listener.event) === false) {
+                scope.push(listener.event);        
+            }
+            // rebuild the reference
+            events[scopeName] = scope;
+            reference.is = listener.is;                
+            reference.events = events;                
+            doc.references[listener.dbPath] = reference;
+        };
 
-            if (listener.add === true) {
-                const reference = doc.references[listener.dbPath] || {};
-                const events = reference.events || {};
-                const scope = events[listener.scope || ""] || [];
-                // make sure the event is added just once
-                if (scope.includes(listener.event) === false) {
-                    scope.push(listener.event);        
-                }
-                // rebuild the reference
-                events[listener.scope] = scope;
-                reference.is = listener.is;                
-                reference.events = events;                
-                doc.references[listener.dbPath] = reference;
-
-            } else if (listener.remove === true) {
-                const reference = doc.references[listener.dbPath];
-                if (reference) {                    
-                    // if event is null, remove all for the dbPath
-                    if (!listener.event) {
-                        delete doc.references[listener.dbPath];
-                    // remove the specified event
-                    } else if (reference.events) {
-                        const scope = reference.events[listener.scope || ""];
-                        if (scope) {
-                            scope.splice(scope.indexOf(listner.event), 1);
-                        }
-                    }
+        const removeListener = (listener) => {
+            const reference = doc.references[listener.dbPath];
+            if (!reference) {
+                return;
+            }
+            // if event is null, remove all for the dbPath
+            if (!listener.event) {
+                delete doc.references[listener.dbPath];
+            // remove the specified event
+            } else if (reference.events) {
+                const scope = reference.events[listener.scope || ""];
+                if (scope) {
+                    scope.splice(scope.indexOf(listener.event), 1);
                 }
             }
-            
+        };
+
+        this._listenersToHandle.forEach(listener => {
+            if (listener.add === true) {               
+                addListener(listener);
+            } else if (listener.remove === true) {
+                removeListener(listener);   
+            }
         });
         return doc;
     }
@@ -193,11 +200,11 @@ hb.DomainObj  = class {
     }
 
     addEventListener(event, dbPath, is, scope) {
-        _listenersToHandle.push({add: true, event, dbPath, is, scope});
+        this._listenersToHandle.push({add: true, event, dbPath, is, scope});
     }
 
-    removeEventListener(event, dbPath, is, scope) {
-        _listenersToHandle.push({remove: true, event, dbPath, is, scope});
+    removeEventListener(event, dbPath, scope) {
+        this._listenersToHandle.push({remove: true, event, dbPath, scope});
     }
 }
 </script>
