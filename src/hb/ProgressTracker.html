@@ -24,6 +24,18 @@ class ProgressTracker {
 				this.steps.push(`${layerDescription}: ${stepDescription}`);
                 currentLayerStep = currentLayerStep + 1;
 				this.notify();
+			},
+			done: (stepDescription) => {
+				const notNeeded = totalSteps - currentLayerStep;
+				this.totalSteps = this.totalSteps - notNeeded + 1;
+				this.steps.push(`${layerDescription}: ${stepDescription}`);
+				this.notify();
+			},
+			error: (error) => {
+				const notNeeded = totalSteps - currentLayerStep;
+				this.totalSteps = this.totalSteps - notNeeded + 1;
+				this.steps.push(error ? `Error: ${error.message}` : "An error occurred");
+				this.notify();
 			}
 		};
 	}
@@ -32,8 +44,8 @@ class ProgressTracker {
 		const {steps, totalSteps:max} = this;
 		const description = steps[steps.length - 1];
 		const value = steps.length;
-        const percentage = Math.round((value / max) * 100);
-		this.onUpdate({
+        const percentage = Math.round((value / max) * 100);		
+		this.onUpdate && this.onUpdate({
 			max,
 			value,
 			description,
