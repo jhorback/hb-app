@@ -134,8 +134,10 @@ hb.DomainObj  = class {
     }
 
     /**
-     * Matches any events in this._eventsToHandle to items in the referencedBy
-     * For every document, load the DomainObj and then call handle events on that DomainObj.
+     * For every referencedBy entry, create the DomainObj
+     * and then call _handleEvents on that DomainObj.
+     * @param doc the data for this domainObj
+     * @returns Promise
      */
     _dispatchEvents(doc) {
         if (!doc.referencedBy) {
@@ -143,55 +145,98 @@ hb.DomainObj  = class {
         }
 
         // notify objects of a reference change
-        Object.keys(doc.referencedBy).forEach(key => {
-            const reference = doc.referencedBy[key];
-            const staticDomainObj = hb[reference.is];
-            const domainObjEvents = staticDomainObj.events;
+        const promises = Object.keys(doc.referencedBy).map(dbPath => {
+            const reference = doc.referencedBy[dbPath];
+            const eventHandlers = hb[reference.is].events;
+            const eventsToHandle = reference.events;
 
+            if (!eventHandlers || !eventsToHandle) {
+                return Promise.resolve();
+            }
 
-            // if the doc does not exist then remove the reference
-
-            // test first if the document has anything to update
-
-            // if reference.events.keys match any domainObjEvents then we need to load that document
-            const docRef = this.db.doc(key);
-            const domainObj = new hb[reference.is](this.db);
-            docRef.get(event => {
-                const referenceDoc = event.data();
-                // call each event handler -> which could add to _eventsToHandle
-                domainObj[handler](doc);
-                // now domainObj may have _eventsToHandle
-
-                // this means this method should be on the document handleEvents OR _handleEvents
-                docRef.update(referenceDoc);
-
-            });
-            // after all events are fired call
-            // domainObj._handleEvents();
-
-
-        });        
+            const domainObj = new hb[reference.is]({db: this.db, dbPath});
+            return domainObj._handleEvents({eventHandlers, eventsToHandle, refDoc: doc});
+        });
+        return Promise.all(promises);
     }
 
     /**
-     * Loads the doc then calls the event handlers for each event.
-     * The handlers return the new doc if they require an update.
-     * If an update is required, save the doc and then call _dispatchEvents.
-     * @param events
-     * The key is the scope and the value is an array of
-     * events to listen for.
+     * See if there are any methods to call.
+     * If so, load the doc from the db and call each method.
+     * If any handler returns a new doc it doc will updated / saved.
+     * If an update is required, then call _dispatchEvents.
+     * @param eventHandlers the statically declared handlers on this domainObj
+     * Example:
+     * {
+	 *   "some-event":  "_someEvent",
+	 *   // scoped
+	 *   "thumbnail-changed": {
+	 *     "": "_someThumbnailChanged",
+	 *     "artwork": "_artworkThumbnailChanged"
+	 *   }
+	 * };
+     * @param eventsToHandle the key is the scope and the value is an array of
+     * Example:
      * {
 	 *   "": ["description-changed"]
-	 *	 "artwork": ["thumbnail-changed"]
-	 *	}
+	 *   "artwork": ["thumbnail-changed"]
+	 * }
+     * @param refDoc the document that triggered the events.
+     * @returns Promise
      */
-    _handleEvents(refDoc, events) {
-        this.docRef.get().then(event => {
-            const doc = event.data();
+    _handleEvents({eventHandlers, eventsToHandle, refDoc}) {
 
-            // for each event call the handler
-            // if there is a change then
-            // save the doc and then call _dispatchEvents
+        const methodsToCall = Object.keys(eventsToHandle).reduce((methods, scope) => {
+            const events = eventsToHandle[scope];
+            events.forEach(eventName => {
+                const handler = eventHandlers[eventName];
+                if (!handler) {
+                    return;
+                }
+
+                let method = null;
+                if (scope === "" && typeof handler === "string") {
+                    method = handler;
+                } else if (handler[scope]) {
+                   method = handler[scope];
+                }
+                
+                // only add the method to call if it exists on this domainObj
+                if (method && this[method]) {
+                    methods.push(method);
+                }
+            });
+            return methods;
+        }, []);
+
+        if (methodsToCall.length === 0) {
+            return Promise.resolve();
+        }
+        
+        // we have methods to call, load the doc and call the methods
+        return this.docRef.get().then(event => {
+            let doc = event.data();
+            const needUpdate = methodsToCall.reduce((needUpdate, method) => {
+                const newDoc = this[method](doc, refDoc);
+                if (newDoc) {
+                    doc = newDoc;
+                    needUpdate = true;
+                }
+                return needUpdate;            
+            }, false);
+            
+            if (needUpdate === false) {
+                return Promise.resolve();
+            }
+
+            return this.docRef.update(doc).then(_ => {
+                //progressLayer.next("Dispatching events");
+                return this._dispatchEvents(doc)
+            }).then(_ => {
+                //progressLayer.done("Document updated");
+            }).catch(error => {
+                //progressLayer.error(error);
+            });
         });
     }
 
