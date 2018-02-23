@@ -37,18 +37,18 @@ hb.DomainObj  = class {
         var progressLayer = progressTracker.addLayer("Update", 5);
         progressLayer.next("Loading document");
         
-        return this.docRef.get().then(event => {
+        return this.docRef.get().then(snapshot => {
             progressLayer.next("Updating");
 
-            const doc = event.data();
-            let newDoc = update(doc);
-           
-            newDoc = this._updateReferences(newDoc);
+            const doc = snapshot.data();
+            let newDoc = update(doc);           
+            
             if (!newDoc) {
                 progressLayer.done("No updates needed");
                 return Promise.resolve();
             }
 
+            newDoc = this._updateReferences(newDoc);
             this.docRef.update(newDoc).then(_ => {
                 progressLayer.next("Updating references");
                 return this._updateReferencedBy(newDoc);
@@ -82,55 +82,92 @@ hb.DomainObj  = class {
         //     }
         // }
         doc.references = doc.references || {};
+        const property = "references";
+        const listeners = [...this._listenersToHandle];
+        doc = hb.DomainObj.__updateDocListeners({doc, property, listeners});
+        return doc;
+    }
 
-        const addListener = (listener) => {
-            const reference = doc.references[listener.dbPath] || {};
-            const events = reference.events || {};
-            const scopeName = listener.scope || "";
-            const scope = events[scopeName] || [];
-            // make sure the event is added just once
-            if (scope.includes(listener.event) === false) {
-                scope.push(listener.event);        
-            }
-            // rebuild the reference
-            events[scopeName] = scope;
-            reference.is = listener.is;                
-            reference.events = events;                
-            doc.references[listener.dbPath] = reference;
-        };
+    // make sure to clone the other listeners
+    // and to clear this._listenersToHandle
+    //
 
-        const removeListener = (listener) => {
-            const reference = doc.references[listener.dbPath];
-            if (!reference) {
-                return;
-            }
-            // if event is null, remove all for the dbPath
-            if (!listener.event) {
-                delete doc.references[listener.dbPath];
-            // remove the specified event
-            } else if (reference.events) {
-                const scope = reference.events[listener.scope || ""];
-                if (scope) {
-                    scope.splice(scope.indexOf(listener.event), 1);
-                }
-            }
-        };
-
-        this._listenersToHandle.forEach(listener => {
-            if (listener.add === true) {               
-                addListener(listener);
+    static __updateDocListeners({doc, property, listeners}) {
+        listeners.forEach(listener => {
+            if (listener.add === true) {
+                doc = hb.DomainObj.__addListener(doc, property, listener);
             } else if (listener.remove === true) {
-                removeListener(listener);   
+                doc = hb.DomainObj.__removeListener(doc, property, listener);   
             }
         });
         return doc;
     }
 
+    // need to pass in the property here - references or referencedBy
+    static __addListener(doc, property, {event, dbPath, scope = "", is}) {
+        const reference = doc[property][dbPath] || {};
+        const events = reference.events || {};
+        const scoped = events[scope] || [];
+        // make sure the event is added just once
+        if (scoped.includes(event) === false) {
+            scoped.push(event);        
+        }
+        // rebuild the reference
+        events[scope] = scoped;
+        reference.is = is;                
+        reference.events = events;                
+        doc[property][dbPath] = reference;
+        return doc;
+    }
+
+    static __removeListener(doc, property, {event, dbPath, scope = ""}) {
+        const reference = doc[property][dbPath];
+        if (!reference) {
+            return;
+        }
+        // if event is null, remove all for the dbPath
+        if (!event) {
+            delete doc[property][dbPath];
+        // remove the specified event
+        } else if (reference.events) {
+            const scoped = reference.events[scope || ""];
+            if (scoped) {
+                scoped.splice(scoped.indexOf(event), 1);
+            }
+        }
+        return doc;
+    }
+
     _updateReferencedBy(doc) {
-        // needs to be a promise
-        // load all objects and add references to them
-        // then clear the _listenersToHandle
-        // return the new doc
+        // _listenersToHandle: [{add: true, event, dbPath, is, scope}]
+        // referencedBy: {
+        //     "doc/gallery-1": {
+        //         is: "hb-art-gallery-doc",
+        //         events: {
+        //             "": ["description-changed"]
+        //             "artwork": ["thumbnail-changed"]
+        //         }
+        //     }
+        // }        
+        const thisDbPath = this.dbPath;
+        const byDbPath = [...this._listenersToHandle].reduce((byDbPath, listener) => {
+            const {dbPath, add, remove, event, is, scope} = listener;
+            byDbPath[dbPath] = listeners[dbPath] || {};
+            byDbPath[dbPath].push({add, remove, event, is, scope, dbPath: thisDbPath});
+        }, {});
+
+        const promises = Object.keys(byDbPath).map(dbPath => {            
+            const docRef = this.db.doc(dbPath);
+            const listeners = byDbPath[dbPath];
+            return docRef.get().then(snapshot => {
+                const doc = snapshot.data();
+                doc = hb.DomainObj.__updateDocListeners(doc, "referencedBy", listeners);
+            });
+        });
+        
+        return Promise.all(promises).then(_ => {
+            this._listenersToHandle = [];
+        });
     }
 
     /**
@@ -214,8 +251,8 @@ hb.DomainObj  = class {
         }
         
         // we have methods to call, load the doc and call the methods
-        return this.docRef.get().then(event => {
-            let doc = event.data();
+        return this.docRef.get().then(snapshot => {
+            let doc = snapshot.data();
             const needUpdate = methodsToCall.reduce((needUpdate, method) => {
                 const newDoc = this[method](doc, refDoc);
                 if (newDoc) {
