@@ -88,9 +88,37 @@ hb.DomainObj  = class {
         return doc;
     }
 
-    // make sure to clone the other listeners
-    // and to clear this._listenersToHandle
-    //
+    _updateReferencedBy(doc) {
+        // _listenersToHandle: [{add: true, event, dbPath, is, scope}]
+        // referencedBy: {
+        //     "doc/gallery-1": {
+        //         is: "hb-art-gallery-doc",
+        //         events: {
+        //             "": ["description-changed"]
+        //             "artwork": ["thumbnail-changed"]
+        //         }
+        //     }
+        // }        
+        const thisDbPath = this.dbPath;
+        const byDbPath = [...this._listenersToHandle].reduce((byDbPath, listener) => {
+            const {dbPath, add, remove, event, is, scope} = listener;
+            byDbPath[dbPath] = listeners[dbPath] || {};
+            byDbPath[dbPath].push({add, remove, event, is, scope, dbPath: thisDbPath});
+        }, {});
+
+        const promises = Object.keys(byDbPath).map(dbPath => {            
+            const docRef = this.db.doc(dbPath);
+            const listeners = byDbPath[dbPath];
+            return docRef.get().then(snapshot => {
+                const doc = snapshot.data();
+                doc = hb.DomainObj.__updateDocListeners(doc, "referencedBy", listeners);
+            });
+        });
+        
+        return Promise.all(promises).then(_ => {
+            this._listenersToHandle = [];
+        });
+    }
 
     static __updateDocListeners({doc, property, listeners}) {
         listeners.forEach(listener => {
@@ -103,7 +131,6 @@ hb.DomainObj  = class {
         return doc;
     }
 
-    // need to pass in the property here - references or referencedBy
     static __addListener(doc, property, {event, dbPath, scope = "", is}) {
         const reference = doc[property][dbPath] || {};
         const events = reference.events || {};
@@ -136,38 +163,6 @@ hb.DomainObj  = class {
             }
         }
         return doc;
-    }
-
-    _updateReferencedBy(doc) {
-        // _listenersToHandle: [{add: true, event, dbPath, is, scope}]
-        // referencedBy: {
-        //     "doc/gallery-1": {
-        //         is: "hb-art-gallery-doc",
-        //         events: {
-        //             "": ["description-changed"]
-        //             "artwork": ["thumbnail-changed"]
-        //         }
-        //     }
-        // }        
-        const thisDbPath = this.dbPath;
-        const byDbPath = [...this._listenersToHandle].reduce((byDbPath, listener) => {
-            const {dbPath, add, remove, event, is, scope} = listener;
-            byDbPath[dbPath] = listeners[dbPath] || {};
-            byDbPath[dbPath].push({add, remove, event, is, scope, dbPath: thisDbPath});
-        }, {});
-
-        const promises = Object.keys(byDbPath).map(dbPath => {            
-            const docRef = this.db.doc(dbPath);
-            const listeners = byDbPath[dbPath];
-            return docRef.get().then(snapshot => {
-                const doc = snapshot.data();
-                doc = hb.DomainObj.__updateDocListeners(doc, "referencedBy", listeners);
-            });
-        });
-        
-        return Promise.all(promises).then(_ => {
-            this._listenersToHandle = [];
-        });
     }
 
     /**
