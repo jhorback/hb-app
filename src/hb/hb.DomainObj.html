@@ -34,34 +34,31 @@ hb.DomainObj  = class {
      * If the return value is falsy, no updates will occur.
      */
     async update(update, progressTracker = new ProgressTracker()) {
-        var progressLayer = progressTracker.addLayer("Update", 5);
+        const progressLayer = progressTracker.addLayer("Update", 5);
         progressLayer.next("Loading document");
         
-        // update to use async await after some basic tests.
-        return this.docRef.get().then(snapshot => {
+        try {
+            const snapshot = await this.docRef.get();
             progressLayer.next("Updating");
-
             let doc = snapshot.data();
-            let newDoc = update(doc);           
-            if (!newDoc) {
+            doc = update(doc);           
+            if (!doc) {
                 progressLayer.done("No updates needed");
                 return Promise.resolve();
             }
-
-            newDoc = this._updateReferences(newDoc);
-            return this.docRef.update(newDoc).then(_ => {
-                progressLayer.next("Updating references");
-                return this._updateReferencedBy(newDoc);
-            }).then(_ => {
-                progressLayer.next("Dispatching events");
-                return this._dispatchEvents(newDoc);
-            }).then(_ => {
-                progressLayer.done("Document updated");
-                return newDoc;
-            }).catch(error => {
-                progressLayer.error(error);
-            });          
-        });
+            this._updateReferences(doc);
+            
+            // update the doc
+            await this.docRef.update(doc);
+            progressLayer.next("Updating references");
+            await this._updateReferencedBy(doc);
+            progressLayer.next("Dispatching events");
+            await this._dispatchEvents(doc);
+            progressLayer.done("Document updated");
+            return doc;
+        } catch(error) {
+            progressLayer.error(error);
+        }
     }
 
     /**
