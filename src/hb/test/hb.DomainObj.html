@@ -16,14 +16,48 @@
 
     <script>
       
-      const clone = obj => JSON.parse(JSON.stringify(obj));      
+      const clone = obj => JSON.parse(JSON.stringify(obj));
+
+      hb.testDoc = class extends hb.DomainObj {
+          static get is() { return "testDoc"; }
+      }
+
+      hb.testRefDoc = class extends hb.DomainObj {
+        static get is() { return "testRefDoc"; }
+      }
+
+      class MockDb{
+        constructor({snapshotData = null, update = null}) {
+          const noop = () => {};
+          this.snapshotData = snapshotData || noop;
+          this.update = update || noop;
+        }
+
+        // returns a docRef
+        doc(path) {
+          return {
+            get: () => {
+              return Promise.resolve({
+                data: () => {
+                  return this.snapshotData(path);
+                }
+              });
+            },
+            update: (doc) => {
+              return Promise.resolve(this.update(path, doc));
+            }
+          };
+        }
+      }
       
-      const db = {
-        doc: () => {}
-      };
 
 
       describe("hb.DomainObj", () => {
+        var db;
+
+        beforeEach(() => {
+          db = new MockDb({});
+        });
 
         it("exists", () => {
           expect(hb.DomainObj).not.to.be.null;
@@ -44,7 +78,7 @@
 
 
         describe("_updateReferences", () => {
-          var testDoc;
+          var testDoc, mockDb;
 
           beforeEach(() => {
             testDoc = clone({
@@ -144,6 +178,87 @@
 
 
 
+        describe("update", () => {
+
+          it ("calls the update callback with an updated document", (done) => {
+            const db = new MockDb({
+              snapshotData: (dbPath) => {
+                return {foo: "bar"};
+              },
+              update: (dbPath, doc) => {}
+            });
+            const testDoc = new hb.testDoc({db, dbPath: "doc/testDoc"});
+            
+            testDoc.update(doc => {
+              doc.foo = "baz";
+              return doc;
+            }).then(doc => {
+              expect(doc.foo).to.be.equal("baz");
+              done();
+            });
+          });
+
+
+          it ("calls the update callback with an undefined document if not updated", (done) => {
+            const db = new MockDb({
+              snapshotData: (dbPath) => {
+                return {foo: "bar"};
+              },
+              update: (dbPath, doc) => {}
+            });
+            const testDoc = new hb.testDoc({db, dbPath: "doc/testDoc"});
+            
+            testDoc.update(doc => {
+              doc.foo = "baz";
+              // no return statement here
+            }).then(doc => {
+              expect(doc).to.be.undefined;
+              done();
+            });
+          });
+        });
+
+
+        describe("references", () => {
+          it ("adds references with addEventListener", (done) => {
+            const db = new MockDb({
+              snapshotData: dbPath => { return {}; },
+              update: (dbPath, doc) => {
+                if (dbPath === "doc/testDoc") {
+                  expect(doc.references["doc/testRefDoc"].events[""][0]).to.be.equal("test-event");
+                  done();
+                }
+              }
+            });
+
+            const testDoc = new hb.testDoc({db, dbPath: "doc/testDoc"});            
+            testDoc.update(doc => {
+              testDoc.addEventListener("test-event", "doc/testRefDoc", "testRefDoc");
+              return doc;
+            });
+          });
+
+          it ("adds referencedBy with addEventListener", (done) => {
+            const db = new MockDb({
+              snapshotData: dbPath => { return {}; },
+              update: (dbPath, doc) => {
+                if (dbPath === "doc/testRefDoc") {
+                  expect(doc.referencedBy["doc/testDoc"].events[""][0]).to.be.equal("test-event");
+                  done();
+                }
+              }
+            });
+
+            const testDoc = new hb.testDoc({db, dbPath: "doc/testDoc"});            
+            testDoc.update(doc => {
+              testDoc.addEventListener("test-event", "doc/testRefDoc", "testRefDoc");
+              return doc;
+            });
+          });
+        });
+
+
+
         describe("_updateReferencedBy", () => {
 
         });
@@ -158,12 +273,6 @@
         
         
         describe("_handleEvents", () => {
-
-        });
-
-
-
-        describe("update", () => {
 
         });
 

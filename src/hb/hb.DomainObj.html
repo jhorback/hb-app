@@ -33,30 +33,31 @@ hb.DomainObj  = class {
      * The document data to update.
      * If the return value is falsy, no updates will occur.
      */
-    update(update, progressTracker = new ProgressTracker()) {
+    async update(update, progressTracker = new ProgressTracker()) {
         var progressLayer = progressTracker.addLayer("Update", 5);
         progressLayer.next("Loading document");
         
+        // update to use async await after some basic tests.
         return this.docRef.get().then(snapshot => {
             progressLayer.next("Updating");
 
-            const doc = snapshot.data();
+            let doc = snapshot.data();
             let newDoc = update(doc);           
-            
             if (!newDoc) {
                 progressLayer.done("No updates needed");
                 return Promise.resolve();
             }
 
             newDoc = this._updateReferences(newDoc);
-            this.docRef.update(newDoc).then(_ => {
+            return this.docRef.update(newDoc).then(_ => {
                 progressLayer.next("Updating references");
                 return this._updateReferencedBy(newDoc);
-            }).then(doc => {
+            }).then(_ => {
                 progressLayer.next("Dispatching events");
-                return this._dispatchEvents(doc)
+                return this._dispatchEvents(newDoc);
             }).then(_ => {
                 progressLayer.done("Document updated");
+                return newDoc;
             }).catch(error => {
                 progressLayer.error(error);
             });          
@@ -70,7 +71,7 @@ hb.DomainObj  = class {
      * The document to update.
      * @returns Object - The updated doc.
      */
-    _updateReferences(doc) {
+        _updateReferences(doc) {
         // _listenersToHandle: [{add: true, event, dbPath, is, scope}]
         // references: {
         //     "doc/gallery-1": {
@@ -98,25 +99,28 @@ hb.DomainObj  = class {
         //             "artwork": ["thumbnail-changed"]
         //         }
         //     }
-        // }        
+        // }
         const thisDbPath = this.dbPath;
         const byDbPath = [...this._listenersToHandle].reduce((byDbPath, listener) => {
             const {dbPath, add, remove, event, is, scope} = listener;
-            byDbPath[dbPath] = listeners[dbPath] || {};
+            byDbPath[dbPath] = byDbPath[dbPath] || [];
             byDbPath[dbPath].push({add, remove, event, is, scope, dbPath: thisDbPath});
+            return byDbPath;
         }, {});
 
         const promises = Object.keys(byDbPath).map(dbPath => {            
             const docRef = this.db.doc(dbPath);
             const listeners = byDbPath[dbPath];
             return docRef.get().then(snapshot => {
-                const doc = snapshot.data();
-                doc = hb.DomainObj.__updateDocListeners(doc, "referencedBy", listeners);
+                let doc = snapshot.data();
+                doc = hb.DomainObj.__updateDocListeners({doc, property: "referencedBy", listeners});
+                return docRef.update(doc);
             });
         });
         
         return Promise.all(promises).then(_ => {
             this._listenersToHandle = [];
+            return doc;
         });
     }
 
@@ -132,6 +136,7 @@ hb.DomainObj  = class {
     }
 
     static __addListener(doc, property, {event, dbPath, scope = "", is}) {
+        doc[property] =  doc[property] || {};
         const reference = doc[property][dbPath] || {};
         const events = reference.events || {};
         const scoped = events[scope] || [];
