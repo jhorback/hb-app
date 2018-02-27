@@ -357,17 +357,11 @@
 
 
         describe("progressTracker", () => {
-          it("is here", async () => {
+          it("Provides a description", async () => {
             const dbPath = "doc/TestDispatchEvent";
             const doc = new hb.TestDispatchEvent({db, dbPath});
-            const updateSpy = sinon.spy(db, "update");
-
-            await doc.doSomethingThatDispatchesAnEvent();            
-            expect(updateSpy.calledTwice).to.be.true;
-            expect(updateSpy.getCall(0).args[0]).to.be.equal("doc/TestDispatchEvent");
-            expect(updateSpy.getCall(1).args[0]).to.be.equal("doc/TestHandleEvent");
-            // jch! - here - working on implementation and tests debugger;
-            debugger;
+            await doc.doSomethingThatDispatchesAnEvent();
+            expect(doc.progressTracker.description).to.be.equal("Update: Loading document, Update: Updating, Update: Updating references, Update: Dispatching events, Handling events for doc/TestHandleEvent: Loading document, Handling events for doc/TestHandleEvent: Updating document, Handling events for doc/TestHandleEvent: Dispatching events, Handling events for doc/TestHandleEvent: Finished handling events, Update: Document updated");
           });
         });
       });

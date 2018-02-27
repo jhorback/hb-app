@@ -114,7 +114,7 @@ hb.DomainObj  = class {
             const snapshot = await docRef.get();
             let doc = snapshot.data();
             doc = hb.DomainObj.__updateDocListeners({doc, property: "referencedBy", listeners});
-            progressLayer.next("Updating document");
+            progressLayer.next("Updating references");
             doc = await docRef.update(doc);
             progresslayer.done("References updated");
             return doc;            

@@ -1,6 +1,9 @@
 <script>
 /**
- * 
+ * Include best practices on when to create layers and descriptions for next.
+ *
+ * Could also update this to make the steps be objects recording detailed "event"
+ *    info and timestaps for graphing and statistics... even logging
  */
 class ProgressTracker {
 	constructor(onUpdate) {
@@ -63,7 +66,14 @@ class ProgressTracker {
 
    get description() {
       return this.steps.join(", ");
-    }
+	}
+
+	get percentage() {
+		const {steps, totalSteps:max} = this;
+		const value = steps.length;
+        const percentage = Math.round((value / max) * 100);
+		return percentage;
+	}
 }
 
 // var tracker = new ProgressTracker(update => {
