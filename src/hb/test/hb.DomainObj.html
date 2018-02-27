@@ -26,6 +26,7 @@
         static get is() { return "testRefDoc"; }
       }
 
+
       class MockDb{
         constructor({snapshotData = null, update = null}) {
           const noop = () => {};
@@ -259,23 +260,102 @@
 
 
 
-        describe("_updateReferencedBy", () => {
+        describe("events", () => {
+          let deb = null;
 
+          const testDispatchEventDocData = {
+            title: "TestDispatchEvent",
+            referencedBy: {
+              "doc/TestHandleEvent": {
+                is: "TestHandleEvent",
+                events: {
+                  "": ["some-event", "notcalled-event"]
+                }
+              }
+            }
+          };
+
+          const testHandleEventData = {
+            title: "TestHandleEvent"
+          };
+
+          hb.TestDispatchEvent = class extends hb.DomainObj {
+            static get is() { return "TestDispatchEvent"; }
+            doSomethingThatDispatchesAnEvent() {
+              return this.update(doc => {
+                this.dispatchEvent("some-event");
+                return doc;
+              });
+            }
+          }
+
+          hb.TestHandleEvent = class extends hb.DomainObj {
+            static get is() { return "TestHandleEvent"; }
+            static get events() {
+              return {
+                "some-event": "_someEvent",
+                "notcalled-event": "_notCalledEvent"
+              }
+            }
+            _someEvent(doc, refDoc) {
+              return doc;
+            }
+            _notCalledEvent(doc, refDoc) {}
+          }
+
+          beforeEach(() => {
+            db = new MockDb({
+              snapshotData: (path) => {
+                if (path === "doc/TestDispatchEvent") {
+                  return testDispatchEventDocData;
+                } else if (path === "doc/TestHandleEvent") {
+                  return testHandleEventData;
+                }
+              },
+              update: (path, doc) => {}
+            });
+          })
+
+
+          it("can dispatch an event", async () => {
+            const dbPath = "doc/TestDispatchEvent";
+            const doc = new hb.TestDispatchEvent({db, dbPath});            
+            const someEventSpy = sinon.spy(hb.TestHandleEvent.prototype, "_someEvent");
+            const notcalledEventSpy = sinon.spy(hb.TestHandleEvent.prototype, "_notCalledEvent");
+
+            await doc.doSomethingThatDispatchesAnEvent();            
+            expect(someEventSpy.calledOnce).to.be.true;
+            expect(notcalledEventSpy.notCalled).to.be.true;
+            someEventSpy.restore();
+            notcalledEventSpy.restore();
+          });
+          
+          it ("updates the referenced doc if the event handler returns a doc", async () => {
+            const dbPath = "doc/TestDispatchEvent";
+            const doc = new hb.TestDispatchEvent({db, dbPath});
+            const updateSpy = sinon.spy(db, "update");
+
+            await doc.doSomethingThatDispatchesAnEvent();            
+            expect(updateSpy.calledTwice).to.be.true;
+            expect(updateSpy.getCall(0).args[0]).to.be.equal("doc/TestDispatchEvent");
+            expect(updateSpy.getCall(1).args[0]).to.be.equal("doc/TestHandleEvent");
+          });
+
+          // if _someEvent returns a doc update is called          
+          it ("does not update the referenced doc if the event handler does not return a doc", async () => {
+            const dbPath = "doc/TestDispatchEvent";
+            const doc = new hb.TestDispatchEvent({db, dbPath});
+            const updateSpy = sinon.spy(db, "update");
+            const someEventStub = sinon.stub(hb.TestHandleEvent.prototype, "_someEvent", (doc, docRef) => {
+              return null;
+            });            
+
+            await doc.doSomethingThatDispatchesAnEvent();            
+            expect(updateSpy.calledOnce).to.be.true;
+            expect(updateSpy.getCall(0).args[0]).to.be.equal("doc/TestDispatchEvent");
+            someEventStub.restore();
+          });
         });
-
-        
-        
-        
-        describe("_dispatchEvents", () => {
-
-        });
-        
-        
-        
-        describe("_handleEvents", () => {
-
-        });
-
 
 
         describe("progressTracker", () => {

@@ -182,7 +182,12 @@ hb.DomainObj  = class {
         const promises = Object.keys(doc.referencedBy).map(dbPath => {
             const reference = doc.referencedBy[dbPath];
             const eventHandlers = hb[reference.is].events;
-            const eventsToHandle = reference.events;
+            const eventsToHandle = Object.keys(reference.events).reduce((toHandle, scope) => {
+                const scopedEvents = reference.events[scope];
+                // find the intersection of scopedEvents and this._eventsToHandle
+                toHandle[scope] = [...new Set(scopedEvents)].filter(e => new Set(this._eventsToHandle).has(e));
+                return toHandle;
+            }, {});
 
             if (!eventHandlers || !eventsToHandle) {
                 return Promise.resolve();
