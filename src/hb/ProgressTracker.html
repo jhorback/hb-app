@@ -1,4 +1,7 @@
 <script>
+/**
+ * 
+ */
 class ProgressTracker {
 	constructor(onUpdate) {
 		this.onUpdate = onUpdate;
@@ -10,17 +13,21 @@ class ProgressTracker {
         let currentLayerStep = 0;
 		this.totalSteps = this.totalSteps + totalSteps;
 		this.notify();
+
+		const addSteps = (count) => {
+			this.totalSteps = this.totalSteps + count;
+			totalSteps = totalSteps + count;
+		};
 		
 		return {
             addSteps: (count) => {
-                this.totalSteps = this.totalSteps + count;
-                totalSteps = totalSteps + count;
+                addSteps(count);
                 this.notify();                
             },
 			next: (stepDescription) => {
                 if (currentLayerStep === totalSteps) {
                    console.warn(`Total steps reached for layer ${layerDescription}: ${stepDescription}`);
-                   return;
+				   addSteps(1);
                 }
 				this.steps.push(`${layerDescription}: ${stepDescription}`);
                 currentLayerStep = currentLayerStep + 1;

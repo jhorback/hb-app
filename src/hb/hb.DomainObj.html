@@ -51,13 +51,14 @@ hb.DomainObj  = class {
             // update the doc
             await this.docRef.update(doc);
             progressLayer.next("Updating references");
-            await this._updateReferencedBy(doc);
+            await this._updateReferencedBy(doc, progressTracker);
             progressLayer.next("Dispatching events");
-            await this._dispatchEvents(doc);
+            await this._dispatchEvents(doc, progressTracker);
             progressLayer.done("Document updated");
             return doc;
         } catch(error) {
             progressLayer.error(error);
+            throw error;
         }
     }
 
@@ -86,7 +87,7 @@ hb.DomainObj  = class {
         return doc;
     }
 
-    _updateReferencedBy(doc) {
+    async _updateReferencedBy(doc, progressTracker) {
         // _listenersToHandle: [{add: true, event, dbPath, is, scope}]
         // referencedBy: {
         //     "doc/gallery-1": {
@@ -105,20 +106,23 @@ hb.DomainObj  = class {
             return byDbPath;
         }, {});
 
-        const promises = Object.keys(byDbPath).map(dbPath => {            
+        const promises = Object.keys(byDbPath).map(async dbPath => {
+            const progressLayer = progressTracker.addLayer(`Updating references for ${dbPath}`, 3); 
             const docRef = this.db.doc(dbPath);
             const listeners = byDbPath[dbPath];
-            return docRef.get().then(snapshot => {
-                let doc = snapshot.data();
-                doc = hb.DomainObj.__updateDocListeners({doc, property: "referencedBy", listeners});
-                return docRef.update(doc);
-            });
-        });
-        
-        return Promise.all(promises).then(_ => {
-            this._listenersToHandle = [];
-            return doc;
-        });
+            progressLayer.next("Loading document");
+            const snapshot = await docRef.get();
+            let doc = snapshot.data();
+            doc = hb.DomainObj.__updateDocListeners({doc, property: "referencedBy", listeners});
+            progressLayer.next("Updating document");
+            doc = await docRef.update(doc);
+            progresslayer.done("References updated");
+            return doc;            
+        });        
+
+        await Promise.all(promises);
+        this._listenersToHandle = [];
+        return doc;
     }
 
     static __updateDocListeners({doc, property, listeners}) {
@@ -171,15 +175,15 @@ hb.DomainObj  = class {
      * For every referencedBy entry, create the DomainObj
      * and then call _handleEvents on that DomainObj.
      * @param doc the data for this domainObj
-     * @returns Promise
+     * @returns async doc
      */
-    _dispatchEvents(doc) {
+    async _dispatchEvents(doc, progressTracker) {
         if (!doc.referencedBy) {
             return Promise.resolve();
         }
 
         // notify objects of a reference change
-        const promises = Object.keys(doc.referencedBy).map(dbPath => {
+        const promises = Object.keys(doc.referencedBy).map(async dbPath => {
             const reference = doc.referencedBy[dbPath];
             const eventHandlers = hb[reference.is].events;
             const eventsToHandle = Object.keys(reference.events).reduce((toHandle, scope) => {
@@ -194,9 +198,16 @@ hb.DomainObj  = class {
             }
 
             const domainObj = new hb[reference.is]({db: this.db, dbPath});
-            return domainObj._handleEvents({eventHandlers, eventsToHandle, refDoc: doc});
+            await domainObj._handleEvents({
+                eventHandlers,
+                eventsToHandle,
+                refDoc: doc,
+                progressTracker
+            });
         });
-        return Promise.all(promises);
+
+        await Promise.all(promises);
+        return doc;
     }
 
     /**
@@ -221,9 +232,9 @@ hb.DomainObj  = class {
 	 *   "artwork": ["thumbnail-changed"]
 	 * }
      * @param refDoc the document that triggered the events.
-     * @returns Promise
+     * @returns async undefined
      */
-    _handleEvents({eventHandlers, eventsToHandle, refDoc}) {
+    async _handleEvents({eventHandlers, eventsToHandle, refDoc, progressTracker}) {
 
         const methodsToCall = Object.keys(eventsToHandle).reduce((methods, scope) => {
             const events = eventsToHandle[scope];
@@ -249,34 +260,36 @@ hb.DomainObj  = class {
         }, []);
 
         if (methodsToCall.length === 0) {
-            return Promise.resolve();
+            return;
         }
         
         // we have methods to call, load the doc and call the methods
-        return this.docRef.get().then(snapshot => {
-            let doc = snapshot.data();
-            const needUpdate = methodsToCall.reduce((needUpdate, method) => {
-                const newDoc = this[method](doc, refDoc);
-                if (newDoc) {
-                    doc = newDoc;
-                    needUpdate = true;
-                }
-                return needUpdate;            
-            }, false);
-            
-            if (needUpdate === false) {
-                return Promise.resolve();
+        const progressLayer = progressTracker.addLayer(`Handling events for ${this.dbPath}`, 4);
+        progressLayer.next("Loading document");
+        const snapshot = await this.docRef.get();
+        let doc = snapshot.data();
+        const needUpdate = methodsToCall.reduce((needUpdate, method) => {
+            const newDoc = this[method](doc, refDoc);
+            if (newDoc) {
+                doc = newDoc;
+                needUpdate = true;
             }
+            return needUpdate;            
+        }, false);
+        
+        if (needUpdate === false) {
+            progressLayer.done("Update not needed");        
+            return;
+        }
+        
+        // we need to update the doc
+        progressLayer.next("Updating document");
+        await this.docRef.update(doc);
 
-            return this.docRef.update(doc).then(_ => {
-                //progressLayer.next("Dispatching events");
-                return this._dispatchEvents(doc)
-            }).then(_ => {
-                //progressLayer.done("Document updated");
-            }).catch(error => {
-                //progressLayer.error(error);
-            });
-        });
+        // handle any additional events
+        progressLayer.next("Dispatching events");
+        await this._dispatchEvents(doc, progressTracker);
+        progressLayer.done("Finished handling events");
     }
 
     dispatchEvent(event) {
