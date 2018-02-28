@@ -94,12 +94,20 @@
         }
 
         addHome(event) {
-            const addDoc = document.createElement("add-document-page");
-            addDoc.title = "Add the home page";
-            addDoc.addEventListener("closed", () => {
+            const close = () => {
                 addDoc.remove();
                 document.body.appendChild(this);
-            })
+            };
+            
+            const addDoc = document.createElement("add-document-page");
+            addDoc.title = "Add the home page";
+
+            addDoc.addEventListener("closed", () =>  close());
+            addDoc.addEventListener("add-new", event => {
+                const {title, is} = event.detail;
+                close();
+                setTimeout(() => alert(`Add ${is} as ${title}`), 300);
+            });
             this.remove();
             document.body.appendChild(addDoc);
         }    

@@ -1,0 +1,12 @@
+<link rel="import" href="hb.html">
+<script>
+/*
+ *
+ */
+hb.DocumentCreator = class {
+    static getDocumentId(type, title) {
+        return `${type}-${encodeURIComponent(title.split(" ").join("-").replace(/[^a-z0-9]/gi, "-").toLowerCase())}`;
+    }
+}
+
+</script>

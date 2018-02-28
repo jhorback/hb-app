@@ -8,7 +8,9 @@
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../hb-styles/hb-styles.html">
+<link rel="import" href="../hb/hb.DocumentCreator.html">
 <link rel="import" href="hb-menu.html">
 <link rel="import" href="hb-config.html">
 <link rel="import" href="hb-current-user.html">
@@ -27,8 +29,20 @@
             paper-item {
                 cursor: default;
             }
-            .list {
+            main > div {
                 margin: 1rem 0rem;
+            }
+            paper-button.create {
+                float: right;               
+            }
+            .add-existing-container {
+                margin-top: 3em;
+            }
+            .add-existing-container paper-button {
+                margin: 0 auto;
+            }
+            .document-id {
+                @apply --paper-font-caption;
             }
         </style>
         <hb-config config="{{config}}"></hb-config>
@@ -38,24 +52,43 @@
                 <app-toolbar>
                     <paper-icon-button icon="hb:close" on-tap="close"></paper-icon-button>
                     <div main-title>
-                        [[title]]
+                        [[getTitle(title, selectedDocType)]]
                     </div>
                 </app-toolbar>
             </app-header>
             <main>
-                <div class="list" hidden$="[[is]]">
-                <template is="dom-repeat" items="[[config.docs]]" as="doc">                
-                    <paper-item on-tap="addDocument">
-                        <paper-item-body two-line>
-                            <div class="paper-font-body2">[[doc.name]]</div>
-                            <div secondary>[[doc.description]]</div>
-                        </paper-item-body>
-                    </paper-item>
-                </template>
+                
+                <div hidden$="[[selectedDocType]]">
+                    <template is="dom-repeat" items="[[getDocTypes(config.docTypes)]]" as="docType">                
+                        <paper-item on-tap="selectDocType">
+                            <paper-item-body two-line>
+                                <div class="paper-font-body2">[[docType.name]]</div>
+                                <div secondary>[[docType.description]]</div>
+                            </paper-item-body>
+                        </paper-item>
+                    </template>
                 </div>
-                <paper-button raised on-tap="addExisting">
-                    Add Existing
-                </paper-button>
+
+
+                <div hidden$="[[!selectedDocType]]">
+                    <paper-input
+                        autofocus
+                        label="[[getTitleInputLabel(selectedDocType)]]"
+                        value="{{documentTitle}}"
+                    ></paper-input>
+                    <div class="document-id">
+                        [[documentId]]
+                    </div>
+                    <paper-button raised on-tap="createDocument" class="primary create">
+                        Create
+                    </paper-button>
+                </div>
+               
+                <div class="add-existing-container">
+                    <paper-button raised on-tap="addExisting" class="xprimary">
+                        Add Existing Document
+                    </paper-button>
+                </div>
             </main>
         </app-header-layout>
     </template>
@@ -69,26 +102,100 @@
     
         static get properties() {
             return {
+                config: {
+                    type: Object
+                },
+                /** An optional initial value for the page title */
                 title: {
                     type: String,
                     value: "Add Document"
                 },
-                config: {
-                    type: Object
+                /** The name to use when creating the document */
+                documentTitle: {
+                    type: String,
+                    observer: "_documentTitleChanged"
                 },
-                is: {
-                    type: String
+                /** Suggested document id when creating the document */
+                documentId: {
+                    type: String                    
+                },
+                
+                /**
+                 * Set when a doc type is selected or there is only one
+                 * Shows the name dialog.
+                 */
+                selectedDocType: {
+                    type: String,
+                    value: null
+                },
+                /**
+                 * An array of valid doc types to add. If not set all will be shown.
+                 * This is filtered by the doc types allowed through the config.
+                 */
+                accept: {
+                    type: Array,
+                    value: []
                 }
             };
         }
 
-        addDocument(event) {
-            this.is = event.model.get("doc").is;
-            // alert(`add ${event.model.get("doc").is}`);
+        getDocTypes(docTypes) {
+            const invalidTypes = this.config.invalidDocTypes;
+            
+            // filter out invalid types
+            if (invalidTypes && invalidTypes.length !== 0) {
+                docTypes = docTypes.reduce((docTypes, type) => {
+                    if (!invalidTypes.includes(type.is)) {
+                        docTypes.push(type);
+                    }
+                    return docTypes;
+                }, []);
+            }
+
+            // keep only those in this.accept
+            if (this.accept && this.accept.length !== 0) {
+                docTypes = docTypes.reduce((docTypes, type) => {
+                    if (this.accept.includes(type.is)) {
+                        docTypes.push(type);
+                    }
+                    return docTypes;
+                }, []);
+            }
+
+            if (docTypes.length === 1) {
+                this.selectedDocType = docTypes[0];
+            }
+
+            return docTypes;
+        }
+
+        getTitle(title, selectedDocType) {
+            return selectedDocType ? `${title}: ${selectedDocType.name}` : title;
+        }
+
+        getTitleInputLabel(selectedDocType) {
+            return selectedDocType ? `Enter ${selectedDocType.name} title` : "Enter title";
+        }
+
+        selectDocType(event) {
+            this.selectedDocType = event.model.get("docType");
+        }
+
+        _documentTitleChanged(title) {
+            this.documentId = hb.DocumentCreator.getDocumentId(this.selectedDocType.route, title);
         }
 
         addExisting(event) {
-            alert("Add existing");
+            setTimeout(() => alert("Add existing"), 300);
+        }
+
+        createDocument(event) {
+            this.dispatchEvent(new CustomEvent("add-new", {
+                detail: {
+                    title: this.documentTitle,
+                    is: this.selectedDocType.is   
+                }
+            }));
         }
 
         close(event) {

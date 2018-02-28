@@ -3,17 +3,20 @@
 hb.config = {
     version: "v0.5",
 
-    docs: [
+    docTypes: [
         {
             is: "hb-doc",
+            route: "doc",
             name: "Document",
             description: "Text and links to other documents."
         }, {
             is: "hb-art-gallery-doc",
+            route: "art-gallery",
             name: "Art Gallery",
             description: "A collection of artwork."
         }, {
             is: "hb-art-doc",
+            route: "art",
             name: "Artwork",
             description: "Images and description of artwork."
         }
@@ -30,7 +33,8 @@ hb.config = {
             storageBucket: "harbor-staging.appspot.com",
             messagingSenderId: "926265757745",
             projectId: "harbor-staging"
-        }
+        },
+        invalidDocTypes: []
     },
 
     "bjroyster": {
@@ -44,7 +48,8 @@ hb.config = {
             storageBucket: "harbor-staging.appspot.com",
             messagingSenderId: "926265757745",
             projectId: "harbor-staging"
-        }
+        },
+        invalidDocTypes: []
     },
 
     default: "bjroyster",
@@ -58,7 +63,7 @@ hb.config = {
         let config = hb.config[location.origin];
         config = config || hb.config[hb.config.default];
         config.version = hb.config.version;
-        config.docs = hb.config.docs;
+        config.docTypes = hb.config.docTypes;
         return config;
     }
 };
