@@ -6,6 +6,10 @@
             height: 100%;
             @apply --paper-font-common-base;
         }
+        
+        [hidden] {
+            display: none !important;
+        }
 
         app-drawer-layout:not([narrow]) [drawer-toggle] {
             display: none;
@@ -20,9 +24,14 @@
             background-color: var(--primary-header-background-color);
             color: var(--primary-header-color);
         }
+
+        app-header.secondary {
+            background-color: inherit;
+            color: inherit;
+        }
         
         app-header [main-title] {
-            margin-left: .5em
+            margin-left: .5rem
         }
 
         [hidden] {

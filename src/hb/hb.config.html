@@ -58,6 +58,7 @@ hb.config = {
         let config = hb.config[location.origin];
         config = config || hb.config[hb.config.default];
         config.version = hb.config.version;
+        config.docs = hb.config.docs;
         return config;
     }
 };

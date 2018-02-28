@@ -1,0 +1,102 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../hb-styles/hb-styles.html">
+<link rel="import" href="hb-menu.html">
+<link rel="import" href="hb-config.html">
+<link rel="import" href="hb-current-user.html">
+
+<dom-module id="add-document-page">
+    <template>
+        <style include="hb-page-layout-shared-styles"></style>
+        <style>
+            :host {
+                display: block;                
+            }
+            main {
+                margin: 1rem;
+                /* margin-left: 3.0rem; */
+            }
+            paper-item {
+                cursor: default;
+            }
+            .list {
+                margin: 1rem 0rem;
+            }
+        </style>
+        <hb-config config="{{config}}"></hb-config>
+        <!-- <hb-current-user user="{{user}}"></hb-current-user> -->
+        <app-header-layout>
+            <app-header slot="header" fixed effects="waterfall" class="secondary">                
+                <app-toolbar>
+                    <paper-icon-button icon="hb:close" on-tap="close"></paper-icon-button>
+                    <div main-title>
+                        [[title]]
+                    </div>
+                </app-toolbar>
+            </app-header>
+            <main>
+                <div class="list" hidden$="[[is]]">
+                <template is="dom-repeat" items="[[config.docs]]" as="doc">                
+                    <paper-item on-tap="addDocument">
+                        <paper-item-body two-line>
+                            <div class="paper-font-body2">[[doc.name]]</div>
+                            <div secondary>[[doc.description]]</div>
+                        </paper-item-body>
+                    </paper-item>
+                </template>
+                </div>
+                <paper-button raised on-tap="addExisting">
+                    Add Existing
+                </paper-button>
+            </main>
+        </app-header-layout>
+    </template>
+    <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class AddDocumentPage extends Polymer.Element {
+        static get is() { return 'add-document-page'; }
+    
+        static get properties() {
+            return {
+                title: {
+                    type: String,
+                    value: "Add Document"
+                },
+                config: {
+                    type: Object
+                },
+                is: {
+                    type: String
+                }
+            };
+        }
+
+        addDocument(event) {
+            this.is = event.model.get("doc").is;
+            // alert(`add ${event.model.get("doc").is}`);
+        }
+
+        addExisting(event) {
+            alert("Add existing");
+        }
+
+        close(event) {
+            this.dispatchEvent(new CustomEvent("closed"));
+        }    
+    }
+    
+    window.customElements.define(AddDocumentPage.is, AddDocumentPage);
+    </script>
+            
+</dom-module>
