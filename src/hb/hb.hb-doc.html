@@ -6,21 +6,27 @@
 hb["hb-doc"] = class extends hb.doc {
     static get is() { return "hb-doc"; }
 
-    static get eventsReson() {
-        return "artwork";
-    }
-
     static get events() {
         return {
             "thumbnail-changed": "_arworkThumbnailChanged",
             "description-changed": {
-                reason: "artwork",
-                handler: "_artworkDescriptionChanged"
-            },
-            "something-happened": {
-                reson: "",
-                handler: "_somethingHappened"
+                artwork: "_artworkDescriptionChanged"
             }
+        };
+    }
+
+    static get defaultValue() {
+        return {
+            docId: null,
+            title: "",
+            is: this.is,
+            author: {/*{userId, displayName}*/},
+            permissions: {},
+            thumb: {},
+            generatedThumb: {},
+            description: "",
+            generatedDescription: "",
+            content: []
         };
     }
 

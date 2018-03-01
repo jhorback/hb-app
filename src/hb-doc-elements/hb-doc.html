@@ -1,12 +1,12 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
-<link rel="import" href="hb-art-data.html">
+<link rel="import" href="hb-doc-data.html">
 
 <dom-module id="hb-art">
 
   <template>
     <h1>[[art.title]]</h1>
     <b>Testing...</b>
-    <hb-art-data doc="{{art}}" doc-id="[[docId]]"></hb-art-data>
+    <hb-doc-data doc="{{doc}}" doc-id="[[docId]]"></hb-doc-data>
   </template>
 
     <script>
@@ -14,8 +14,8 @@
     * @customElement
     * @polymer
     */
-    class HbArt extends Polymer.Element {
-        static get is() { return 'hb-art'; }
+    class HbDoc extends Polymer.Element {
+        static get is() { return 'hb-doc'; }
         
         static get properties() {
             return {
@@ -23,7 +23,7 @@
                     type: String,
                     reflectToAttribute: true
                 },
-                art: {                
+                doc: {                
                     type: Object
                 }
             };
@@ -31,16 +31,16 @@
 
         connectedCallback() {
             super.connectedCallback();
-            this.dispatchEvent(new CustomEvent("request-art", {
-                bubbles: true,
-                composed: true,
-                detail: {
-                    uid: this.uid
-                }
-            }));
+            // this.dispatchEvent(new CustomEvent("request-art", {
+            //     bubbles: true,
+            //     composed: true,
+            //     detail: {
+            //         uid: this.uid
+            //     }
+            // }));
         }
     }
 
-    window.customElements.define(HbArt.is, HbArt);
+    window.customElements.define(HbDoc.is, HbDoc);
     </script>
 </dom-module>

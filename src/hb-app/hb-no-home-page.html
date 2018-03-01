@@ -14,6 +14,7 @@
 <link rel="import" href="hb-menu.html">
 <link rel="import" href="hb-config.html">
 <link rel="import" href="hb-current-user.html">
+<link rel="import" href="../hb/hb.hb-art-doc.html">
 
 <dom-module id="hb-no-home-page">
     <template>
@@ -107,6 +108,9 @@
                 const {title, is} = event.detail;
                 close();
                 setTimeout(() => alert(`Add ${is} as ${title}`), 300);
+            });
+            addDoc.addEventListener("add-existing", event => {
+                alert("Add exising from no home page...");
             });
             this.remove();
             document.body.appendChild(addDoc);

@@ -50,10 +50,12 @@
                 [[config.applicationTitle]]...
             </div>
         </div>
-        <template is="dom-if" if="[[_showNoHome(appReady, app)]]" restamp>
+        <template is="dom-if" if="[[!_hasHome(appReady, app)]]" restamp>
             <hb-no-home-page></hb-no-home-page>
         </template>
-        
+        <template is="dom-if" if="[[_hasHome(appReady, app)]]" restamp>
+            <div id="homePage">HAS HOME PAGE</div>            
+        </template>
     </template>
     <script>
     /**
@@ -84,15 +86,15 @@
             };
         }
 
-        _showNoHome(appReady, app) {
-            return this.appReady && (!this.app.homeDoc || !this.app.homeDoc.docId);
+        _hasHome(appReady, app) {
+            return this.appReady && (this.app.homeDoc && this.app.homeDoc.docId);
         }
 
         _appChanged() {
             if (!this.app || !this.app.homeDoc || !this.app.homeDoc.docId) {
                 if (this.home) {
                     this.home.remove();
-                    this._showNoHome(this.appReady);
+                    this._hasHome(this.appReady);
                 }
                 return;
             }
@@ -105,7 +107,7 @@
             this.home = document.createElement(docType);
             this.home.docId = docId;
             this.home.route = this.route;
-            this.shadowRoot.appendChild(this.home);            
+            this.shadowRoot.appendChild(this.home);
         }
 
         _routeChanged() {
