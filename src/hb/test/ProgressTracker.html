@@ -205,6 +205,57 @@
             expect(tracker.totalSteps).to.be.equal(6);
           });
         });
+
+        describe("toJSON", () => {
+
+          it("supports a toJSON call", () => {
+            const tracker = new ProgressTracker();
+            const layer = tracker.addLayer("Test", 5);
+            const layer2 = tracker.addLayer("Test2", 3);
+            layer.next("one");
+            layer2.next("two");
+            layer.next("three");
+            layer2.next("four");
+            layer.done("done");
+            const json = tracker.toJSON();
+            expect(json.layers.length).to.be.equal(2);
+            expect(json.events.length).to.be.equal(8);
+            expect(json.currentUser).to.be.null;
+            expect(json.started).to.not.be.null;
+          });
+
+        });
+
+        describe("save", () => {
+          it("can save to the database", async () => {
+            const tracker = new ProgressTracker();
+            const dbId = await tracker.save({
+              db: {
+                collection: (name) => {
+                  expect(name).to.be.equal("progressLogs");
+                  return {
+                    add: (log) => {
+                      expect(log.currentUser.uid).to.be.equal("uid");
+                      expect(log.currentUser.photoURL).to.be.equal("photoURL");
+                      expect(log.currentUser.displayName).to.be.equal("displayName");
+                      expect(log.dbPath).to.be.equal("some/dbPath");
+                      return {
+                        id: "someDbId"
+                      };
+                    }
+                  }
+                }
+              },
+              currentUser: {
+                uid: "uid",
+                photoURL: "photoURL",
+                displayName: "displayName"
+              },
+              dbPath: "some/dbPath"
+            });
+            expect(dbId).to.be.equal("someDbId");
+          });
+        });
       });
     </script>
   </body>
