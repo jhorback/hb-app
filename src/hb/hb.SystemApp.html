@@ -1,12 +1,12 @@
+<link rel="import" href="hb.html">
 <link rel="import" href="hb.DomainObj.html">
 <link rel="import" href="hb.DocumentCreator.html">
-<link rel="import" href="hb.db.html">
 <script>
 /**
  * Base class for doc documents
  */
 hb.SystemApp = class extends hb.DomainObj {     
-    constructor({db = hb.db()}) {
+    constructor({db = hb.db}) {
         super({db, dbPath: "System/App"})
     }
 

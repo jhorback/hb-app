@@ -157,9 +157,13 @@ class ProgressTracker {
 	* document was being saved to the database.
 	* @Returns {String} the id of the progress log added.
 	*/
-   async save({db = hb.db(), dbPath = null}) {
+   async save({
+		db = hb.db,
+		currentUser = hb.currentUser,
+		dbPath = null
+	}) {
 	   this.finished = new Date();
-	   const {uid, photoURL, displayName} = db.app.auth().currentUser;
+	   const {uid, photoURL, displayName} = currentUser;
 	   this.currentUser = {uid, photoURL, displayName};
 	   const log = this.toJSON();
 
@@ -182,13 +186,6 @@ class ProgressTracker {
 
    get description() {
       return this.steps.join(", ");
-	}
-
-	get percentage() {
-		const {steps, totalSteps:max} = this;
-		const value = steps.length;
-        const percentage = Math.round((value / max) * 100);
-		return percentage;
 	}
 }
 

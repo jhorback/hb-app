@@ -1,5 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../hb/hb.db.html">
+<link rel="import" href="../hb/hb.html">
 <link rel="import" href="../hb-app/EventMap.html">
 <script>
 /**
@@ -36,7 +36,7 @@ class HbDocData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
 
     constructor() {
         super();
-        this.domain = new hb["hb-doc"]({db: hb.db(), docId: this.docId});
+        this.domain = new hb["hb-doc"]({db: hb.db, docId: this.docId});
         //constructor({db, docId}) {
         // create the domain object?!?!?!
     }

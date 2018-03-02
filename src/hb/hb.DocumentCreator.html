@@ -1,13 +1,12 @@
 <link rel="import" href="hb.html">
 <link rel="import" href="hb.config.html">
-<link rel="import" href="hb.db.html">
 <script>
 /*
  *
  */
 hb.DocumentCreator = class {
     constructor(db) {
-        this.db = db || hb.db();
+        this.db = db || hb.db;
     }
 
     static getDocumentId(route, title) {
