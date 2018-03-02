@@ -44,14 +44,14 @@
                 font-size: 3rem;
             }
         </style>
-        <hb-system-data app="{{app}}" app-ready="{{appState.isReady}}"></hb-system-data>
-        <div hidden$="[[appReady]]">
+        <hb-system-data app="{{app}}" app-state="{{appState}}"></hb-system-data>
+        <div hidden$="[[appState.isReady]]">
             <div class="loading-home">
                 <hb-config config="{{config}}"></hb-config>
                 [[config.applicationTitle]]...
             </div>
         </div>
-        <template is="dom-if" if="[[!_hasHome(appState.isReady, app)]]" restamp>
+        <template is="dom-if" if="[[_hasNoHome(appState.isReady, app)]]" restamp>
             <hb-no-home-page></hb-no-home-page>
         </template>
     </template>
@@ -81,15 +81,19 @@
             };
         }
 
-        _hasHome(appReady, app) {
-            return this.appReady && (this.app.homeDoc && this.app.homeDoc.docId);
+        _hasNoHome(isReady, app) {
+            if (isReady === false) {
+                return false;
+            }
+            const hasHome = this.app.homeDoc && this.app.homeDoc.docId;
+            return !hasHome;
         }
 
+        /** Add/remove the home doc */
         _appChanged() {
             if (!this.app || !this.app.homeDoc || !this.app.homeDoc.docId) {
                 if (this.home) {
                     this.home.remove();
-                    this._hasHome(this.appReady);
                 }
                 return;
             }
