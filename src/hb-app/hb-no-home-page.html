@@ -14,6 +14,7 @@
 <link rel="import" href="hb-menu.html">
 <link rel="import" href="hb-config.html">
 <link rel="import" href="hb-current-user.html">
+<link rel="import" href="hb-system-data.html">
 <link rel="import" href="../hb/hb.hb-art-doc.html">
 
 <dom-module id="hb-no-home-page">
@@ -47,7 +48,7 @@
         </style>
         <hb-config config="{{config}}"></hb-config>
         <hb-current-user user="{{user}}"></hb-current-user>
-
+        <hb-system-data></hb-system-data>
         <app-drawer-layout id="drawerLayout" force-narrow>
             <app-drawer id="drawer" slot="drawer" swipe-open>
                 <hb-menu></hb-menu>
@@ -104,14 +105,23 @@
             addDoc.title = "Add the home page";
 
             addDoc.addEventListener("closed", () =>  close());
-            addDoc.addEventListener("add-new", event => {
-                const {title, is} = event.detail;
+            addDoc.addEventListener("add-new", async event => {
                 close();
-                setTimeout(() => alert(`Add ${is} as ${title}`), 300);
+                const {title, is} = event.detail;
+                this.dispatchEvent(new CustomEvent("create-home-page", {
+                    bubbles: true,
+                    composed: true,
+                    detail: {title, is}
+                }));                
             });
+            
+            
+
             addDoc.addEventListener("add-existing", event => {
+                close();
                 alert("Add exising from no home page...");
             });
+
             this.remove();
             document.body.appendChild(addDoc);
         }    

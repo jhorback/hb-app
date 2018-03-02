@@ -1,5 +1,5 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
+<link rel="import" href="hb-system-data.html">
 <link rel="import" href="hb-no-home-page.html">
 <link rel="import" href="hb-config.html">
 
@@ -44,17 +44,15 @@
                 font-size: 3rem;
             }
         </style>
+        <hb-system-data app="{{app}}" app-ready="{{appState.isReady}}"></hb-system-data>
         <div hidden$="[[appReady]]">
             <div class="loading-home">
                 <hb-config config="{{config}}"></hb-config>
                 [[config.applicationTitle]]...
             </div>
         </div>
-        <template is="dom-if" if="[[!_hasHome(appReady, app)]]" restamp>
+        <template is="dom-if" if="[[!_hasHome(appState.isReady, app)]]" restamp>
             <hb-no-home-page></hb-no-home-page>
-        </template>
-        <template is="dom-if" if="[[_hasHome(appReady, app)]]" restamp>
-            <div id="homePage">HAS HOME PAGE</div>            
         </template>
     </template>
     <script>
@@ -62,22 +60,19 @@
      * @customElement
      * @polymer
      */
-    class HbHome extends Polymer.FirestoreMixin(Polymer.Element) {
+    class HbHome extends Polymer.Element {
         static get is() { return 'hb-home'; }
     
         static get properties() {
             return {
                 app: {
                     type: Object,
-                    doc: "system/app",
-                    live: true,
                     observer: "_appChanged"
                 },
-                
-                appReady: {
-                    type: Boolean,                    
-                    value: false
-                },
+
+                appState: {
+                    type: Object
+                },                
     
                 route: {
                     type: Object,

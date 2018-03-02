@@ -31,11 +31,10 @@ hb.DomainObj  = class {
      * A method that recieves its document which can make changes to
      * and return the document.
      * The method can make calls to dispatchEvent, addEventListener, and  removeEventListener.
+     * If the return value is falsy, no updates will occur.
      * @param progressTracker
      * An optional ProgressTracker to listen for the progress of the update.
-     * @returns Object
-     * The document data to update.
-     * If the return value is falsy, no updates will occur.
+     * @returns Object the updated (or not) document
      */
     async update(update, progressTracker = new ProgressTracker()) {
         const progressLayer = progressTracker.addLayer("Update", 5);
@@ -45,21 +44,21 @@ hb.DomainObj  = class {
             const snapshot = await this.docRef.get();
             progressLayer.next("Updating");
             let doc = snapshot.data();
-            doc = update(doc);           
-            if (!doc) {
+            let newDoc = update(doc);           
+            if (!newDoc) {
                 progressLayer.done("No updates needed");
-                return Promise.resolve();
+                return newDoc;
             }
-            this._updateReferences(doc);
+            this._updateReferences(newDoc);
             
             // update the doc
-            await this.docRef.update(doc);
+            await this.docRef.update(newDoc);
             progressLayer.next("Updating references");
-            await this._updateReferencedBy(doc, progressTracker);
+            await this._updateReferencedBy(newDoc, progressTracker);
             progressLayer.next("Dispatching events");
-            await this._dispatchEvents(doc, progressTracker);
+            await this._dispatchEvents(newDoc, progressTracker);
             progressLayer.done("Document updated");
-            return doc;
+            return newDoc;
         } catch(error) {
             progressLayer.error(error);
             throw error;

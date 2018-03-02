@@ -1,0 +1,122 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../hb.SystemApp.html">
+<link rel="import" href="EventMap.html">
+
+<dom-module id="hb-system-data">
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbSystemData extends Polymer.FirestoreMixin(
+        EventMap(Polymer.Element)
+    ) {
+      
+      static get is() { return 'hb-system-data'; }
+
+      static get properties() {
+            return {
+                app: {
+                    type: Object,
+                    doc: "system/app",
+                    live: true,
+                    notify: true,
+                    value: HbSystemData.defaultApp
+                },
+                appState: {
+                    type: Object,
+                    notify: true,
+                    value: {
+                        isReady: false,
+                        homePageProgress: null, /*{
+                            title: "",
+                            description: "",
+                            percent: 0
+                        }*/
+                    }
+                },
+                /** provided by the FirestoreMixin */
+                appReady: {
+                    type: Boolean,
+                    value: false,
+                    observer: "_appReadyChanged"
+                }
+            };
+        }
+
+        static get defaultApp() {
+            return {
+               homeDoc: {/*
+                    docId: String,
+                    is: String
+               */},
+               menu: [/*{
+                   docId: String,
+                   is: String,
+                   name: String,
+                   url??
+               }*/],
+               permissions: [{
+                 key: "sysAdmin",
+                 name: "System Administrator",
+                 description: "Can change system level settings."
+               }, {
+                 key: "siteAdmin",
+                 name: "Site Administrator",
+                 description: "Can change site settings."
+               }, {
+                 key: "author",
+                 name: "Author",
+                 description: "Can create documents and upload content."
+               }]
+            };
+        }
+
+        static get eventsListenAt() {
+            return "parent";
+        }
+
+        static get events() {
+            return {
+                "create-home-page": "_createHomePage"
+            };
+        }
+
+        constructor() {
+            super();
+            this.systemApp = new hb.SystemApp();
+        }
+
+        _appReadyChanged() {
+            this.set("appState.isReady", this.appReady);
+        }
+
+        async _createHomePage({is, title}) {
+
+            this.set("appState.homePageProgress", {
+                title: "Creating the home page",
+                percentage: 0
+            });
+
+            const progressTracker = new progressTracker(update => {
+                const {percentage, description} = update;
+                this.set("appState.homePageProgress", {
+                    title: "Creating the home page",
+                    percentage,
+                    description
+                });
+                console.log(update);
+            });
+
+            const app = await this.systemApp.createHomePage({is, title, progressTracker});
+            this.set("appState.homePageProgress", null);
+            // progressTracker.save();
+            return app;
+        }
+    }
+
+    window.customElements.define(HbSystemData.is, HbSystemData);
+  </script>
+</dom-module>
