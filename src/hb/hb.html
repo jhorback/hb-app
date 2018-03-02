@@ -1,11 +1,11 @@
 <script>
 const hb = class {
-    static  get db() {
+    static get db() {
         return firebase.firestore();
     }
 
     static get currentUser() {
-        return hb.db.app.auth().currentUser;
+        return hb.db().app.auth().currentUser;
     }
 }
 </script>

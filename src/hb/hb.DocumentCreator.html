@@ -5,8 +5,8 @@
  *
  */
 hb.DocumentCreator = class {
-    constructor(db) {
-        this.db = db || hb.db;
+    constructor(db = hb.db) {
+        this.db = db;
     }
 
     static getDocumentId(route, title) {
