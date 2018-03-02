@@ -112,7 +112,7 @@ class ProgressTracker {
 				const notNeeded = totalSteps - currentLayerStep;
 				const type = ProgressTracker.eventType.error;
 				this.totalSteps = this.totalSteps - notNeeded + 1;
-				this.steps.push();
+				this.steps.push(`Error: ${message}`);
 				this.notify({layerId, type, name, message, stack});
 				notifyLayerFinished();
 			}

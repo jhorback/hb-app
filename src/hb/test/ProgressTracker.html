@@ -74,7 +74,7 @@
             layer.next("step 1");
           });
 
-          it("does not add more steps then defined", () => {
+          it("adds more steps and warns if going over the number defined", () => {
             let count = 0;
             const tracker = new ProgressTracker(update => {
               count = count + 1;
@@ -85,13 +85,16 @@
                 case 2: 
                   expect(update.description).to.equal("Test: step 1");
                   break;
+                case 4:
+                  expect(update.event.warn).to.not.be.undefined;                  
+                  break;
               }
             });
             const layer = tracker.addLayer("Test", 2);
             layer.next("step 1");
             layer.next("step 2");
             layer.next("step 3");
-            expect(tracker.description).to.equal("Test: step 1, Test: step 2");
+            expect(tracker.description).to.equal("Test: step 1, Test: step 2, Test: step 3");
           });
 
           it("can call done", () => {
@@ -199,7 +202,7 @@
             layer2.next("four");
             layer.done("done");
             expect(tracker.description).to.equal("Test: one, Test2: two, Test: three, Test2: four, Test: done");
-            expect(tracker.totalCount).to.be.equal(6);
+            expect(tracker.totalSteps).to.be.equal(6);
           });
         });
       });
