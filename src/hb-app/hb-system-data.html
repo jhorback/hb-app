@@ -1,7 +1,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
-<link rel="import" href="../hb.SystemApp.html">
+<link rel="import" href="../hb/hb.SystemApp.html">
 <link rel="import" href="EventMap.html">
 
 <dom-module id="hb-system-data">
@@ -86,7 +86,7 @@
 
         constructor() {
             super();
-            this.systemApp = new hb.SystemApp();
+            this.systemApp = new hb.SystemApp({db: hb.db});
         }
 
         _appReadyChanged() {
@@ -101,18 +101,24 @@
             });
 
             const progressTracker = new progressTracker(update => {
-                const {percentage, description} = update;
+                const { percentage, description, event } = update;
                 this.set("appState.homePageProgress", {
                     title: "Creating the home page",
                     percentage,
                     description
                 });
+
+                if (event.type === "error") {
+                    // how does material show this kind of error?
+                    // toast?
+                    alert(error.message);
+                }
                 console.log(update);
             });
 
             const app = await this.systemApp.createHomePage({is, title, progressTracker});
             this.set("appState.homePageProgress", null);
-            // progressTracker.save();
+            progressTracker.save({dbPath: this.dbPath});
             return app;
         }
     }

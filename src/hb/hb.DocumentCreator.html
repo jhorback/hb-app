@@ -37,6 +37,8 @@ hb.DocumentCreator = class {
                 hb.DocumentCreator.getDocumentId(docType.route, title),
                 progressTracker);
             progressLayer.next("Creating document");
+            const {uid, photoURL, displayName} = hb.currentAuthor();
+            doc.author = {uid, photoURL, displayName};
             await this.db.doc(`doc/${docId}`).set(doc);
             progressLayer.done("Document created");
             return { docId, doc };
