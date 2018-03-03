@@ -51,7 +51,7 @@
                 [[config.applicationTitle]]...
             </div>
         </div>
-        <template is="dom-if" if="[[_hasNoHome(appState.isReady, app)]]" restamp>
+        <template is="dom-if" if="[[_hasNoHome(appState.isReady, app)]]">
             <hb-no-home-page></hb-no-home-page>
         </template>
     </template>
@@ -98,12 +98,12 @@
                 return;
             }
 
-            const {docId, docType} = this.app.homeDoc;
+            const {docId, is} = this.app.homeDoc;
             if (this.home) {
                 this.home.remove();
             }
 
-            this.home = document.createElement(docType);
+            this.home = document.createElement(is);
             this.home.docId = docId;
             this.home.route = this.route;
             this.shadowRoot.appendChild(this.home);

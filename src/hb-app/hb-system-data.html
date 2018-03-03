@@ -33,7 +33,7 @@
                         homePageProgress: null, /*{
                             title: "",
                             description: "",
-                            percent: 0
+                            percentage: 0
                         }*/
                     }
                 },
@@ -115,7 +115,6 @@
                     // toast?
                     alert(error.message);
                 }
-                console.log(update);
             });
 
             const {app, docId, doc} = await this.systemApp.createHomePage({is, title, progressTracker});

@@ -14,7 +14,7 @@ hb.DocumentCreator = class {
     }
 
     async _getDocId(docId, progressTracker) {
-        const progressLayer = progressTracker.addLayer("_getDocId", 2);
+        const progressLayer = progressTracker.addLayer("Getting document id", 2);
         progressLayer.next(`Checking id ${docId}`);
         const snapshot = await this.db.doc(`doc/${docId}`).get();
         if (snapshot.exists) {
@@ -38,6 +38,7 @@ hb.DocumentCreator = class {
                 progressTracker);
             progressLayer.next("Creating document");
             const {uid, photoURL, displayName} = hb.currentAuthor;
+            doc.docId = docId;
             doc.title = title;        
             doc.author = {uid, photoURL, displayName};
             await this.db.doc(`doc/${docId}`).set(doc);

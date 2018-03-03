@@ -9,6 +9,7 @@
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../hb-styles/hb-styles.html">
 <link rel="import" href="add-document-page.html">
 <link rel="import" href="hb-menu.html">
@@ -28,7 +29,6 @@
             .message {
                 cursor: default;
                 margin: .5rem;
-                xwidth: 100%;
                 padding: 4rem 1rem;                
                 text-align: center;
                 background: rgba(0, 0, 0, 0.6);
@@ -45,10 +45,18 @@
                 font-weight: normal;
                 color: var(--message-text-color);          
             }
+            .home-page-progress {
+                margin: 3em 0;
+            }
+            .home-page-progress .container {
+                display: table;
+                margin: 0 auto;
+                @apply --paper-font-body2;
+            }
         </style>
         <hb-config config="{{config}}"></hb-config>
         <hb-current-user user="{{user}}"></hb-current-user>
-        <hb-system-data></hb-system-data>
+        <hb-system-data app-state="{{appState}}"></hb-system-data>
         <app-drawer-layout id="drawerLayout" force-narrow>
             <app-drawer id="drawer" slot="drawer" swipe-open>
                 <hb-menu></hb-menu>
@@ -64,16 +72,27 @@
                 </app-header>
                 <main>
                 <!-- main content -->
-                    <div class="message" hidden$="[[user.permissions.isSiteAdmin]]">
-                        <div class="text">
-                            Coming soon...
+                    <div hidden$="[[appState.homePageProgress]]">
+                        <div class="message" hidden$="[[user.permissions.isSiteAdmin]]">
+                            <div class="text">
+                                Coming soon...
+                            </div>
+                        </div>
+                        <div class="message" hidden$="[[!user.permissions.isSiteAdmin]]">
+                            <div class="text">
+                                No home
+                            </div>
+                            <paper-button on-tap="addHome">Add the home page</paper-button>
                         </div>
                     </div>
-                    <div class="message" hidden$="[[!user.permissions.isSiteAdmin]]">
-                        <div class="text">
-                            No home
+                    <div hidden$="[[!appState.homePageProgress]]" class="home-page-progress">
+                        <div class="container">
+                            <h3>[[appState.homePageProgress.title]]</h3>
+                            <paper-progress value="[[appState.homePageProgress.percentage]]"></paper-progress>
+                            <div>
+                                [[appState.homePageProgress.description]]
+                            </div>
                         </div>
-                        <paper-button on-tap="addHome">Add the home page</paper-button>
                     </div>
                 </main>
             </app-header-layout>
@@ -90,6 +109,9 @@
         static get properties() {
             return {
                 user: {
+                    type: Object
+                },
+                appState: {
                     type: Object
                 }
             };

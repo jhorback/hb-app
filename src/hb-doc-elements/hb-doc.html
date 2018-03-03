@@ -4,9 +4,12 @@
 <dom-module id="hb-doc">
 
   <template>
-    <h1>HB DOC HERE</h1>
-    <b>Testing...</b>
     <hb-doc-data doc="{{doc}}" doc-id="[[docId]]"></hb-doc-data>
+    <h1>[[doc.title]]</h1>
+    <div style="text-align:center">
+        Author: [[doc.author.displayName]]<br>
+        <img src="[[doc.author.photoURL]]" width="100">
+    </div>
   </template>
 
     <script>
