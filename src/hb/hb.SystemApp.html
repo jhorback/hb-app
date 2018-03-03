@@ -12,7 +12,7 @@ hb.SystemApp = class extends hb.DomainObj {
 
     /**
      * Creates the document and adds it as the System.App.homeDoc.
-     * @Returns the System.App
+     * @Returns {app, docId, doc}
      */
     async createHomePage({is, title, progressTracker}) {
         const docCreator = new hb.DocumentCreator();
@@ -30,7 +30,7 @@ hb.SystemApp = class extends hb.DomainObj {
         });
         progressLayer.done("Home page created");        
         // save progressTracker.save();
-        return app;
+        return {app, docId, doc};
     }
 }
 </script>

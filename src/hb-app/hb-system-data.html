@@ -10,8 +10,8 @@
      * @customElement
      * @polymer
      */
-    class HbSystemData extends Polymer.FirestoreMixin(
-        EventMap(Polymer.Element)
+    class HbSystemData extends EventMap(
+        Polymer.FirestoreMixin(Polymer.Element)
     ) {
       
       static get is() { return 'hb-system-data'; }
@@ -93,15 +93,17 @@
             this.set("appState.isReady", this.appReady);
         }
 
-        async _createHomePage({is, title}) {
+        async _createHomePage(event) {
+            const {is, title} = event.detail;
 
             this.set("appState.homePageProgress", {
                 title: "Creating the home page",
                 percentage: 0
             });
 
-            const progressTracker = new progressTracker(update => {
+            const progressTracker = new ProgressTracker(update => {
                 const { percentage, description, event } = update;
+                console.log(update);
                 this.set("appState.homePageProgress", {
                     title: "Creating the home page",
                     percentage,
@@ -116,9 +118,9 @@
                 console.log(update);
             });
 
-            const app = await this.systemApp.createHomePage({is, title, progressTracker});
+            const {app, docId, doc} = await this.systemApp.createHomePage({is, title, progressTracker});
             this.set("appState.homePageProgress", null);
-            progressTracker.save({dbPath: this.dbPath});
+            progressTracker.save({dbPath: `doc/${docId}`});
             return app;
         }
     }

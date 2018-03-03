@@ -96,7 +96,7 @@
         }
 
         addHome(event) {
-            const close = () => {
+            const closeAddDoc = () => {
                 addDoc.remove();
                 document.body.appendChild(this);
             };
@@ -105,20 +105,20 @@
             addDoc.title = "Add the home page";
 
             addDoc.addEventListener("closed", () =>  close());
-            addDoc.addEventListener("add-new", async event => {
-                close();
+            addDoc.addEventListener("add-new", event => {
+                closeAddDoc();
                 const {title, is} = event.detail;
-                this.dispatchEvent(new CustomEvent("create-home-page", {
+                this.shadowRoot.dispatchEvent(new CustomEvent("create-home-page", {
                     bubbles: true,
                     composed: true,
                     detail: {title, is}
-                }));                
+                }));
             });
             
             
 
             addDoc.addEventListener("add-existing", event => {
-                close();
+                closeAddDoc();
                 alert("Add exising from no home page...");
             });
 
