@@ -103,7 +103,6 @@
 
             const progressTracker = new ProgressTracker(update => {
                 const { percentage, description, event } = update;
-                console.log(update);
                 this.set("appState.homePageProgress", {
                     title: "Creating the home page",
                     percentage,
@@ -111,8 +110,8 @@
                 });
 
                 if (event.type === "error") {
-                    // how does material show this kind of error?
-                    // toast?
+                    // hook up to the hb-data systemError method when implemented
+                    // this.systemError(error);
                     alert(error.message);
                 }
             });

@@ -37,13 +37,13 @@
 
             .message .text {
                 font-size: 2rem;
-                color: var(--message-text-color);                
+                color: var(--message-text-color);
             }
 
             .message paper-button {
                 margin-top: 2em;
                 font-weight: normal;
-                color: var(--message-text-color);          
+                color: var(--message-text-color);
             }
             .home-page-progress {
                 margin: 3em 0;
@@ -131,8 +131,6 @@
                 closeAddDoc();
                 const {title, is} = event.detail;
                 this.shadowRoot.dispatchEvent(new CustomEvent("create-home-page", {
-                    bubbles: true,
-                    composed: true,
                     detail: {title, is}
                 }));
             });
@@ -141,7 +139,7 @@
 
             addDoc.addEventListener("add-existing", event => {
                 closeAddDoc();
-                alert("Add exising from no home page...");
+                alert("TODO: Add exising document from no home page...");
             });
 
             this.remove();
