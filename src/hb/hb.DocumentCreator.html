@@ -5,8 +5,9 @@
  *
  */
 hb.DocumentCreator = class {
-    constructor(db = hb.db) {
+    constructor(db = hb.db, currentAuthor = hb.currentAuthor) {
         this.db = db;
+        this.currentAuthor = currentAuthor;
     }
 
     static getDocumentId(route, title) {
@@ -37,7 +38,7 @@ hb.DocumentCreator = class {
                 hb.DocumentCreator.getDocumentId(docType.route, title),
                 progressTracker);
             progressLayer.next("Creating document");
-            const {uid, photoURL, displayName} = hb.currentAuthor;
+            const {uid, photoURL, displayName} = this.currentAuthor;
             doc.docId = docId;
             doc.title = title;        
             doc.author = {uid, photoURL, displayName};
