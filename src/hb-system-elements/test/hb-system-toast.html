@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    <title>Tests</title>
+
+    <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../../bower_components/web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../hb-system-toast.html">
+</head>
+
+<body>
+    <test-fixture id="basic">
+        <template>
+            <hb-system-toast></hb-system-toast>
+        </template>
+    </test-fixture>
+
+    <script>
+        'use strict';
+
+        describe("hb-system-toast", () => {
+            var hbToast;
+
+            beforeEach(() => {
+                hbToast = fixture("basic");
+            });
+
+            it("exists", () => {
+                expect(hbToast).to.exist;
+            });
+
+            it("is upgraded", () => {
+                expect(hbToast instanceof Polymer.Element).to.be.true;
+            });
+
+            it("shows a toast message when the toast-changed event is fired", function () {
+                let toast = document.querySelector("paper-toast");
+                expect(toast).to.be.equal(null);
+                hbToast.toast = { text: "toast message" };
+                hbToast.dispatchEvent(new CustomEvent("toast-changed", {
+                    bubbles: true
+                }));
+                toast = document.querySelector("paper-toast");
+                expect(toast.text).to.be.equal("toast message");
+            });
+        });
+    </script>
+</body>
+
+</html>
