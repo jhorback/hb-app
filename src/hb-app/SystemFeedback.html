@@ -1,0 +1,63 @@
+<script>
+/*
+this is really just a SystemFeedback mixin that implements the properties and the methods.
+
+could create a base hb-data element to codify this
+
+<hb-data>
+	Mixins
+		firestore
+		event map
+	Properties
+		systemActivity
+		systemToast
+		systemError
+	Base methods
+		setSystemToast
+		systemError
+		startSystemActivity
+		endSystemActivity
+
+
+
+		
+includes methods for system feedback UI
+
+
+// this.setSystemToast("Hello");
+// id = this.startSystemActivity("Doing something");
+// this.endSystemActivity(id);
+// this.systemError(error);
+*/
+    let SystemFeedback = (superclass) => class extends superclass {
+
+        static get properties() {
+            return {
+                systemFeedback: {
+                    type: Object,
+                    observer: "_systemFeedbackChanged"
+                }
+            }
+        }
+
+        _systemFeedbackChanged() {
+            // thought is to update the individual bits of feedback?
+        }
+
+        showToast() {
+            
+        }
+
+        startSystemActivity() {
+
+        }
+
+        endSystemActivity() {
+
+        }
+
+        systemError() {
+            
+        }
+    };
+</script>
