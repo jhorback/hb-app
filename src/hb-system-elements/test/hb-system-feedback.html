@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    <title>Tests</title>
+
+    <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../../bower_components/web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../hb-system-feedback.html">
+</head>
+
+<body>
+    <test-fixture id="basic">
+        <template>
+            <hb-system-feedback></hb-system-feedback>
+        </template>
+    </test-fixture>
+
+    <script>
+        'use strict';
+
+        describe("hb-system-feedback", () => {
+            var hbSystemFeedback;
+
+            beforeEach(() => {
+                hbSystemFeedback = fixture("basic");
+            });
+
+            it("exists", () => {
+                expect(hbSystemFeedback).to.exist;
+            });
+
+            it("is upgraded", () => {
+                expect(hbSystemFeedback instanceof Polymer.Element).to.be.true;
+            });
+        });
+    </script>
+</body>
+
+</html>

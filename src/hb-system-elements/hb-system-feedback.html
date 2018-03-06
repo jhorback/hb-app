@@ -4,17 +4,18 @@
 <link rel="import" href="hb-system-error.html">
 
 <dom-module id="hb-system-feedback">
-<template>    
-    <hb-system-activity-bar activity="[[systemFeedback.activity]]"></hb-system-activity-bar>
-    <hb-system-toast toast="[[systemFeedback.toast]]"></hb-system-toast>
-    <hb-system-error error="[[systemFeedback.error]]"></hb-system-error>    
+    <template>    
+        <hb-system-activity-bar activity="[[systemFeedback.activity]]"></hb-system-activity-bar>
+        <hb-system-toast toast="[[systemFeedback.toast]]"></hb-system-toast>
+        <hb-system-error error="[[systemFeedback.error]]"></hb-system-error>  
+    </template>  
     <script>
         /**
          * @polymer
          */
          class HbSystemFeedback extends Polymer.Element {
 
-            static get is() { return "hb-system-feedback" }
+            static get is() { return "hb-system-feedback"; }
 
             static get properties() {
                 return {
@@ -30,6 +31,6 @@
             }
         }
 
-        customElements.define(HbSystemFeedback.is, HbSystemFeedback);
+        window.customElements.define(HbSystemFeedback.is, HbSystemFeedback);
     </script>
-</template>
+</dom-module>
