@@ -1,33 +1,6 @@
 <script>
 /*
-this is really just a SystemFeedback mixin that implements the properties and the methods.
 
-could create a base hb-data element to codify this
-
-<hb-data>
-	Mixins
-		firestore
-		event map
-	Properties
-		systemActivity
-		systemToast
-		systemError
-	Base methods
-		setSystemToast
-		systemError
-		startSystemActivity
-		endSystemActivity
-
-
-
-		
-includes methods for system feedback UI
-
-
-// this.setSystemToast("Hello");
-// id = this.startSystemActivity("Doing something");
-// this.endSystemActivity(id);
-// this.systemError(error);
 */
     let SystemFeedback = (superclass) => class extends superclass {
 
@@ -35,29 +8,102 @@ includes methods for system feedback UI
             return {
                 systemFeedback: {
                     type: Object,
-                    observer: "_systemFeedbackChanged"
+                    notify: true,
+                    value: {
+                        toast: null,
+                        error: null,
+                        activity: []
+                    }
                 }
             }
         }
 
-        _systemFeedbackChanged() {
-            // thought is to update the individual bits of feedback?
+        /**
+         * Shows a toast.
+         * @param text {String} the toast text
+         * @param action {Object} an optional object to add an action to the toast.
+         * @param action.text {String} the text to show for the action
+         * @param action.eventName {String} the name of the event to fire when the action is clicked.
+         */
+        showSystemToast({text, action}) {
+            this.set("systemFeedback.toast", { text, action });
+            this.dispatchEvent(new CustomEvent("system-toast-changed", {
+                bubbles: true,
+                composed: true
+            }));
         }
 
-        showToast() {
-            
+        /**
+         * Starts system activity progress.
+         * @param description {String} optional description of what the pogress is about
+         * @param max {Number} optional maximum number of steps for determinant progress
+         * @param value {Number} optional current value/step in progress
+         * @returns {Symbol} the id of the progress used for updating and ending progress.
+         */
+        startSystemActivity({description, max, value}) {
+            const id = Symbol();
+            this.push("systemFeedback.activity", {
+                id, description, max, value
+            });
+            this.dispatchEvent(new CustomEvent("system-activity-changed", {
+                bubbles: true,
+                composed: true
+            }));
         }
 
-        startSystemActivity() {
+        updateSystemActivity(id, {max, value}) {
+            let activityIndex = null;
+            const activity = this.systemFeedback.activity.find((activity, index) => {
+                if (activity.id === id) {
+                    activityIndex = index;
+                    return true;
+                }
+            });
 
+            if (!activity) {
+                console.warn("Could not find system activity.");
+                return;
+            }
+
+            activity.max = max;
+            activity.value = value;
+
+            this.dispatchEvent(new CustomEvent("system-activity-changed", {
+                bubbles: true,
+                composed: true
+            }));
         }
 
-        endSystemActivity() {
-
+        /**
+         * Removes the system activity.
+         * @param id {Symbol} the id of the activity to end
+         */
+        endSystemActivity(id) {
+            let activityIndex = null;
+            const activity = this.systemFeedback.activity.find((activity, index) => {
+                if (activity.id === id) {
+                    activityIndex = index;
+                    return true;
+                }
+            });
+            this.systemFeedback.activity.splice(activityIndex, 1);
+            this.dispatchEvent(new CustomEvent("system-activity-changed", {
+                bubbles: true,
+                composed: true
+            }));
         }
 
-        systemError() {
-            
+        /**
+         * Use for unrecoverable system errors.
+         * @param error {Error} the error to handle.
+         */
+        systemError(error) {
+            const { name, message, stack } = error;
+            this.set("systemFeedback.error", { name, message, stack });
+            this.dispatchEvent(new CustomEvent("system-error-changed", {
+                bubbles: true,
+                composed: true
+            }));
         }
     };
 </script>

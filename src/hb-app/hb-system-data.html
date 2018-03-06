@@ -2,6 +2,7 @@
 <link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
 <link rel="import" href="../hb/hb.SystemApp.html">
+<link rel="import" href="SystemFeedback.html">
 <link rel="import" href="EventMap.html">
 
 <dom-module id="hb-system-data">
@@ -11,8 +12,9 @@
      * @polymer
      */
     class HbSystemData extends EventMap(
+        SystemFeedback(
         Polymer.FirestoreMixin(Polymer.Element)
-    ) {
+    )) {
       
       static get is() { return 'hb-system-data'; }
 
