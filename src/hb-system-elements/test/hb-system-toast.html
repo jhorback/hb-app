@@ -38,11 +38,11 @@
                 expect(hbToast instanceof Polymer.Element).to.be.true;
             });
 
-            it("shows a toast message when the toast-changed event is fired", function () {
+            it("shows a toast message when the system-toast-changed event is fired", function () {
                 let toast = document.querySelector("paper-toast");
                 expect(toast).to.be.equal(null);
                 hbToast.toast = { text: "toast message" };
-                hbToast.dispatchEvent(new CustomEvent("toast-changed", {
+                hbToast.dispatchEvent(new CustomEvent("system-toast-changed", {
                     bubbles: true
                 }));
                 toast = document.querySelector("paper-toast");

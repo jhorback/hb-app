@@ -37,6 +37,25 @@
             it("is upgraded", () => {
                 expect(hbSystemError instanceof Polymer.Element).to.be.true;
             });
+
+            it("shows an error and reloads the page", () => {
+                hbSystemError.error = {
+                    message: "There was an error."
+                };
+               
+                const alertStub = sinon.stub(window, "alert");
+                const reloadStub = sinon.stub(hbSystemError, "reload");
+
+                hbSystemError.dispatchEvent(new CustomEvent("system-error-changed", {
+                    bubbles: true
+                }));
+
+                expect(alertStub).to.be.called.once;
+                expect(reloadStub).to.be.called.once;
+
+                alertStub.restore();
+                reloadStub.restore();
+            });
         });
     </script>
 </body>

@@ -35,8 +35,17 @@
         }
  
         _systemErrorChanged(event) {
-            
-            // document.body.appendChild(toast);
+            if (this.error) {
+                alert(`
+                    There was a system error: ${this.error.message}
+                    The page will reload.
+                    `);
+                this.reload();
+            }
+        }
+
+        reload() {
+            window.location.reload(true);
         }
     }
  

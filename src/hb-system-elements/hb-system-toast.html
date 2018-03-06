@@ -35,14 +35,14 @@
  
         static get events() {
             return {
-                "toast-changed": {
+                "system-toast-changed": {
                     listenAt: "parent",
-                    handler: "_toastChanged"
+                    handler: "_systemToastChanged"
                 }
             };
         }
  
-        _toastChanged(event) {
+        _systemToastChanged(event) {
             const toast = document.createElement("paper-toast");
             toast.text = this.toast.text;
  
