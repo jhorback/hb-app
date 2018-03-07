@@ -11,8 +11,7 @@ hb.User = class extends hb.DomainObj {
     }
 
     async recordLogin({authUser}) {
-        // create a base method for notify if fields are different ?!
-        // good for cloning and comparing 
+        
        const user = this.update(user => {
            user.uid = authUser.uid;
            if (user.displayName === user.providerDisplayName) {
@@ -25,14 +24,5 @@ hb.User = class extends hb.DomainObj {
            return user;
        });
     }
-
-    /*
-    events = {
-        displayName: "display-name-changed"
-    }
-    this.dispatchChange??(current, new, events) {
-        compare
-    }
-    */
 }
 </script>
