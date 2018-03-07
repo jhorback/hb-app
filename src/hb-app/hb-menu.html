@@ -86,7 +86,7 @@
                     <div main-title>[[config.applicationTitle]]</div>
                 </app-toolbar>
             </app-header>
-            <div>               
+            <div on-tap="close">               
                 <a href="[[rootPath]]/" tabindex="-1">
                     <paper-icon-item>
                         <iron-icon icon="hb:home" item-icon slot="item-icon"></iron-icon>
@@ -98,14 +98,8 @@
                         <span class="paper-font-body2">Another item</span>
                     </paper-icon-item>
                 </a>
-                <a href="[[rootPath]]/" tabindex="-1">
-                    <paper-icon-item>
-                        <iron-icon icon="hb:add" item-icon slot="item-icon"></iron-icon>
-                        <span class="paper-font-body2">Add menu item</span>
-                    </paper-icon-item>
-                </a>
                 <hr class="divider"/>
-                <a href="[[rootPath]]/" tabindex="-1">
+                <a href="[[rootPath]]/site/settings" tabindex="-1">
                     <paper-icon-item>
                         <iron-icon icon="hb:settings" item-icon slot="item-icon"></iron-icon>
                         <span class="paper-font-body2">Settings</span>
@@ -128,10 +122,6 @@
                 </paper-icon-item>
             </div>
         </div>
-        
-
-
-
     </template>
     <script>
     /**
@@ -147,6 +137,10 @@
                     type: Object
                 }
             };
+        }
+
+        close() {
+            // alert("close");
         }
 
         signIn() {

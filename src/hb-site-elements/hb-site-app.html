@@ -1,0 +1,84 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="hb-logs-page.html">
+<link rel="import" href="hb-menu-config-page.html">
+<link rel="import" href="hb-settings-page.html">
+<link rel="import" href="hb-user-profile-page.html">
+<link rel="import" href="hb-users-page.html">
+
+<dom-module id="hb-site-app">
+  <template>
+    SITE APP ROUTING
+     <!-- Settings page route -->
+     <app-route
+        route="[[route]]"
+        pattern="/settings"
+        active="{{settingsRouteActive}}">
+    </app-route>
+    <template is="dom-if" if="[[settingsRouteActive]]" restamp>
+        <hb-settings-page></hb-settings-page>
+    </template>
+
+    <!-- Users page route -->    
+    <app-route
+        route="[[route]]"
+        pattern="/users"
+        active="{{usersRouteActive}}">
+    </app-route>
+    <template is="dom-if" if="[[usersRouteActive]]" restamp>
+        <hb-users-page></hb-users-page>
+    </template>
+
+    <!-- Profile page route -->    
+    <app-route
+        route="[[route]]"
+        pattern="/users/:id"
+        data="{{profileRouteData}}"
+        active="{{profileRouteActive}}">
+    </app-route>
+    <template is="dom-if" if="[[profileRouteActive]]" restamp>
+        <hb-user-profile-page id="[[profileRouteData.id]]"></hb-user-profile-page>
+    </template>
+
+    <!-- Menu config page route -->    
+    <app-route
+        route="[[route]]"
+        pattern="/menu"
+        active="{{menuRouteActive}}">
+    </app-route>
+    <template is="dom-if" if="[[menuRouteActive]]" restamp>
+        <hb-menu-config-page></hb-menu-config-page>
+    </template>
+
+
+     <!-- Logs page route -->    
+    <app-route
+        route="[[route]]"
+        pattern="/logs"
+        active="{{logsRouteActive}}">
+    </app-route>
+    <template is="dom-if" if="[[logsRouteActive]]" restamp>
+        <hb-logs-page></hb-logs-page>
+    </template>
+  </template>
+
+    <script>
+    /**
+    * @customElement
+    * @polymer
+    */
+    class HbSiteApp extends Polymer.Element {
+        static get is() { return 'hb-site-app'; }
+        
+        static get properties() {
+            return {
+                route: {
+                    type: Object
+                }
+            };
+        }
+    }
+
+    window.customElements.define(HbSiteApp.is, HbSiteApp);
+    </script>
+</dom-module>

@@ -2,6 +2,7 @@
 <link rel="import" href="../../bower_components/app-route/app-location.html">
 <link rel="import" href="../../bower_components/app-route/app-route.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../hb-site-elements/hb-site-app.html">
 <link rel="import" href="hb-home.html">
 <link rel="import" href="hb-config.html">
 <link rel="import" href="hb-doc-routing.html">
@@ -34,8 +35,18 @@
       tail="{{routeTail}}"
       active="{{routeActive}}"
     ></app-route>
+    <app-route
+      route="[[_getRootRoute(route, routeTail)]]"
+      pattern="/site"
+      tail="{{siteRouteTail}}"
+      active="{{siteRouteActive}}">
+    </app-route>
 
-    <template is="dom-if" if="[[!isInitialized]]">
+    <template is="dom-if" if="[[siteRouteActive]]" restamp>
+      <hb-site-app route="[[siteRouteTail]]"></hb-site-app>
+    </template>
+
+    <template is="dom-if" if="[[!isInitialized]]" restamp>
       Application initializing...
     </template>
 
@@ -43,7 +54,7 @@
         <hb-doc-routing route="[[_getRootRoute(route, routeTail)]]"></hb-doc-routing>      
     </template>
 
-    <template is="dom-if" if="[[_showHomePage(route, isInitialized)]]">
+    <template is="dom-if" if="[[_showHomePage(route, isInitialized)]]" xrestamp>
         <hb-home route="[[_getRootRoute(route, routeTail)]]"></hb-home>
     </template>
     
@@ -61,6 +72,11 @@
             type: Object
           },
 
+          isInitialized: {
+            type: Boolean,
+            value: false
+          },
+
           route: {
             type: Object
           },
@@ -73,9 +89,12 @@
             type: Boolean
           },
 
-          isInitialized: {
-            type: Boolean,
-            value: false
+          siteRouteTail: {
+            type: Object
+          },
+
+          siteRouteActive: {
+            type: Boolean
           }
         };
       }

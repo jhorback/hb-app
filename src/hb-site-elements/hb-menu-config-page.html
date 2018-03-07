@@ -1,0 +1,50 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../hb-app/hb-menu.html">
+
+<dom-module id="hb-menu-config-page">
+  <template>
+    <style include="hb-page-layout-shared-styles"></style>
+    <style>
+    </style>
+    <app-header-layout>
+        <app-header slot="header" fixed effects="waterfall">
+            <app-toolbar>
+                <a href="[[rootPath]]/site/settings" tabindex="-1">
+                    <paper-icon-button icon="hb:arrow-back"></paper-icon-button>
+                </a>
+                <div main-title>Menu</div>
+            </app-toolbar>
+        </app-header>
+        <main>
+        <!-- main content -->
+        Menu page
+
+        </main>
+    </app-header-layout>
+  </template>
+
+    <script>
+    /**
+    * @customElement
+    * @polymer
+    */
+    class HbMenuConfigPage extends Polymer.Element {
+        static get is() { return 'hb-menu-config-page'; }
+        
+        static get properties() {
+            return {
+            };
+        }
+    }
+
+    window.customElements.define(HbMenuConfigPage.is, HbMenuConfigPage);
+    </script>
+</dom-module>
