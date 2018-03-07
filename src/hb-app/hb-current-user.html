@@ -5,7 +5,7 @@
 
 <dom-module id="hb-current-user">
   <template>
-    <firebase-auth id="auth" user="{{authUser}}" provider="google"></firebase-auth>
+    <firebase-auth id="auth" user="{{authUser}}" status-known="{{statusKnown}}" provider="google"></firebase-auth>
   </template>
   <script>
     /**
@@ -21,21 +21,37 @@
       static get properties() {
             return {
                 uid: {
+                    type: String
+                },
+
+                for: {
                     type: String,
-                    value: "anonymous"
+                    value: "NA"
                 },
 
                 authUser: {
                     type: Object,
-                    observer: "_authUserChanged"
+                    observer: "_userChanged"
+                },
+
+                statusKnown: {
+                    type: Boolean,
+                    value: false,
+                    observer: "_userChanged"
                 },
 
                 dbUser: {
                     type: Object,
                     doc: "users/{uid}",
                     live: true,
-                    observer: "_dbUserChanged"
+                    observer: "_userChanged"
                 },
+
+                dbUserReady: {
+                    type: Boolean,
+                    value: false,
+                    observer: "_userChanged"
+                },              
 
                 user: {
                     type: Object,
@@ -77,18 +93,58 @@
             this.$.auth.signOut();            
         }
 
-        _authUserChanged() {
+        _userChanged() {
+            this._logInfo();
+            
+            if (!this.isConnected || !this.statusKnown) {
+                return;
+            }
+
+            if (this.authUser && !this.dbUserReady) {
+                this.user = Object.assign({}, this.user, this._getAuthUserFields());
+                this.uid = this.authUser.uid;
+            }
+
             if (!this.authUser) {
                 this.user = HbCurrentUser.defaultUser;
                 this.uid = "anonymous";
-            } else {
-                this.user = Object.assign({}, this.user, this.authUser);
-                this.uid = this.authUser.uid;
             }
-        } 
+            
+            // not sure why this.uid can be out of sync with __id__
+            // seems like a bug
+            if (this.authUser && this.dbUserReady && this.uid === this.dbUser.__id__) {
+                this.user = Object.assign({}, this._getAuthUserFields(), this.dbUser);                
+            }
+        }
 
-        _dbUserChanged() {
-            this.user = Object.assign({}, this.user, this.dbUser);
+        _getAuthUserFields() {
+            const {
+                uid,
+                displayName: providerDisplayName,
+                email,
+                photoUrl,
+                isAnonymous
+            } = this.authUser;
+
+            return {
+                uid,
+                providerDisplayName,
+                email,
+                photoUrl,
+                isAnonymous
+            };
+        }
+
+        _logInfo() {
+            return;
+            console.log({
+                for: this.for,
+                connected: this.isConnected,
+                statusKnown: this.statusKnown,
+                dbUserReady: this.dbUserReady,
+                uid: this.uid,
+                dbUserId: this.dbUser && this.dbUser.__id__
+            });
         }
     }
 

@@ -8,14 +8,15 @@
 
 <dom-module id="hb-site-app">
   <template>
-    SITE APP ROUTING
+     <hb-current-user user="{{user}}" for="hb-site-app"></hb-current-user>
+
      <!-- Settings page route -->
      <app-route
         route="[[route]]"
         pattern="/settings"
         active="{{settingsRouteActive}}">
     </app-route>
-    <template is="dom-if" if="[[settingsRouteActive]]" restamp>
+    <template is="dom-if" if="[[_hasPermission(user, settingsRouteActive)]]" restamp>
         <hb-settings-page></hb-settings-page>
     </template>
 
@@ -36,7 +37,7 @@
         data="{{profileRouteData}}"
         active="{{profileRouteActive}}">
     </app-route>
-    <template is="dom-if" if="[[profileRouteActive]]" restamp>
+    <template is="dom-if" if="[[_hasPermission(user, profileRouteActive)]]" restamp>
         <hb-user-profile-page id="[[profileRouteData.id]]"></hb-user-profile-page>
     </template>
 
@@ -46,7 +47,7 @@
         pattern="/menu"
         active="{{menuRouteActive}}">
     </app-route>
-    <template is="dom-if" if="[[menuRouteActive]]" restamp>
+    <template is="dom-if" if="[[_hasPermission(user, menuRouteActive)]]" restamp>
         <hb-menu-config-page></hb-menu-config-page>
     </template>
 
@@ -57,7 +58,7 @@
         pattern="/logs"
         active="{{logsRouteActive}}">
     </app-route>
-    <template is="dom-if" if="[[logsRouteActive]]" restamp>
+    <template is="dom-if" if="[[_hasPermission(user, logsRouteActive)]]" restamp>
         <hb-logs-page></hb-logs-page>
     </template>
   </template>
@@ -74,8 +75,15 @@
             return {
                 route: {
                     type: Object
+                },
+                user: {
+                    type: Object
                 }
             };
+        }
+
+        _hasPermission(user, routeActive) {
+            return routeActive && this.user.permissions.isSiteAdmin;
         }
     }
 
