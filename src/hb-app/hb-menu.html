@@ -140,7 +140,13 @@
         }
 
         close() {
-            // alert("close");
+            if (this.parentElement.tagName === "APP-DRAWER") {
+                this.parentElement.close();
+            }
+            this.dispatchEvent(new CustomEvent("close-menu", {
+                bubbles: true,
+                composed: true
+            }));
         }
 
         signIn() {
