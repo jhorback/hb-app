@@ -1,7 +1,10 @@
 <link rel="import" href="hb.html">
 <script>
 hb.config = {
-    version: "v0.5",
+    currentVersion: {
+        version: "v0.8",
+        description: "Site elements (in progress)"
+    },
 
     docTypes: [
         {
@@ -62,7 +65,7 @@ hb.config = {
     current: () => {
         let config = hb.config[location.origin];
         config = config || hb.config[hb.config.default];
-        config.version = hb.config.version;
+        config.currentVersion = hb.config.currentVersion;
         config.docTypes = hb.config.docTypes;
         return config;
     }

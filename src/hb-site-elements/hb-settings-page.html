@@ -10,6 +10,7 @@
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../hb-app/hb-menu.html">
+<link rel="import" href="../hb-app/hb-config.html">
 
 <dom-module id="hb-settings-page">
   <template>
@@ -29,6 +30,7 @@
             cursor: pointer;
         }
     </style>
+    <hb-config config="{{config}}"></hb-config>
     <app-drawer-layout id="drawerLayout" force-narrow>
         <app-drawer id="drawer" slot="drawer" swipe-open>
             <hb-menu></hb-menu>
@@ -75,8 +77,8 @@
                     </a>
                     <paper-item>
                         <paper-item-body two-line>
-                            <div class="paper-font-body2">Website version</div>
-                            <div secondary>Version 0.8</div>
+                            <div class="paper-font-body2">Application version</div>
+                            <div secondary>[[config.currentVersion.version]] - [[config.currentVersion.description]]</div>
                         </paper-item-body>
                     </paper-item>
                 </div>
