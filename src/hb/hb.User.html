@@ -1,0 +1,38 @@
+<link rel="import" href="hb.html">
+<link rel="import" href="hb.DomainObj.html">
+<link rel="import" href="hb.DocumentCreator.html">
+<script>
+/**
+ * Base class for doc documents
+ */
+hb.User = class extends hb.DomainObj {     
+    constructor({db, uid}) {
+        super({db, dbPath: `users/${uid}`})
+    }
+
+    async recordLogin({authUser}) {
+        // create a base method for notify if fields are different ?!
+        // good for cloning and comparing 
+       const user = this.update(user => {
+           user.uid = authUser.uid;
+           if (user.displayName === user.providerDisplayName) {
+               user.displayName = authUser.displayName;
+           }
+           user.providerDisplayName = authUser.displayName;
+           user.email = authUser.email;
+           user.photoURL = authUser.photoURL;
+           user.lastLogin = new Date();
+           return user;
+       });
+    }
+
+    /*
+    events = {
+        displayName: "display-name-changed"
+    }
+    this.dispatchChange??(current, new, events) {
+        compare
+    }
+    */
+}
+</script>

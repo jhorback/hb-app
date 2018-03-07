@@ -126,39 +126,3 @@
     window.customElements.define(HbApp.is, HbApp);
   </script>
 </dom-module>
-
-<!--  TEST CODE
-
-      <firebase-auth
-      id="auth"
-      user="{{user}}"
-      provider="google">
-    </firebase-auth>
-
-
-<div>
-    App is ready? [[appReady]]
-    Home: [[app.homeDoc.docId]]
-  </div>
-  <div>
-    User isAnonymous: [[user.isAnonymous]]<br>
-    Name: [[user.displayName]]
-    Email: [[user.email]]
-    < <img src="[[user.photoURL]]" hidden$="[[!user]]" width="20"> >
-    <div hidden$="[[user]]" on-click="signIn">
-      Sign In
-    </div>
-  </div>
-
-  <firebase-storage-ref
-    path="images/104_IMG_0073_170913CK04_P0659_Ul (1).jpg"      
-    download-url="{{downloadUrl}}">
-  </firebase-storage-ref>
-  <img src="[[downloadUrl]]" style="max-width:200px"/>
-
-
-  <h1>HB App</h1>
-  <a href="[[rootPath]]">Root</a>
-  
-  <a href="[[rootPath]]/art/1">Art / 1</a>
--->
