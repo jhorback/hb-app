@@ -9,6 +9,7 @@
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../hb-app/hb-menu.html">
 <link rel="import" href="hb-users-data.html">
 
@@ -17,6 +18,9 @@
   <template>
     <style include="hb-page-layout-shared-styles"></style>
     <style>
+        paper-toggle-button {
+            --primary-color: var(--accent-color);
+        }
         .users-list {
             max-width: 800px;
             margin: 2em auto;
@@ -43,12 +47,18 @@
                     <paper-icon-button icon="hb:arrow-back"></paper-icon-button>
                 </a>
                 <div main-title>Users</div>
+                <paper-toggle-button
+                    title="Show unregistered users"
+                    checked="[[usersState.showUnregistered]]"
+                    on-tap="_showUnregisteredTapped">
+                </paper-toggle-button>
             </app-toolbar>
         </app-header>
         <main>
         <!-- main content -->
             <div hidden$="[[!usersState.isReady]]" class="users-list">
-            <template is="dom-repeat" items="[[users]]" as="user">
+                <div>[[usersState.noUsersMessage]]</div>
+            <template is="dom-repeat" items="[[usersState.filteredUsers]]" as="user">
                 <a href="[[rootPath]]/site/profile/[[user.uid]]" tabindex="-1">
 
                     <paper-icon-item>
@@ -107,6 +117,13 @@
                 description.push("Author");
             }
             return description.join(", ");
+        }
+
+        _showUnregisteredTapped(event) {
+            const {checked:showUnregistered} = event.target;
+            this.shadowRoot.dispatchEvent(new CustomEvent("filter-changed", {
+                detail: {showUnregistered}
+            }));
         }
     }
 

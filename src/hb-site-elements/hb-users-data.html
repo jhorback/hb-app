@@ -27,7 +27,9 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
                 notify: true,
                 value: {
                     isReady: false,
-                    showUnregistered: false
+                    showUnregistered: false,
+                    filteredUsers: [],
+                    noUsersMessage: ""
                 }
             }
         };
@@ -39,20 +41,38 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
     
     static get events() {
         return {
-            
+            "filter-changed": "_filterChanged"
         };
     }
 
-    _usersReadyChanged() {
+    _usersReadyChanged(currentValue, oldValue) {        
         this.set("usersState.isReady", this.usersReady);
+        if (this.usersReady) {
+            this._filterUsers();
+        }
     }
 
-    // constructor() {
-    //     super();
-    //     this.domain = new hb["hb-doc"]({db: hb.db, docId: this.docId});
-    //     //constructor({db, docId}) {
-    //     // create the domain object?!?!?!
-    // }
+    _filterChanged(event) {
+        const {showUnregistered} = event.detail;
+        this.set("usersState.showUnregistered", showUnregistered);
+        this._filterUsers();
+    }
+
+    _filterUsers() {
+        const {showUnregistered} = this.usersState;
+        const users = this.users.reduce((users, user) => {
+            if (!user.isRegistered === showUnregistered) {
+                users.push(user);
+            }
+            return users;
+        }, []);
+
+       const noUsersMessage = users.length !== 0 ? "" :
+                showUnregistered ? "There are no unregistered users" :
+                "There are no registered users";
+        this.set("usersState.noUsersMessage", noUsersMessage);
+        this.set("usersState.filteredUsers", users);
+    }
 }
 
 window.customElements.define(HbUsersData.is, HbUsersData);

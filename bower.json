@@ -17,7 +17,8 @@
     "paper-listbox": "PolymerElements/paper-listbox#^2.0.0",
     "firebase": "^4.6.0",
     "polymerfire": "https://github.com/firebase/polymerfire.git#firestore",
-    "paper-progress": "PolymerElements/paper-progress#^2.1.0"
+    "paper-progress": "PolymerElements/paper-progress#^2.1.0",
+    "paper-toggle-button": "PolymerElements/paper-toggle-button#^2.0.0"
   },
   "devDependencies": {
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",
