@@ -18,7 +18,7 @@
     "name": "default",
     "bundle": {
         "sourcemaps": true,
-        "js": { "minify": false, "compile": false },
+        "js": { "minify": false, "compile": true },
         "css": { "minify": true },
         "html": { "minify": true },
         "bundle": false,

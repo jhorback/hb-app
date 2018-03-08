@@ -108,12 +108,14 @@
             </div>
             <div class="bottom-bar">
                 <hr class="divider"/>
-                <paper-icon-item on-tap="signOut" hidden$="[[user.isAnonymous]]">
-                    <div class="avatar" slot="item-icon"
-                        style="background-image: url([[user.photoURL]]);"
-                    ></div>
-                    <div class="sign-in-text">[[user.displayName]]</div>
-                </paper-icon-item>
+                <a href="[[rootPath]]/site/profile/[[user.uid]]" hidden$="[[user.isAnonymous]]">
+                    <paper-icon-item>
+                        <div class="avatar" slot="item-icon"
+                            style="background-image: url([[user.photoURL]]);"
+                        ></div>
+                        <div class="sign-in-text">[[user.displayName]]</div>
+                    </paper-icon-item>
+                </a>
                 <paper-icon-item on-tap="signIn"hidden$="[[!user.isAnonymous]]">
                     <div class="avatar" slot="item-icon"
                         style="background-image: url([[importPath]]/assets/google.svg);"

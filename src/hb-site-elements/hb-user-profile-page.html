@@ -7,32 +7,84 @@
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../hb-app/hb-menu.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="hb-user-profile-data.html">
 
 <dom-module id="hb-user-profile-page">
 
   <template>
     <style include="hb-page-layout-shared-styles"></style>
     <style>
+        .profile-name {
+            padding-top: 5rem;
+            max-width: 800px;
+            margin: 2rem auto;
+            @apply --paper-font-subhead;
+            font-size: 2rem;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+        .profile-name .avatar {
+            border-radius:50%;
+            width: 150px;
+            margin-bottom: 1rem;
+        }
+        .profile-details {
+            max-width: 800px;
+            margin: auto;
+            margin-top: 9rem;
+            margin-bottom: 2rem;
+        }
     </style>
-    <app-drawer-layout id="drawerLayout" force-narrow>
-        <app-drawer id="drawer" slot="drawer" swipe-open>
-            <hb-menu></hb-menu>
-        </app-drawer>
-        <app-header-layout>
-            <app-header slot="header" fixed effects="waterfall">
-                <app-toolbar>
-                    <paper-icon-button icon="hb:menu" drawer-toggle></paper-icon-button>
-                    <div main-title>User Profile Page</div>
-                </app-toolbar>
-            </app-header>
-            <main>
-            <!-- main content -->
-            User profile page
-
-            </main>
-        </app-header-layout>
-    </app-drawer-layout> 
+    <hb-user-profile-data uid="[[uid]]" user="{{user}}"></hb-user-profile-data>
+    <app-header-layout>
+        <app-header slot="header" fixed effects="waterfall">
+            <app-toolbar>
+                <a href="[[rootPath]]/site/users" tabindex="-1">
+                    <paper-icon-button icon="hb:arrow-back"></paper-icon-button>
+                </a>
+            </app-toolbar>
+            <app-toolbar>                
+                <div class="profile-name">
+                    <img class="avatar" src="[[user.photoURL]]">
+                    <div>
+                        [[user.displayName]]
+                    </div>
+                </div>
+            </app-toolbar>
+        </app-header>
+        <main>
+        <!-- main content -->
+        
+        <div class="profile-details">
+            <div>
+                <paper-item>                
+                    <paper-item-body two-line>
+                        <div>Last login</div>
+                        <div secondary>[[_getLastLogin(user)]]</div>
+                    </paper-item-body>    
+                </paper-item>
+                <paper-item>                
+                    <paper-item-body two-line>
+                        <div>Email</div>
+                        <div secondary>[[user.email]]</div>
+                    </paper-item-body>    
+                </paper-item>
+                <paper-item>                
+                    <paper-item-body two-line>
+                        <div>Permissions</div>
+                        <div secondary>[[_getPermissionsDescription(user)]]</div>
+                    </paper-item-body>    
+                </paper-item>
+            </div>
+        </div>
+        
+        <!-- logout button ?? where -->
+        
+        
+        </main>
+    </app-header-layout>
   </template>
 
     <script>
@@ -49,6 +101,34 @@
                     type: String
                 }
             };
+        }
+
+        // duplicated on the user list
+        // could make this a static method on the user domain object
+        _getPermissionsDescription(user) {
+            if (!user || !user.permissions) {
+                return "";
+            }
+
+            const description = [];
+            const {permissions} = user;
+            if (permissions.isSysAdmin) {
+                description.push("System admin");
+            }
+            if (permissions.isSiteAdmin) {
+                description.push("Site admin");
+            }            
+            if (permissions.isAuthor) {
+                description.push("Author");
+            }
+            return description.join(", ");
+        }
+
+        // another method for the user domain object
+        _getLastLogin(user) {
+            return user.lastLogin ?
+                `Last login: ${user.lastLogin.toLocaleString()}` :
+                "";
         }
     }
 
