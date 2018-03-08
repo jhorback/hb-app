@@ -33,12 +33,12 @@
     <!-- Profile page route -->    
     <app-route
         route="[[route]]"
-        pattern="/users/:id"
+        pattern="/profile/:id"
         data="{{profileRouteData}}"
         active="{{profileRouteActive}}">
     </app-route>
     <template is="dom-if" if="[[_hasPermission(user, profileRouteActive)]]" restamp>
-        <hb-user-profile-page id="[[profileRouteData.id]]"></hb-user-profile-page>
+        <hb-user-profile-page uid="[[profileRouteData.id]]"></hb-user-profile-page>
     </template>
 
     <!-- Menu config page route -->    

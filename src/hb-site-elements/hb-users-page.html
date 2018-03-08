@@ -7,6 +7,8 @@
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../hb-app/hb-menu.html">
 <link rel="import" href="hb-users-data.html">
 
@@ -15,8 +17,25 @@
   <template>
     <style include="hb-page-layout-shared-styles"></style>
     <style>
+        .users-list {
+            max-width: 800px;
+            margin: 2em auto;
+        }
+        .users-list a {
+            color: inherit;
+            text-decoration: inherit;
+            cursor: pointer;
+        }
+        .avatar {
+            display: inline-block;
+            box-sizing: border-box;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: contain;
+        }
     </style>
-    <hb-users-data users="{{users}}" test="{{test}}"></hb-users-data>
+    <hb-users-data users="{{users}}" users-state="{{usersState}}"></hb-users-data>
     <app-header-layout>
         <app-header slot="header" fixed effects="waterfall">
             <app-toolbar>
@@ -28,12 +47,24 @@
         </app-header>
         <main>
         <!-- main content -->
+            <div hidden$="[[!usersState.isReady]]" class="users-list">
             <template is="dom-repeat" items="[[users]]" as="user">
-                <div>
-                    [[user.displayName]]
-                    <img src="[[user.photoURL]]" width="50">
-                </div>
+                <a href="[[rootPath]]/site/profile/[[user.uid]]" tabindex="-1">
+
+                    <paper-icon-item>
+                        <div class="avatar blue" slot="item-icon"
+                            style="[[_getAvatarBackground(user)]]">
+                        </div>
+                        <paper-item-body two-line>
+                            <div class="paper-font-body2">[[user.displayName]]</div>
+                            <div secondary>
+                                [[_getPermissionsDescription(user)]]
+                            </div>
+                        </paper-item-body>
+                    </paper-icon-item>
+                </a>
             </template>
+            </div>
         </main>
     </app-header-layout>
   </template>
@@ -49,14 +80,33 @@
         static get properties() {
             return {
                 users: {
-                    type: Array,
-                    observer: "_usersChange"
+                    type: Array
+                },
+                usersState: {
+                    type: Object
                 }
             };
         }
 
-        _usersChange() {
-            // debugger;
+        _getAvatarBackground(user) {
+            return user.photoURL ?
+                `background-image: url(${user.photoURL})` :
+                "background-color: var(--accent-color)";
+        }
+
+        _getPermissionsDescription(user) {
+            const description = [];
+            const {permissions} = user;
+            if (permissions.isSystemAdmin) {
+                description.push("System admin");
+            }
+            if (permissions.isSiteAdmin) {
+                description.push("Site admin");
+            }            
+            if (permissions.isAuthor) {
+                description.push("Author");
+            }
+            return description.join(", ");
         }
     }
 

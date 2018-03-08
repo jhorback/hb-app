@@ -15,8 +15,20 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
                 type: Array,
                 notify: true,
                 collection: "users",
-                value: [{}],
+                value: [],
                 live: true
+            },
+            usersReady: {
+                type: Boolean,
+                observer: "_usersReadyChanged"
+            },
+            usersState: {
+                type: Object,
+                notify: true,
+                value: {
+                    isReady: false,
+                    showUnregistered: false
+                }
             }
         };
     }
@@ -29,6 +41,10 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
         return {
             
         };
+    }
+
+    _usersReadyChanged() {
+        this.set("usersState.isReady", this.usersReady);
     }
 
     // constructor() {
