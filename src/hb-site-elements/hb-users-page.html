@@ -10,6 +10,7 @@
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../hb-styles/hb-no-results.html">
 <link rel="import" href="../hb-app/hb-menu.html">
 <link rel="import" href="hb-users-data.html">
 
@@ -57,8 +58,8 @@
         <main>
         <!-- main content -->
             <div hidden$="[[!usersState.isReady]]" class="users-list">
-                <div>[[usersState.noUsersMessage]]</div>
-            <template is="dom-repeat" items="[[usersState.filteredUsers]]" as="user">
+                <hb-no-results hidden$="[[!usersState.noResults]]" text="[[usersState.noUsersMessage]]"></hb-no-results>
+                <template is="dom-repeat" items="[[usersState.filteredUsers]]" as="user">
                 <a href="[[rootPath]]/site/profile/[[user.uid]]" tabindex="-1">
 
                     <paper-icon-item>
@@ -73,10 +74,10 @@
                         </paper-item-body>
                     </paper-icon-item>
                 </a>
-            </template>
+                </template>
             </div>
         </main>
-    </app-header-layout>
+    </app-header-layout>    
   </template>
 
     <script>
@@ -107,7 +108,7 @@
         _getPermissionsDescription(user) {
             const description = [];
             const {permissions} = user;
-            if (permissions.isSystemAdmin) {
+            if (permissions.isSysAdmin) {
                 description.push("System admin");
             }
             if (permissions.isSiteAdmin) {

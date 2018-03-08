@@ -13,9 +13,9 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
         return {
             users: {
                 type: Array,
-                notify: true,
                 collection: "users",
                 value: [],
+                notify: true,
                 live: true
             },
             usersReady: {
@@ -29,6 +29,7 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
                     isReady: false,
                     showUnregistered: false,
                     filteredUsers: [],
+                    noRestuls: false,
                     noUsersMessage: ""
                 }
             }
@@ -70,6 +71,8 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
        const noUsersMessage = users.length !== 0 ? "" :
                 showUnregistered ? "There are no unregistered users" :
                 "There are no registered users";
+        const noResults = users.length === 0;
+        this.set("usersState.noResults", noResults);
         this.set("usersState.noUsersMessage", noUsersMessage);
         this.set("usersState.filteredUsers", users);
     }
