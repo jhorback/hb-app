@@ -66,12 +66,20 @@
                         <div class="avatar blue" slot="item-icon"
                             style="[[_getAvatarBackground(user)]]">
                         </div>
-                        <paper-item-body two-line>
-                            <div class="paper-font-body2">[[user.displayName]]</div>
+                        <paper-item-body three-line>
+                            <div>[[user.displayName]]</div>
                             <div secondary>
                                 [[_getPermissionsDescription(user)]]
                             </div>
+                            <div secondary>
+                                [[_getLastLogin(user)]]
+                            </div>
                         </paper-item-body>
+                        <!-- <paper-icon-button
+                            on-tap="_showUserMenu"
+                            icon="hb:more-vert"
+                            title="Update">
+                        </paper-icon-button> -->
                     </paper-icon-item>
                 </a>
                 </template>
@@ -125,6 +133,18 @@
             this.shadowRoot.dispatchEvent(new CustomEvent("filter-changed", {
                 detail: {showUnregistered}
             }));
+        }
+
+        _getLastLogin(user) {
+            return user.lastLogin ?
+                `Last login: ${user.lastLogin.toLocaleString()}` :
+                "";
+        }
+
+        _showUserMenu(event) {
+            event.detail.sourceEvent.preventDefault();
+            const user = event.model.get("user");
+            debugger;
         }
     }
 
