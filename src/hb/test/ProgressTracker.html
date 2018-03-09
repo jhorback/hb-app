@@ -41,7 +41,7 @@
         });
 
         describe("layer", () => {
-          it("can add steps", () => {
+        it("can add steps", () => {
             let count = 0;
             const tracker = new ProgressTracker("test");
             tracker.onUpdate = (update) => {
@@ -229,10 +229,26 @@
             const json = tracker.toJSON();
             expect(json.layers.length).to.be.equal(2);
             expect(json.events.length).to.be.equal(8);
-            expect(json.currentUser).to.be.null;
+            expect(json.user).to.be.null;
             expect(json.started).to.not.be.null;
           });
 
+          it("has a top level description", () => {
+            const tracker = new ProgressTracker("Test description");
+            const json = tracker.toJSON();
+            expect(json.description).to.be.equal("Test description");
+          });
+
+          it("has a top level isError property", () => {
+            const tracker = new ProgressTracker();
+            const layer = tracker.addLayer("Test", 5);
+            layer.next("one");
+            const noErrorJson = tracker.toJSON();
+            expect(noErrorJson.isError).to.be.false;
+            layer.error(new Error("Testing"));
+            const json = tracker.toJSON();
+            expect(json.isError).to.be.true;
+          });
         });
 
         describe("save", () => {
@@ -244,9 +260,9 @@
                   expect(name).to.be.equal("progressLogs");
                   return {
                     add: (log) => {
-                      expect(log.currentUser.uid).to.be.equal("uid");
-                      expect(log.currentUser.photoURL).to.be.equal("photoURL");
-                      expect(log.currentUser.displayName).to.be.equal("displayName");
+                      expect(log.user.uid).to.be.equal("uid");
+                      expect(log.user.photoURL).to.be.equal("photoURL");
+                      expect(log.user.displayName).to.be.equal("displayName");
                       expect(log.dbPath).to.be.equal("some/dbPath");
                       return {
                         id: "someDbId"

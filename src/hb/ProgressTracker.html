@@ -15,6 +15,7 @@
 class ProgressTracker {
 	constructor(description) {
 		this.description = description;
+		this.isError = false;
 		this.onUpdate = null;
 		this.steps = [];
 		this.totalSteps = 0;
@@ -117,6 +118,7 @@ class ProgressTracker {
 				const notNeeded = totalSteps - currentLayerStep;
 				const type = ProgressTracker.eventType.error;
 				this.totalSteps = this.totalSteps - notNeeded + 1;
+				this.isError = true;
 				this.steps.push(`Error: ${message}`);
 				this.notify({layerId, type, name, message, stack});
 				notifyLayerFinished();
@@ -150,7 +152,8 @@ class ProgressTracker {
 		   seconds: this._getSeconds(this),
 		   dbPath: this.dbPath,
 		   layers: this.layers,
-		   events: this.events
+		   events: this.events,
+		   isError: this.isError
 	   }
    }
 
