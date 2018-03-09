@@ -7,6 +7,7 @@
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="hb-user-profile-data.html">
@@ -39,14 +40,19 @@
         .no-avatar-spacer {
             margin-top: 2.5em;
         }
+        .logout-button {
+            font-size: 1rem;
+        }
     </style>
     <hb-user-profile-data uid="[[uid]]" user="{{user}}"></hb-user-profile-data>
     <app-header-layout>
-        <app-header slot="header" fixed effects="waterfall">
+        <app-header slot="header" effects="waterfall">
             <app-toolbar>
                 <a href="[[rootPath]]/site/users" tabindex="-1">
                     <paper-icon-button icon="hb:arrow-back"></paper-icon-button>
                 </a>
+                <div main-title></div>
+                <paper-button class="logout-button">Logout</paper-button>            
             </app-toolbar>
             <app-toolbar>                
                 <div class="profile-name">
