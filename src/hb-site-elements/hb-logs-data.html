@@ -19,7 +19,11 @@ class HbLogsData extends
                 collection: "progressLogs",
                 value: [],
                 notify: true,
-                live: true
+                live: true,
+                query: (q, el) => {
+                    q = q.orderBy('started', 'desc').limit(100);
+                    return q;
+                },
             },
             logsReady: {
                 type: Boolean,

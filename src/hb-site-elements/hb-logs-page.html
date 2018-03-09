@@ -6,7 +6,7 @@
 <link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
-<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../hb-app/hb-menu.html">
@@ -20,6 +20,23 @@
         .logs-list {
             max-width: 800px;
             margin: 2em auto;
+        }
+        .avatar {
+            display: inline-block;
+            box-sizing: border-box;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: contain;
+        }
+        .flex {
+            display: flex;
+        }
+        .flex-grow {
+            flex-grow: 1;
+        }
+        .flex-grow span {
+            @apply --paper-font-caption;
         }
     </style>
     <hb-logs-data logs="{{logs}}"></hb-logs-data>
@@ -36,16 +53,27 @@
         <!-- main content -->
         <div class="logs-list">
             <template is="dom-repeat" items="[[logs]]" as="log">
-                <paper-item>
+                <paper-icon-item>
+                    <div class="avatar" slot="item-icon"
+                        title="[[_getUserDisplayName(log)]]"
+                        style="[[_getAvatarBackground(log)]]">
+                    </div>
                     <paper-item-body two-line>
-                        <div>[[user.displayName]]</div>
-                        <div secondary>
-                           
+                        <div class="flex">
+                            <div class="flex-grow">
+                                [[_getLogDescription(log)]]
+                                <span>([[log.dbPath]])</span>
+                            </div>
+                            <div>[[log.seconds]]s</div>
                         </div>
-                        <div secondary>
+                        <div secondary class="flex">
+                            <div class="flex-grow">[[_getStarted(log)]]</div>
+                            <div title="[[_getLayerTitle(log)]]">
+                                ([[log.layers.length]].[[log.events.length]])
+                            </div>
                         </div>
                     </paper-item-body>
-                </paper-item>
+                </paper-icon-item>
             </template>
         </div>
         </main>
@@ -63,6 +91,32 @@
         static get properties() {
             return {
             };
+        }
+
+        _getLogDescription(log) {
+            return log.description || "DB update";
+        }
+
+        _getStarted(log) {
+            return log.started.toLocaleString();
+        }
+        
+        _getUserDisplayName(log) {
+            const user = log.user || log.currentUser;
+            return user && user.displayName ?
+                user.displayName :
+                "Unknown";           
+        }
+
+        _getAvatarBackground(log) {
+            const user = log.user || log.currentUser;
+            return user && user.photoURL ?
+                `background-image: url(${user.photoURL})` :
+                "background-color: var(--accent-color)";
+        }
+
+        _getLayerTitle(log) {
+            return `Layers: ${log.layers.length}, Events: ${log.events.length}`;
         }
     }
 
