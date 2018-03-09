@@ -33,16 +33,18 @@
         });
 
         it("notifies when creating a layer", () => {
-          const tracker = new ProgressTracker(update => {
+          const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
             expect(update.max).to.equal(2);
-          });
+          };
           tracker.addLayer("Test", 2);
         });
 
         describe("layer", () => {
           it("can add steps", () => {
             let count = 0;
-            const tracker = new ProgressTracker(update => {
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
               count = count + 1;
               switch(count) {
                 case 1:
@@ -52,14 +54,15 @@
                   expect(update.max).to.equal(5);
                   break;
               }
-            });
+            };
             const layer = tracker.addLayer("Test", 2);
             layer.addSteps(3);
           });
 
           it("can call next", () => {
             let count = 0;
-            const tracker = new ProgressTracker(update => {
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
               count = count + 1;
               switch(count) {
                 case 1:
@@ -69,14 +72,15 @@
                   expect(update.description).to.equal("Test: step 1");
                   break;
               }
-            });
+            };
             const layer = tracker.addLayer("Test", 2);
             layer.next("step 1");
           });
 
           it("adds more steps and warns if going over the number defined", () => {
             let count = 0;
-            const tracker = new ProgressTracker(update => {
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
               count = count + 1;
               switch(count) {
                 case 1:
@@ -89,17 +93,18 @@
                   expect(update.event.warn).to.not.be.undefined;                  
                   break;
               }
-            });
+            };
             const layer = tracker.addLayer("Test", 2);
             layer.next("step 1");
             layer.next("step 2");
             layer.next("step 3");
-            expect(tracker.description).to.equal("Test: step 1, Test: step 2, Test: step 3");
+            expect(tracker.stepsDescription).to.equal("Test: step 1, Test: step 2, Test: step 3");
           });
 
           it("can call done", () => {
             let count = 0;
-            const tracker = new ProgressTracker(update => {
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
               count = count + 1;
               switch(count) {
                 case 1:
@@ -109,18 +114,19 @@
                   expect(update.description).to.equal("Test: step 1");
                   break;
               }
-            });
+            };
             const layer = tracker.addLayer("Test", 5);
             layer.next("step 1");
             expect(tracker.totalSteps).to.equal(5);            
             layer.done("done");
-            expect(tracker.description).to.equal("Test: step 1, Test: done");
+            expect(tracker.stepsDescription).to.equal("Test: step 1, Test: done");
             expect(tracker.totalSteps).to.equal(2);
           });
 
           it("can call error", () => {
             let count = 0;
-            const tracker = new ProgressTracker(update => {
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
               count = count + 1;
               switch(count) {
                 case 1:
@@ -130,12 +136,12 @@
                   expect(update.description).to.equal("Test: step 1");
                   break;
               }
-            });
+            };
             const layer = tracker.addLayer("Test", 5);
             layer.next("step 1");
             expect(tracker.totalSteps).to.equal(5);            
             layer.error({message: "An error occurred."});
-            expect(tracker.description).to.equal("Test: step 1, Error: An error occurred.");
+            expect(tracker.stepsDescription).to.equal("Test: step 1, Error: An error occurred.");
             expect(tracker.totalSteps).to.equal(2);
           });
         });
@@ -143,7 +149,8 @@
         describe("multiple layers", () => {
           it("can track multiple layers", () => {
             let count = 0;
-            const tracker = new ProgressTracker(update => {
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
               count = count + 1;
               switch(count) {
                 case 1:
@@ -153,14 +160,15 @@
                   expect(update.max).to.equal(8);
                   break;
               }
-            });
+            };
             const layer = tracker.addLayer("Test", 5);
             const layer2 = tracker.addLayer("Test2", 3);
           });
 
           it("can handle next for multiple layers", () => {
             let count = 0;
-            const tracker = new ProgressTracker(update => {
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
               count = count + 1;
               switch(count) {
                 case 1:
@@ -170,7 +178,7 @@
                   expect(update.max).to.equal(8);
                   break;
               }
-            });
+            };
             const layer = tracker.addLayer("Test", 5);
             const layer2 = tracker.addLayer("Test2", 3);
             layer.next("one");
@@ -178,12 +186,13 @@
             layer.next("three");
             layer2.next("four");            
            
-            expect(tracker.description).to.equal("Test: one, Test2: two, Test: three, Test2: four");
+            expect(tracker.stepsDescription).to.equal("Test: one, Test2: two, Test: three, Test2: four");
           });
 
         it("can handle done for multiple layers", () => {
             let count = 0;
-            const tracker = new ProgressTracker(update => {
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
               count = count + 1;
               switch(count) {
                 case 1:
@@ -193,7 +202,7 @@
                   expect(update.max).to.equal(8);
                   break;
               }
-            });
+            };
             const layer = tracker.addLayer("Test", 5);
             const layer2 = tracker.addLayer("Test2", 3);
             layer.next("one");
@@ -201,7 +210,7 @@
             layer.next("three");
             layer2.next("four");
             layer.done("done");
-            expect(tracker.description).to.equal("Test: one, Test2: two, Test: three, Test2: four, Test: done");
+            expect(tracker.stepsDescription).to.equal("Test: one, Test2: two, Test: three, Test2: four, Test: done");
             expect(tracker.totalSteps).to.be.equal(6);
           });
         });

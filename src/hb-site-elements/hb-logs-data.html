@@ -1,0 +1,54 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../hb/hb.html">
+<link rel="import" href="../hb-app/EventMap.html">
+<script>
+/**
+ * @customElement
+ * @polymer
+ */
+class HbLogsData extends
+    Polymer.FirestoreMixin(
+    EventMap(Polymer.Element
+    )) {
+    static get is() { return 'hb-logs-data'; }
+
+    static get properties() {
+        return {
+            logs: {
+                type: Array,
+                collection: "progressLogs",
+                value: [],
+                notify: true,
+                live: true
+            },
+            logsReady: {
+                type: Boolean,
+                observer: "_logsReadyChanged"
+            },
+            logsState: {
+                type: Object,
+                notify: true,
+                value: {
+                    isReady: false
+                }
+            }
+        };
+    }
+
+    static get eventsListenAt() {
+        return "parent";
+    }
+    
+    static get events() {
+        return {
+        };
+    }
+
+    _logsReadyChanged() {
+        this.set("logsState.isReady", this.logsReady);
+    }
+  
+}
+
+window.customElements.define(HbLogsData.is, HbLogsData);
+</script>

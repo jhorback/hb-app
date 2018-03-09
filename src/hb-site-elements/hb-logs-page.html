@@ -6,15 +6,23 @@
 <link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../hb-app/hb-menu.html">
+<link rel="import" href="hb-logs-data.html">
 
 <dom-module id="hb-logs-page">
 
   <template>
     <style include="hb-page-layout-shared-styles"></style>
     <style>
+        .logs-list {
+            max-width: 800px;
+            margin: 2em auto;
+        }
     </style>
+    <hb-logs-data logs="{{logs}}"></hb-logs-data>
     <app-header-layout>
         <app-header slot="header" fixed effects="waterfall">
             <app-toolbar>
@@ -26,8 +34,20 @@
         </app-header>
         <main>
         <!-- main content -->
-        Logs page
-
+        <div class="logs-list">
+            <template is="dom-repeat" items="[[logs]]" as="log">
+                <paper-item>
+                    <paper-item-body two-line>
+                        <div>[[user.displayName]]</div>
+                        <div secondary>
+                           
+                        </div>
+                        <div secondary>
+                        </div>
+                    </paper-item-body>
+                </paper-item>
+            </template>
+        </div>
         </main>
     </app-header-layout>
   </template>

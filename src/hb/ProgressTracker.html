@@ -13,8 +13,9 @@
  * the event type and handle errors as needed.
  */
 class ProgressTracker {
-	constructor(onUpdate) {
-		this.onUpdate = onUpdate;
+	constructor(description) {
+		this.description = description;
+		this.onUpdate = null;
 		this.steps = [];
 		this.totalSteps = 0;
 		this.currentUser = null;
@@ -33,6 +34,10 @@ class ProgressTracker {
 			done: "done",
 			error: "error"
 		};
+	}
+
+	onUpdate(onUpdate) {
+		this.onUpdate = onUpdate;		
 	}
 
 	addLayer(layerDescription, totalSteps) {
@@ -66,7 +71,7 @@ class ProgressTracker {
 			this.totalSteps = this.totalSteps + count;
 			totalSteps = totalSteps + count;
 		};
-		
+
 		return {
             addSteps: (count) => {
                 addSteps(count);
@@ -138,6 +143,7 @@ class ProgressTracker {
 
    toJSON() {
 	   return {
+		   description: this.description,
 		   currentUser: this.currentUser,
 		   started: this.started,
 		   finished: this.finished,
@@ -185,27 +191,8 @@ class ProgressTracker {
 	   return Math.abs((started.getTime() - finished.getTime()) / 1000);
    }
 
-   get description() {
+   get stepsDescription() {
       return this.steps.join(", ");
 	}
 }
-
-// var tracker = new ProgressTracker(update => {
-//   console.clear();
-//   console.log(update);
-// });
-
-// var layer1 = tracker.addLayer("Doing something", 5);
-// layer1.next("Here we go");
-// layer1.next("Again");
-
-// var layer2 = tracker.addLayer("New layer", 2);
-// layer2.next("here");
-// layer1.next("again...");
-// layer2.next("qwer");
-// layer2.addSteps(1);
-// layer2.next("here we go again");
-// layer2.next("would cause a warning and not update the descriptions or counts");
-
-// console.log(tracker.description);
 </script>

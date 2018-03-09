@@ -361,7 +361,7 @@
             const dbPath = "doc/TestDispatchEvent";
             const doc = new hb.TestDispatchEvent({db, dbPath});
             await doc.doSomethingThatDispatchesAnEvent();
-            expect(doc.progressTracker.description).to.be.equal("Update: Loading document, Update: Updating, Update: Updating references, Update: Dispatching events, Handling events for doc/TestHandleEvent: Loading document, Handling events for doc/TestHandleEvent: Updating document, Handling events for doc/TestHandleEvent: Dispatching events, Handling events for doc/TestHandleEvent: Finished handling events, Update: Document updated");
+            expect(doc.progressTracker.stepsDescription).to.be.equal("Update: Loading document, Update: Updating, Update: Updating references, Update: Dispatching events, Handling events for doc/TestHandleEvent: Loading document, Handling events for doc/TestHandleEvent: Updating document, Handling events for doc/TestHandleEvent: Dispatching events, Handling events for doc/TestHandleEvent: Finished handling events, Update: Document updated");
           });
         });
       });

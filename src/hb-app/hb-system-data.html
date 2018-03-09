@@ -103,7 +103,8 @@
                 percentage: 0
             });
 
-            const progressTracker = new ProgressTracker(update => {
+            const progressTracker = new ProgressTracker("Create home page");
+            progressTracker.onUpdate = (update) => {
                 const { percentage, description, event } = update;
                 this.set("appState.homePageProgress", {
                     title: "Creating the home page",
@@ -116,7 +117,7 @@
                     // this.systemError(error);
                     alert(error.message);
                 }
-            });
+            };
 
             const {app, docId, doc} = await this.systemApp.createHomePage({is, title, progressTracker});
             this.set("appState.homePageProgress", null);
