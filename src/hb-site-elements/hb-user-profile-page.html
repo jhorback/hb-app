@@ -48,9 +48,7 @@
     <app-header-layout>
         <app-header slot="header" effects="waterfall">
             <app-toolbar>
-                <a href="[[rootPath]]/site/users" tabindex="-1">
-                    <paper-icon-button icon="hb:arrow-back"></paper-icon-button>
-                </a>
+                <paper-icon-button icon="hb:arrow-back" on-tap="_goBack"></paper-icon-button>
                 <div main-title></div>
                 <paper-button class="logout-button">Logout</paper-button>            
             </app-toolbar>
@@ -142,6 +140,10 @@
             return user.lastLogin ?
                 `Last login: ${user.lastLogin.toLocaleString()}` :
                 "Never logged in";
+        }
+
+        _goBack(event) {
+            window.history.back();
         }
     }
 
