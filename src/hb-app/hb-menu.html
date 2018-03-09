@@ -108,7 +108,7 @@
             </div>
             <div class="bottom-bar">
                 <hr class="divider"/>
-                <a href="[[rootPath]]/site/profile/[[user.uid]]" hidden$="[[user.isAnonymous]]">
+                <a href="[[rootPath]]/site/profile/[[user.uid]]?profile" hidden$="[[user.isAnonymous]]"> 
                     <paper-icon-item>
                         <div class="avatar" slot="item-icon"
                             style="background-image: url([[user.photoURL]]);"
@@ -116,7 +116,7 @@
                         <div class="sign-in-text">[[user.displayName]]</div>
                     </paper-icon-item>
                 </a>
-                <paper-icon-item on-tap="signIn"hidden$="[[!user.isAnonymous]]">
+                <paper-icon-item on-tap="signIn" hidden$="[[!user.isAnonymous]]">
                     <div class="avatar" slot="item-icon"
                         style="background-image: url([[importPath]]/assets/google.svg);"
                     ></div>
@@ -145,6 +145,7 @@
             if (this.parentElement.tagName === "APP-DRAWER") {
                 this.parentElement.close();
             }
+
             this.dispatchEvent(new CustomEvent("close-menu", {
                 bubbles: true,
                 composed: true
@@ -154,10 +155,20 @@
         signIn() {
             this.shadowRoot.dispatchEvent(new CustomEvent("user-sign-in"));
         }
-    
-        signOut() {
-            this.shadowRoot.dispatchEvent(new CustomEvent("user-sign-out"));
-        }
+
+        // _goToProfile(event) {
+        //     var profile = document.createElement("hb-user-profile-page");
+        //     profile.uid = this.user.uid;
+        //     profile.isCurrentUser = true;
+        //     profile.addEventListener("user-profile-closed", event => {
+        //         //document.body.appendChild(this.parentElement);
+        //         //this.close(); 
+        //     });
+        //     //this.close();
+        //     //this.parentElement.remove();
+        //     //this.remove();
+        //     document.body.appendChild(profile);
+        // }
     }
     
     window.customElements.define(HbMenu.is, HbMenu);

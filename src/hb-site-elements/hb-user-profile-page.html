@@ -120,6 +120,14 @@
             };
         }
 
+        constructor() {
+            super();
+            const {search: qs} = window.location;
+            if (qs === "?profile") {
+                this.isCurrentUser = true;
+            }
+        }
+
         // duplicated on the user list
         // could make this a static method on the user domain object
         _getPermissionsDescription(user) {
@@ -157,6 +165,7 @@
 
         _signOut(event) {
             window.dispatchEvent(new CustomEvent("user-sign-out"));
+            window.location = this.rootPath;
         }
 
         _getBackIcon() {
