@@ -136,7 +136,7 @@
         }
 
         _getLastLogin(user) {
-            return user.lastLogin ?
+            return user && user.lastLogin ?
                 `Last login: ${user.lastLogin.toLocaleString()}` :
                 "";
         }

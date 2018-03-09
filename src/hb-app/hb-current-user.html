@@ -82,7 +82,10 @@
         static get events() {
             return {
                 "user-sign-in": "_userSignIn",
-                "user-sign-out": "_userSignOut"
+                "user-sign-out": {
+                    listenAt: "window",
+                    handler: "_userSignOut"
+                }
             };
         }
 
