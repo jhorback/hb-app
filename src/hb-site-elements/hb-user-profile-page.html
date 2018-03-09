@@ -36,6 +36,9 @@
             margin-top: 9rem;
             margin-bottom: 2rem;
         }
+        .no-avatar-spacer {
+            margin-top: 2.5em;
+        }
     </style>
     <hb-user-profile-data uid="[[uid]]" user="{{user}}"></hb-user-profile-data>
     <app-header-layout>
@@ -47,7 +50,8 @@
             </app-toolbar>
             <app-toolbar>                
                 <div class="profile-name">
-                    <img class="avatar" src="[[user.photoURL]]">
+                    <img class="avatar" src="[[user.photoURL]]" hidden$="[[!user.photoURL]]">
+                    <div class="no-avatar-spacer" hidden$="[[user.photoURL]]"></div>
                     <div>
                         [[user.displayName]]
                     </div>
@@ -65,7 +69,7 @@
                         <div secondary>[[_getLastLogin(user)]]</div>
                     </paper-item-body>    
                 </paper-item>
-                <paper-item>                
+                <paper-item hidden$="[[!user.email]]">                
                     <paper-item-body two-line>
                         <div>Email</div>
                         <div secondary>[[user.email]]</div>
@@ -121,14 +125,17 @@
             if (permissions.isAuthor) {
                 description.push("Author");
             }
-            return description.join(", ");
+
+            return description.length > 0 ?
+                description.join(", ") :
+                "None";
         }
 
         // another method for the user domain object
         _getLastLogin(user) {
             return user.lastLogin ?
                 `Last login: ${user.lastLogin.toLocaleString()}` :
-                "";
+                "Never logged in";
         }
     }
 
