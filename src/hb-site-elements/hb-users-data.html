@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../hb/hb.html">
+<link rel="import" href="../hb/hb.User.html">
 <link rel="import" href="../hb-app/EventMap.html">
 <script>
 /**
@@ -27,10 +28,11 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
                 notify: true,
                 value: {
                     isReady: false,
-                    showUnregistered: false,
+                    showUnregistered: true,
                     filteredUsers: [],
                     noRestuls: false,
-                    noUsersMessage: ""
+                    noUsersMessage: "",
+                    selectedUser: null
                 }
             }
         };
@@ -42,7 +44,9 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
     
     static get events() {
         return {
-            "filter-changed": "_filterChanged"
+            "filter-changed": "_filterChanged",
+            "select-user": "_selectUser",
+            "update-permissions": "_updatePermissions"
         };
     }
 
@@ -75,6 +79,19 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
         this.set("usersState.noResults", noResults);
         this.set("usersState.noUsersMessage", noUsersMessage);
         this.set("usersState.filteredUsers", users);
+    }
+
+    _selectUser(event) {
+        const {uid} = event.detail;
+        const user = this.users.find(u => u.uid === uid);
+        this.set("usersState.selectedUser", user);
+    }
+
+    async _updatePermissions(event) {
+        console.log("udpate user", event.detail);
+        const {uid, isRegistered, isSysAdmin, isSiteAdmin, isAuthor} = event.detail;
+        const userDO = new hb.User({db: hb.db, uid});
+        const user = await userDO.updatePermissions({isRegistered, isSysAdmin, isSiteAdmin, isAuthor});
     }
 }
 

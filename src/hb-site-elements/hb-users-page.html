@@ -8,7 +8,10 @@
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../hb-styles/hb-no-results.html">
 <link rel="import" href="../hb-app/hb-menu.html">
@@ -38,6 +41,15 @@
             height: 40px;
             border-radius: 50%;
             background-size: contain;
+        }
+        hr.divider {
+            display: block;
+            height: 1px;
+            min-height: 1px;
+            max-height: 1px;
+            background-color: var(--paper-divider-color, #000);
+            opacity: 0.12;
+            @apply --paper-divider;
         }
     </style>
     <hb-users-data users="{{users}}" users-state="{{usersState}}"></hb-users-data>
@@ -75,14 +87,49 @@
                                 [[_getLastLogin(user)]]
                             </div>
                         </paper-item-body>
-                        <!-- <paper-icon-button
+                        <paper-icon-button
                             on-tap="_showUserMenu"
                             icon="hb:more-vert"
                             title="Update">
-                        </paper-icon-button> -->
+                        </paper-icon-button>
                     </paper-icon-item>
                 </a>
                 </template>
+                <paper-dialog id="permissionsDialog">
+                    <h2>[[usersState.selectedUser.displayName]] Permissions</h2>
+                    <div>
+                        <paper-item>
+                            <paper-item-body>Registered</paper-item-body>
+                            <paper-toggle-button
+                                checked="{{usersState.selectedUser.isRegistered}}">
+                            </paper-toggle-button>
+                        </paper-item>
+                        <hr class="divider">
+                        <paper-item>
+                            <paper-item-body>System admin</paper-item-body>
+                            <paper-toggle-button
+                                checked="{{usersState.selectedUser.permissions.isSysAdmin}}"> 
+                            </paper-toggle-button>
+                        </paper-item>
+                        <paper-item>
+                            <paper-item-body>Site admin</paper-item-body>
+                            <paper-toggle-button
+                                checked="{{usersState.selectedUser.permissions.isSiteAdmin}}">
+                            </paper-toggle-button>
+                        </paper-item>
+                        <paper-item>
+                            <paper-item-body>Author</paper-item-body>
+                            <paper-toggle-button
+                                checked="{{usersState.selectedUser.permissions.isAuthor}}">
+                            </paper-toggle-button>
+                        </paper-item>
+                    </div>
+                    <div class="buttons">
+                        <paper-button on-tap="_updateSelectedUsersPermissions">
+                            Update
+                        </paper-button>
+                    </div>
+                </paper-dialog>
             </div>
         </main>
     </app-header-layout>    
@@ -143,8 +190,24 @@
 
         _showUserMenu(event) {
             event.detail.sourceEvent.preventDefault();
-            const user = event.model.get("user");
-            debugger;
+            const {uid} = event.model.get("user");
+            this.shadowRoot.dispatchEvent(new CustomEvent("select-user", {
+                detail: { uid }
+            }))
+            document.body.appendChild(this.$.permissionsDialog);
+            this.$.permissionsDialog.positionTarget = event.target;
+            this.$.permissionsDialog.open();
+        }
+
+        _updateSelectedUsersPermissions(event) {
+            this.$.permissionsDialog.close();
+            const {uid, isRegistered} = this.usersState.selectedUser;
+            const {isSysAdmin, isSiteAdmin, isAuthor} = this.usersState.selectedUser.permissions;
+            this.shadowRoot.dispatchEvent(new CustomEvent("update-permissions", {
+                detail: {
+                    uid, isRegistered, isSysAdmin, isSiteAdmin, isAuthor
+                 }
+            }))
         }
     }
 

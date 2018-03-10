@@ -1,6 +1,7 @@
 <link rel="import" href="hb.html">
 <link rel="import" href="hb.DomainObj.html">
 <link rel="import" href="hb.DocumentCreator.html">
+<link rel="import" href="ProgressTracker.html">
 <script>
 /**
  * Base class for doc documents
@@ -11,8 +12,8 @@ hb.User = class extends hb.DomainObj {
     }
 
     async recordLogin({authUser}) {
-        
-       const user = this.update(user => {
+       const progress = new ProgressTracker("Login");
+       const user = await this.update(user => {
            user.uid = authUser.uid;
            if (user.displayName === user.providerDisplayName) {
                user.displayName = authUser.displayName;
@@ -22,7 +23,24 @@ hb.User = class extends hb.DomainObj {
            user.photoURL = authUser.photoURL;
            user.lastLogin = new Date();
            return user;
-       });
+       }, progress);
+       progress.save();
+       return user;
+    }
+
+    async updatePermissions({isRegistered, isSysAdmin, isSiteAdmin, isAuthor}) {
+       const progress = new ProgressTracker("Update permissions");
+       const user = await this.update(user => {
+           user.isRegistered = isRegistered;
+           user.permissions = {
+               isSysAdmin,
+               isSiteAdmin,
+               isAuthor
+           };
+           return user;
+       }, progress);
+       progress.save();
+       return user;
     }
 }
 </script>

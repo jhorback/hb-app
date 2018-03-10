@@ -117,7 +117,7 @@
             
             // not sure why this.uid can be out of sync with __id__
             // seems like a bug
-            if (this.authUser && this.dbUserReady && this.uid === this.dbUser.__id__) {
+            if (this.authUser && this.dbUserReady && this.dbUser && this.uid === this.dbUser.__id__) {
                 this.user = Object.assign({}, this.dbUser);                
             }
         }
