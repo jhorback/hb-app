@@ -97,7 +97,7 @@
                 </template>
                 <paper-dialog id="permissionsDialog">
                     <h2>[[usersState.selectedUser.displayName]] Permissions</h2>
-                    <div>
+                    <paper-dialog-scrollable>
                         <paper-item>
                             <paper-item-body>Registered</paper-item-body>
                             <paper-toggle-button
@@ -123,7 +123,7 @@
                                 checked="{{usersState.selectedUser.permissions.isAuthor}}">
                             </paper-toggle-button>
                         </paper-item>
-                    </div>
+                    </paper-dialog-scrollable>
                     <div class="buttons">
                         <paper-button on-tap="_updateSelectedUsersPermissions">
                             Update

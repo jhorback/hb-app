@@ -30,15 +30,15 @@ hb.User = class extends hb.DomainObj {
 
     async updatePermissions({isRegistered, isSysAdmin, isSiteAdmin, isAuthor}) {
        const progress = new ProgressTracker("Update permissions");
-       const user = await this.update(user => {
-           user.isRegistered = isRegistered;
-           user.permissions = {
-               isSysAdmin,
-               isSiteAdmin,
-               isAuthor
-           };
-           return user;
-       }, progress);
+        const user = await this.update(user => {
+            user.isRegistered = isRegistered;
+            user.permissions = {
+                isSysAdmin,
+                isSiteAdmin,
+                isAuthor
+            };
+            return user;
+        }, progress);
        progress.save();
        return user;
     }

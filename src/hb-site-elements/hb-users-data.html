@@ -19,16 +19,18 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
                 notify: true,
                 live: true
             },
+
             usersReady: {
                 type: Boolean,
                 observer: "_usersReadyChanged"
             },
+
             usersState: {
                 type: Object,
                 notify: true,
                 value: {
                     isReady: false,
-                    showUnregistered: true,
+                    showUnregistered: false,
                     filteredUsers: [],
                     noRestuls: false,
                     noUsersMessage: "",
@@ -90,6 +92,7 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
     async _updatePermissions(event) {
         console.log("udpate user", event.detail);
         const {uid, isRegistered, isSysAdmin, isSiteAdmin, isAuthor} = event.detail;
+        debugger;
         const userDO = new hb.User({db: hb.db, uid});
         const user = await userDO.updatePermissions({isRegistered, isSysAdmin, isSiteAdmin, isAuthor});
     }
