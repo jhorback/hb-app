@@ -11,6 +11,34 @@ hb.User = class extends hb.DomainObj {
         super({db, dbPath: `users/${uid}`})
     }
 
+    static getPermissionsDescription(user) {
+        if (!user || !user.permissions) {
+            return "";
+        }
+
+        const description = [];
+        const {permissions} = user;
+        if (permissions.isSysAdmin) {
+            description.push("System admin");
+        }
+        if (permissions.isSiteAdmin) {
+            description.push("Site admin");
+        }            
+        if (permissions.isAuthor) {
+            description.push("Author");
+        }
+
+        return description.length > 0 ?
+            description.join(", ") :
+            "None";
+    }
+
+    static getLastLogin(user) {
+        return user && user.lastLogin ?
+            `Last login: ${user.lastLogin.toLocaleString()}` :
+            "Never logged in";
+    }
+
     async recordLogin({authUser}) {
        const progress = new ProgressTracker("Login");
        const user = await this.update(user => {

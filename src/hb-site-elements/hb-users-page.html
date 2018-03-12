@@ -16,6 +16,7 @@
 <link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../hb-styles/hb-no-results.html">
 <link rel="import" href="../hb-app/hb-menu.html">
+<link rel="import" href="../hb/hb.User.html">
 <link rel="import" href="hb-users-data.html">
 
 <dom-module id="hb-users-page">
@@ -162,18 +163,11 @@
         }
 
         _getPermissionsDescription(user) {
-            const description = [];
-            const {permissions} = user;
-            if (permissions.isSysAdmin) {
-                description.push("System admin");
-            }
-            if (permissions.isSiteAdmin) {
-                description.push("Site admin");
-            }            
-            if (permissions.isAuthor) {
-                description.push("Author");
-            }
-            return description.join(", ");
+            return hb.User.getPermissionsDescription(user);
+        }
+
+        _getLastLogin(user) {
+            return hb.User.getLastLogin(user);
         }
 
         _showUnregisteredTapped(event) {
@@ -182,13 +176,7 @@
                 detail: {showUnregistered}
             }));
         }
-
-        _getLastLogin(user) {
-            return user && user.lastLogin ?
-                `Last login: ${user.lastLogin.toLocaleString()}` :
-                "";
-        }
-
+        
         _showUserMenu(event) {
             event.detail.sourceEvent.preventDefault();
             const {uid} = event.model.get("user");

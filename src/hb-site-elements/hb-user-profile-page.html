@@ -10,6 +10,7 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../hb/hb.User.html">
 <link rel="import" href="hb-user-profile-data.html">
 
 <dom-module id="hb-user-profile-page">
@@ -128,37 +129,6 @@
             }
         }
 
-        // duplicated on the user list
-        // could make this a static method on the user domain object
-        _getPermissionsDescription(user) {
-            if (!user || !user.permissions) {
-                return "";
-            }
-
-            const description = [];
-            const {permissions} = user;
-            if (permissions.isSysAdmin) {
-                description.push("System admin");
-            }
-            if (permissions.isSiteAdmin) {
-                description.push("Site admin");
-            }            
-            if (permissions.isAuthor) {
-                description.push("Author");
-            }
-
-            return description.length > 0 ?
-                description.join(", ") :
-                "None";
-        }
-
-        // another method for the user domain object
-        _getLastLogin(user) {
-            return user && user.lastLogin ?
-                `Last login: ${user.lastLogin.toLocaleString()}` :
-                "Never logged in";
-        }
-
         _goBack(event) {
             window.history.back();
         }
@@ -170,6 +140,14 @@
 
         _getBackIcon() {
             return this.isCurrentUser ? "hb:close" : "hb:arrow-back";
+        }
+
+        _getPermissionsDescription(user) {
+            return hb.User.getPermissionsDescription(user);
+        }
+
+        _getLastLogin(user) {
+            return hb.User.getLastLogin(user);
         }
     }
 
