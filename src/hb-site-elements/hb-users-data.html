@@ -67,6 +67,11 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
 
     _filterUsers() {
         const {showUnregistered} = this.usersState;
+        
+        if (!this.users) {
+            return;
+        }
+
         const users = this.users.reduce((users, user) => {
             if (!user.isRegistered === showUnregistered) {
                 users.push(user);
@@ -90,11 +95,10 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
     }
 
     async _updatePermissions(event) {
-        console.log("udpate user", event.detail);
         const {uid, isRegistered, isSysAdmin, isSiteAdmin, isAuthor} = event.detail;
-        debugger;
         const userDO = new hb.User({db: hb.db, uid});
         const user = await userDO.updatePermissions({isRegistered, isSysAdmin, isSiteAdmin, isAuthor});
+        this._filterUsers();
     }
 }
 

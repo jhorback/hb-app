@@ -24,11 +24,16 @@ hb.User = class extends hb.DomainObj {
            user.lastLogin = new Date();
            return user;
        }, progress);
-       progress.save();
+       progress.save({dbPath: `users/${authUser.uid}`});
        return user;
     }
 
-    async updatePermissions({isRegistered, isSysAdmin, isSiteAdmin, isAuthor}) {
+    async updatePermissions({
+        isRegistered = false,
+        isSysAdmin = false,
+        isSiteAdmin = false,
+        isAuthor = false
+    }) {
        const progress = new ProgressTracker("Update permissions");
         const user = await this.update(user => {
             user.isRegistered = isRegistered;
@@ -39,7 +44,7 @@ hb.User = class extends hb.DomainObj {
             };
             return user;
         }, progress);
-       progress.save();
+       progress.save({dbPath: this.dbPath});
        return user;
     }
 }

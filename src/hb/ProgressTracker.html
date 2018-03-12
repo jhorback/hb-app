@@ -175,6 +175,9 @@ class ProgressTracker {
 	   const {uid, photoURL, displayName} = currentUser;
 	   this.currentUser = {uid, photoURL, displayName};
 	   this.dbPath = dbPath;
+	   if (!dbPath) {
+		   throw new Error("dbPath is required to save a ProgressTracker");
+	   }
 	   const log = this.toJSON();
 
 	   return new Promise((resolve, reject) => {

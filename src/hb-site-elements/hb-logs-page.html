@@ -56,7 +56,7 @@
         <!-- main content -->
         <div class="logs-list">
             <template is="dom-repeat" items="[[logs]]" as="log">
-                <paper-icon-item class$="[[_getLogClass(log)]]">
+                <paper-icon-item class$="[[_getLogClass(log)]]" on-tap="_logLog">
                     <div class="avatar" slot="item-icon"
                         title="[[_getUserDisplayName(log)]]"
                         style="[[_getAvatarBackground(log)]]">
@@ -124,6 +124,11 @@
 
         _getLogClass(log) {
             return log.isError ? "error" : "";
+        }
+
+        _logLog(event) {
+            const log = event.model.get("log");
+            console.log(log);
         }
     }
 
