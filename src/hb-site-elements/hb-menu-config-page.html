@@ -7,13 +7,30 @@
 <link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
-<link rel="import" href="../hb-app/hb-menu.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../hb-styles/hb-no-results.html">
+<link rel="import" href="../hb-app/hb-system-data.html">
 
 <dom-module id="hb-menu-config-page">
   <template>
     <style include="hb-page-layout-shared-styles"></style>
     <style>
+        paper-card {
+            display: block;
+            max-width: 800px;
+            margin: 2em auto;
+        }
+        paper-card hr {
+            margin-top: 0;
+        }
+        paper-card .card-actions {
+            margin-top: 8px;
+        }
+
     </style>
+    <hb-system-data app="{{app}}" app-state="{{appState}}"></hb-system-data>
     <app-header-layout>
         <app-header slot="header" fixed effects="waterfall">
             <app-toolbar>
@@ -25,8 +42,42 @@
         </app-header>
         <main>
         <!-- main content -->
-        Menu page
-
+       <paper-card>
+           <app-toolbar>
+               Home
+           </app-toolbar>
+           <hr class="divider">
+           <div>
+               <paper-item>
+                    <div hidden$="[[!appState.hasHome]]">
+                        [[app.homeDoc.title]]
+                    </div>
+                    <div hidden$="[[appState.hasHome]]">
+                        There is no home page
+                    </div>
+               </paper-item>               
+            </div>
+            <div class="card-actions">
+               <paper-button>Remove</paper-button>
+               <paper-button>Update</paper-button>
+           </div>
+       </paper-card>
+       <paper-card>
+            <app-toolbar>
+                Menu
+            </app-toolbar>
+            <hr class="divider">
+            <hb-no-results
+                hidden$="[[appState.hasMenuItems]]"
+                text="There are no menu items">
+            </hb-no-results>
+            <div hidden$="[[!appState.hasMenuItems]]">
+                
+            </div>
+            <div class="card-actions">
+                <paper-button>Add</paper-button>
+            </div>
+        </paper-card>
         </main>
     </app-header-layout>
   </template>
@@ -41,6 +92,12 @@
         
         static get properties() {
             return {
+                app: {
+                    type: Object
+                },
+                appState: {
+                    type: Object
+                }
             };
         }
     }

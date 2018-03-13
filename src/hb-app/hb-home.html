@@ -51,7 +51,7 @@
                 [[config.applicationTitle]]...
             </div>
         </div>
-        <template is="dom-if" if="[[_hasNoHome(appState.isReady, app)]]">
+        <template is="dom-if" if="[[appState.showNoHome]]">
             <hb-no-home-page></hb-no-home-page>
         </template>
     </template>
@@ -79,14 +79,6 @@
                     observer: "_routeChanged"
                 }
             };
-        }
-
-        _hasNoHome(isReady, app) {
-            if (isReady === false) {
-                return false;
-            }
-            const hasHome = this.app.homeDoc && this.app.homeDoc.docId;
-            return !hasHome;
         }
 
         /** Add/remove the home doc */

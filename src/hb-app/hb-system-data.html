@@ -25,13 +25,30 @@
                     doc: "system/app",
                     live: true,
                     notify: true,
+                    observer: "_appChanged",
                     value: HbSystemData.defaultApp
+                    /* {
+                        homeDoc: {
+                            docId: String,
+                            is: String,
+                            title: String
+                        },
+                        menu: [{
+                            docId: String,
+                            is: String,
+                            title: String,
+                            url: String
+                        }]
+                    }*/
                 },
                 appState: {
                     type: Object,
                     notify: true,
                     value: {
                         isReady: false,
+                        showNoHome: false,
+                        hasHome: false,
+                        hasMenuItems: false,
                         homePageProgress: null, /*{
                             title: "",
                             description: "",
@@ -50,16 +67,8 @@
 
         static get defaultApp() {
             return {
-               homeDoc: {/*
-                    docId: String,
-                    is: String
-               */},
-               menu: [/*{
-                   docId: String,
-                   is: String,
-                   name: String,
-                   url??
-               }*/],
+               homeDoc: {},
+               menu: [],
                permissions: [{
                  key: "sysAdmin",
                  name: "System Administrator",
@@ -93,6 +102,18 @@
 
         _appReadyChanged() {
             this.set("appState.isReady", this.appReady);
+            this._appChanged();
+        }
+
+        _appChanged() {
+            if (this.appReady === false) {
+                return;
+            }
+
+            const hasHome = this.app.homeDoc && this.app.homeDoc.docId;
+            this.set("appState.hasHome", hasHome);
+            this.set("appState.showNoHome", !hasHome);
+            this.set("appState.hasMenuItems", this.app.menu && this.app.menu.length > 0);
         }
 
         async _createHomePage(event) {
@@ -113,9 +134,7 @@
                 });
 
                 if (event.type === "error") {
-                    // hook up to the hb-data systemError method when implemented
-                    // this.systemError(error);
-                    alert(error.message);
+                    this.sytemError(event.error);
                 }
             };
 

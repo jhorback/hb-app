@@ -24,7 +24,8 @@ hb.SystemApp = class extends hb.DomainObj {
         const app = await this.update(app => {
             app.homeDoc = {
                 docId,
-                is: doc.is
+                is: doc.is,
+                title: doc.title
             };
             return app;            
         });
