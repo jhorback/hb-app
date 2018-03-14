@@ -9,6 +9,9 @@
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../hb-styles/hb-no-results.html">
 <link rel="import" href="../hb-app/hb-system-data.html">
@@ -27,8 +30,17 @@
         }
         paper-card .card-actions {
             margin-top: 8px;
+            text-align: right;        
         }
-
+        iron-selector paper-icon-button {
+            visibility: hidden;
+        }
+        iron-selector paper-icon-item:hover paper-icon-button {
+            visibility: visible;
+        }
+        iron-selector .iron-selected paper-icon-button {
+            visibility: visible;
+        }
     </style>
     <hb-system-data app="{{app}}" app-state="{{appState}}"></hb-system-data>
     <app-header-layout>
@@ -47,19 +59,24 @@
                Home
            </app-toolbar>
            <hr class="divider">
-           <div>
-               <paper-item>
-                    <div hidden$="[[!appState.hasHome]]">
-                        [[app.homeDoc.title]]
-                    </div>
-                    <div hidden$="[[appState.hasHome]]">
-                        There is no home page
-                    </div>
-               </paper-item>               
-            </div>
+            <iron-selector hidden$="[[!appState.hasHome]]">
+                <paper-icon-item>
+                    <paper-icon-button
+                        slot="item-icon"
+                        icon="hb:delete"
+                        on-tap="_removeHomePage">
+                    </paper-icon-button>
+                    <paper-item-body>
+                        <div>[[app.homeDoc.title]]</div>
+                    </paper-item-body>
+                </paper-icon-item>
+            </iron-selector>
+            <hb-no-results
+                hidden$="[[appState.hasHome]]"
+                text="There is no home page">
+            </hb-no-results>             
             <div class="card-actions">
-               <paper-button>Remove</paper-button>
-               <paper-button>Update</paper-button>
+               <paper-button on-tap="_updateHomePage">Update</paper-button>
            </div>
        </paper-card>
        <paper-card>
@@ -67,13 +84,20 @@
                 Menu
             </app-toolbar>
             <hr class="divider">
+            <iron-selector hidden$="[[!appState.hasMenuItems]]">
+                <!-- <paper-icon-item>
+                    <paper-icon-button slot="item-icon" icon="hb:delete"></paper-icon-button>
+                    <paper-item-body>
+                        <div>[[app.homeDoc.title]]</div>
+                    </paper-item-body>
+                    <paper-icon-button icon="hb:keyboard-arrow-down"></paper-icon-button>
+                    <paper-icon-button icon="hb:keyboard-arrow-up"></paper-icon-button>
+                </paper-icon-item> -->
+            </iron-selector>
             <hb-no-results
                 hidden$="[[appState.hasMenuItems]]"
                 text="There are no menu items">
             </hb-no-results>
-            <div hidden$="[[!appState.hasMenuItems]]">
-                
-            </div>
             <div class="card-actions">
                 <paper-button>Add</paper-button>
             </div>
@@ -99,6 +123,14 @@
                     type: Object
                 }
             };
+        }
+
+        _removeHomePage(event) {
+            alert("remove home page");
+        }
+
+        _updateHomePage(event) {
+            alert("update home page");
         }
     }
 
