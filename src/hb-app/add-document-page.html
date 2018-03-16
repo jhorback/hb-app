@@ -9,6 +9,7 @@
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../hb-styles/hb-styles.html">
 <link rel="import" href="../hb/hb.DocumentCreator.html">
 <link rel="import" href="hb-menu.html">
@@ -32,17 +33,27 @@
             main > div {
                 margin: 1rem 0rem;
             }
-            paper-button.create {
-                float: right;               
-            }
-            .add-existing-container {
-                margin-top: 3em;
-            }
-            .add-existing-container paper-button {
-                margin: 0 auto;
-            }
             .document-id {
                 @apply --paper-font-caption;
+            }
+            paper-card {
+                display: block;
+                max-width: 800px;
+                margin: 2em auto;
+            }
+            paper-card hr {
+                margin-top: 0;
+            }
+            paper-card .card-actions {
+                margin-top: 8px;
+                text-align: right;        
+            }
+            paper-card .create-action {
+                text-align: right;
+                padding: 16px 8px;
+            }
+            .enter-title-card {
+                padding-top: 2em;
             }
         </style>
         <hb-config config="{{config}}"></hb-config>
@@ -58,7 +69,7 @@
             </app-header>
             <main>
                 
-                <div hidden$="[[selectedDocType]]">
+                <paper-card hidden$="[[selectedDocType]]">                    
                     <template is="dom-repeat" items="[[getDocTypes(config.docTypes)]]" as="docType">                
                         <paper-item on-tap="selectDocType">
                             <paper-item-body two-line>
@@ -67,28 +78,31 @@
                             </paper-item-body>
                         </paper-item>
                     </template>
-                </div>
-
-
-                <div hidden$="[[!selectedDocType]]">
-                    <paper-input
-                        autofocus
-                        label="[[getTitleInputLabel(selectedDocType)]]"
-                        value="{{documentTitle}}"
-                    ></paper-input>
-                    <div class="document-id">
-                        [[documentId]]
+                    <div class="card-actions">
+                        <paper-button on-tap="searchDocs" class="primary">
+                            Add An Existing Document
+                        </paper-button>
                     </div>
-                    <paper-button raised on-tap="createDocument" class="primary create">
-                        Create
-                    </paper-button>
-                </div>
-               
-                <div class="add-existing-container">
-                    <paper-button raised on-tap="addExisting" class="xprimary">
-                        Add Existing Document
-                    </paper-button>
-                </div>
+                </paper-card>
+
+
+                <paper-card hidden$="[[!selectedDocType]]" class="enter-title-card">
+                    <div class="card-content">
+                        <paper-input
+                            autofocus
+                            label="[[getTitleInputLabel(selectedDocType)]]"
+                            value="{{documentTitle}}"
+                        ></paper-input>
+                        <div class="document-id">
+                            [[documentId]]
+                        </div>
+                    </div>
+                    <div class="create-action">
+                        <paper-button raised on-tap="createDocument" class="primary">
+                            Create
+                        </paper-button>
+                    </div>
+                </paper-card>
             </main>
         </app-header-layout>
     </template>
@@ -185,8 +199,9 @@
             this.documentId = hb.DocumentCreator.getDocumentId(this.selectedDocType.route, title);
         }
 
-        addExisting(event) {
+        searchDocs(event) {
             setTimeout(() => alert("Add existing"), 300);
+            // event.detail.doc
         }
 
         createDocument(event) {

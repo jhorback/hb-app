@@ -126,7 +126,7 @@
             const addDoc = document.createElement("add-document-page");
             addDoc.title = "Add the home page";
 
-            addDoc.addEventListener("closed", () =>  close());
+            addDoc.addEventListener("closed", () =>  closeAddDoc());
             addDoc.addEventListener("add-new", event => {
                 closeAddDoc();
                 const {title, is} = event.detail;
@@ -135,8 +135,6 @@
                 }));
             });
             
-            
-
             addDoc.addEventListener("add-existing", event => {
                 closeAddDoc();
                 alert("TODO: Add exising document from no home page...");
