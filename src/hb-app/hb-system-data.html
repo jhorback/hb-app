@@ -91,7 +91,8 @@
 
         static get events() {
             return {
-                "create-home-page": "_createHomePage"
+                "create-home-page": "_createHomePage",
+                "remove-home-page": "_removeHomePage"
             };
         }
 
@@ -118,17 +119,33 @@
 
         async _createHomePage(event) {
             const {is, title} = event.detail;
+            const progressTracker = this._createHomePageProgressTracker("Creating the home page");
+            const {app, docId, doc} = await this.systemApp.createHomePage({is, title, progressTracker});
+            this.set("appState.homePageProgress", null);
+            progressTracker.save({dbPath: `system/app`});
+            this._appChanged();
+        }       
 
+        async _removeHomePage(event) {
+            const progressTracker = this._createHomePageProgressTracker("Removing the home page");
+            const app = await this.systemApp.removeHomePage(progressTracker);
+            this.set("appState.homePageProgress", null);
+            progressTracker.save({dbPath: `system/app`});
+            this._appChanged();
+        }
+        
+
+         _createHomePageProgressTracker(title) {
             this.set("appState.homePageProgress", {
-                title: "Creating the home page",
+                title,
                 percentage: 0
             });
 
-            const progressTracker = new ProgressTracker("Create home page");
+            const progressTracker = new ProgressTracker(title);
             progressTracker.onUpdate = (update) => {
                 const { percentage, description, event } = update;
                 this.set("appState.homePageProgress", {
-                    title: "Creating the home page",
+                    title,
                     percentage,
                     description
                 });
@@ -138,10 +155,7 @@
                 }
             };
 
-            const {app, docId, doc} = await this.systemApp.createHomePage({is, title, progressTracker});
-            this.set("appState.homePageProgress", null);
-            progressTracker.save({dbPath: `doc/${docId}`});
-            return app;
+            return progressTracker;
         }
     }
 

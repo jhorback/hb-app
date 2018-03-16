@@ -41,8 +41,18 @@
         iron-selector .iron-selected paper-icon-button {
             visibility: visible;
         }
+
+        .home-page-progress {
+            margin: 3em 0;
+        }
+        .home-page-progress .container {
+            display: table;
+            margin: 0 auto;
+            @apply --paper-font-body2;
+        }
     </style>
     <hb-system-data app="{{app}}" app-state="{{appState}}"></hb-system-data>
+    <hb-system-feedback system-feedback="[[systemFeedback]]"></hb-system-feedback>    
     <app-header-layout>
         <app-header slot="header" fixed effects="waterfall">
             <app-toolbar>
@@ -54,6 +64,17 @@
         </app-header>
         <main>
         <!-- main content -->
+
+        <div hidden$="[[!appState.homePageProgress]]" class="home-page-progress">
+            <div class="container">
+                <h3>[[appState.homePageProgress.title]]</h3>
+                <paper-progress value="[[appState.homePageProgress.percentage]]"></paper-progress>
+                <div>
+                    [[appState.homePageProgress.description]]
+                </div>
+            </div>
+        </div>
+
        <paper-card>
            <app-toolbar>
                Home
@@ -126,7 +147,7 @@
         }
 
         _removeHomePage(event) {
-            alert("remove home page");
+            this.shadowRoot.dispatchEvent(new CustomEvent("remove-home-page"));
         }
 
         _updateHomePage(event) {

@@ -10,28 +10,64 @@ hb.SystemApp = class extends hb.DomainObj {
         super({db, dbPath: "system/app"})
     }
 
+    static get events() {
+        return {		
+            "title-changed": {
+                "homeDoc": "_homeDocTitleChanged"
+            }
+	    };
+	}
+
+
     /**
      * Creates the document and adds it as the System.App.homeDoc.
-     * @Returns {app, docId, doc}
+     * @returns {app, docId, doc}
      */
     async createHomePage({is, title, progressTracker}) {
         const docCreator = new hb.DocumentCreator();
 
         // create the document
         const { docId, doc } = await docCreator.createDocument(is, title, progressTracker);
-        const progressLayer = progressTracker.addLayer("Updating application", 2);
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
         progressLayer.next("Updating");
         const app = await this.update(app => {
+            progressTracker.next("Saving");
             app.homeDoc = {
                 docId,
                 is: doc.is,
                 title: doc.title
             };
+            
+            this.addEventListener("title-changed", `doc/${docId}`, doc.is, "homeDoc");
+
             return app;            
         });
-        progressLayer.done("Home page created");        
-        // save progressTracker.save();
+        progressLayer.done("Home page created");
         return {app, docId, doc};
+    }
+
+    /**
+     * Removes the home page
+     * @returns app
+     */
+    async removeHomePage(progressTracker) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+        const app = await this.update(app => {
+            if (app.homeDoc && app.homeDoc.docId) {
+                progressLayer.next("Saving");
+                this.removeEventListener("title-changed", `doc/${app.homeDoc.docId}`, "homeDoc");
+                app.homeDoc = {};
+                return app;
+            }
+            progressLayer.next("No need to save");
+        });
+        progressLayer.done("Home page removed");
+        return app;
+    }
+
+    _homeDocTitleChanged(doc, refDoc) {
+        throw new Error("Not implemented");
     }
 }
 </script>

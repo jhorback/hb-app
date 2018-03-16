@@ -3,6 +3,27 @@
 <script>
 /**
  * Base class for all domain objects.
+ *
+ * @description
+ * Handling events
+ * ```
+ * 	static get events() {
+ *	    return {
+ *		  "some-event":  "_someEvent",
+ *		  // scoped
+ *		  "thumbnail-changed": {
+ *			"": "_someThumbnailChanged",
+ *			"artwork": "_artworkThumbnailChanged"
+ *		  }
+ *	    };
+ *	}
+ *	
+ *	_someEvent(doc, refDoc) {
+ *		// update the doc and return it
+ *		// can call this.dispatchEvent("event-name");
+ *		// return the new doc or falsy if nothing was done
+ *	}
+ * ```
  */
 hb.DomainObj  = class {
     static get is() { 
@@ -19,10 +40,6 @@ hb.DomainObj  = class {
         
         //[event-name]
         this._eventsToHandle = [];
-    }
-
-    getDefaultDocument() {
-        
     }
     
     /**
@@ -62,6 +79,18 @@ hb.DomainObj  = class {
         } catch(error) {
             progressLayer.error(error);
         }
+    }
+
+    dispatchEvent(event) {
+        this._eventsToHandle.push(event);
+    }
+
+    addEventListener(event, dbPath, is, scope) {
+        this._listenersToHandle.push({add: true, event, dbPath, is, scope});
+    }
+
+    removeEventListener(event, dbPath, scope) {
+        this._listenersToHandle.push({remove: true, event, dbPath, scope});
     }
 
     /**
@@ -292,18 +321,6 @@ hb.DomainObj  = class {
         progressLayer.next("Dispatching events");
         await this._dispatchEvents(doc, progressTracker);
         progressLayer.done("Finished handling events");
-    }
-
-    dispatchEvent(event) {
-        this._eventsToHandle.push(event);
-    }
-
-    addEventListener(event, dbPath, is, scope) {
-        this._listenersToHandle.push({add: true, event, dbPath, is, scope});
-    }
-
-    removeEventListener(event, dbPath, scope) {
-        this._listenersToHandle.push({remove: true, event, dbPath, scope});
     }
 }
 </script>
