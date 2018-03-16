@@ -1,0 +1,39 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../hb/hb.SystemApp.html">
+<link rel="import" href="SystemFeedback.html">
+<link rel="import" href="EventMap.html">
+
+<dom-module id="hb-system-data">
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbAddDocumentData extends EventMap(
+        SystemFeedback(
+        Polymer.FirestoreMixin(Polymer.Element)
+    )) {
+      
+      static get is() { return 'hb-add-document-data'; }
+
+      static get properties() {
+            return {
+               
+            };
+        }
+
+        static get eventsListenAt() {
+            return "parent";
+        }
+
+        static get events() {
+            return {
+            };
+        }
+    }
+
+    window.customElements.define(HbAddDocumentData.is, HbAddDocumentData);
+  </script>
+</dom-module>

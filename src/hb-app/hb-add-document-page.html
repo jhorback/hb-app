@@ -16,7 +16,7 @@
 <link rel="import" href="hb-config.html">
 <link rel="import" href="hb-current-user.html">
 
-<dom-module id="add-document-page">
+<dom-module id="hb-add-document-page">
     <template>
         <style include="hb-page-layout-shared-styles"></style>
         <style>
@@ -111,8 +111,8 @@
      * @customElement
      * @polymer
      */
-    class AddDocumentPage extends Polymer.Element {
-        static get is() { return 'add-document-page'; }
+    class HbAddDocumentPage extends Polymer.Element {
+        static get is() { return 'hb-add-document-page'; }
     
         static get properties() {
             return {
@@ -218,7 +218,7 @@
         }    
     }
     
-    window.customElements.define(AddDocumentPage.is, AddDocumentPage);
+    window.customElements.define(HbAddDocumentPage.is, HbAddDocumentPage);
     </script>
             
 </dom-module>

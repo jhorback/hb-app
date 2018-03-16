@@ -11,7 +11,7 @@
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../hb-styles/hb-styles.html">
 <link rel="import" href="../hb-system-elements/hb-system-feedback.html">
-<link rel="import" href="add-document-page.html">
+<link rel="import" href="hb-add-document-page.html">
 <link rel="import" href="hb-menu.html">
 <link rel="import" href="hb-config.html">
 <link rel="import" href="hb-current-user.html">
@@ -123,7 +123,7 @@
                 document.body.appendChild(this);
             };
             
-            const addDoc = document.createElement("add-document-page");
+            const addDoc = document.createElement("hb-add-document-page");
             addDoc.title = "Add the home page";
 
             addDoc.addEventListener("closed", () =>  closeAddDoc());
