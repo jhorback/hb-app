@@ -1,11 +1,16 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
 <link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
-<link rel="import" href="../hb/hb.SystemApp.html">
+<link rel="import" href="../hb/hb.DocumentCreator.html">
+<link rel="import" href="hb-config.html">
 <link rel="import" href="SystemFeedback.html">
 <link rel="import" href="EventMap.html">
 
-<dom-module id="hb-system-data">
+
+<dom-module id="hb-add-document-data">
+    <template>
+        <hb-config config="{{config}}"></hb-config>
+    </template>
   <script>
     /**
      * @customElement
@@ -20,7 +25,22 @@
 
       static get properties() {
             return {
-               
+               config: {
+                   type: Object
+               },
+               docData: {
+                    type: Object,
+                    notify: true,
+                    value: {
+                        pageTitle: "Add document",
+                        titleInputLabel: "",
+                        accept: "",
+                        selectedDocType: null,
+                        docName: "",
+                        docId: "",
+                        docTypes: []
+                    }
+               }
             };
         }
 
@@ -30,8 +50,59 @@
 
         static get events() {
             return {
+                "request-doc-types": "_requestDocTypes",
+                "select-document": "_selectDocument"
             };
         }
+
+        _requestDocTypes(event) {
+            const {accept, pageTitle} = event.detail;
+            const invalidTypes = this.config.invalidDocTypes;
+            let docTypes = this.config.docTypes;
+            
+            // filter out invalid types
+            if (invalidTypes && invalidTypes.length !== 0) {
+                docTypes = docTypes.reduce((docTypes, type) => {
+                    if (!invalidTypes.includes(type.is)) {
+                        docTypes.push(type);
+                    }
+                    return docTypes;
+                }, []);
+            }
+
+            // keep only those in this.accept
+            if (accept && accept.length !== 0) {
+                docTypes = docTypes.reduce((docTypes, type) => {
+                    if (accept.includes(type.is)) {
+                        docTypes.push(type);
+                    }
+                    return docTypes;
+                }, []);
+            }
+
+            if (docTypes.length === 1) {
+                this.selectedDocType = docTypes[0];
+            }
+
+            this.set("docData.docTypes", docTypes);
+            this.set("docData.pageTitle", pageTitle);
+            this.set("docData.selectedDocType", null);
+        }
+
+        _selectDocument(event) {
+            const {is} = event.detail;
+            const selectedDocType = this.config.docTypes.find(d => d.is === is);
+            this.set("docData.selectedDocType", selectedDocType);
+            this.set("docData.pageTitle", `${this.docData.pageTitle}: ${selectedDocType.name}`);
+            this.set("docData.titleInputLabel", `Enter ${selectedDocType.name} title`);
+        }
+
+        _documentTitleChanged(event) {
+            const {documentTitle} = event.detail;
+            const docId =  hb.DocumentCreator.getDocumentId(this.docData.selectedDocType.route, documentTitle);
+            this.set("docData.docId", docId); 
+        }
+
     }
 
     window.customElements.define(HbAddDocumentData.is, HbAddDocumentData);

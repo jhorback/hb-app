@@ -13,8 +13,7 @@
 <link rel="import" href="../hb-styles/hb-styles.html">
 <link rel="import" href="../hb/hb.DocumentCreator.html">
 <link rel="import" href="hb-menu.html">
-<link rel="import" href="hb-config.html">
-<link rel="import" href="hb-current-user.html">
+<link rel="import" href="hb-add-document-data.html">
 
 <dom-module id="hb-add-document-page">
     <template>
@@ -56,22 +55,19 @@
                 padding-top: 2em;
             }
         </style>
-        <hb-config config="{{config}}"></hb-config>
-        <!-- <hb-current-user user="{{user}}"></hb-current-user> -->
+        <hb-add-document-data doc-data="{{docData}}"></hb-add-document-data>
         <app-header-layout>
             <app-header slot="header" fixed effects="waterfall" class="secondary">                
                 <app-toolbar>
                     <paper-icon-button icon="hb:close" on-tap="close"></paper-icon-button>
-                    <div main-title>
-                        [[getTitle(title, selectedDocType)]]
-                    </div>
+                    <div main-title>[[docData.pageTitle]]</div>
                 </app-toolbar>
             </app-header>
             <main>
                 
-                <paper-card hidden$="[[selectedDocType]]">                    
-                    <template is="dom-repeat" items="[[getDocTypes(config.docTypes)]]" as="docType">                
-                        <paper-item on-tap="selectDocType">
+                <paper-card hidden$="[[docData.selectedDocType]]">                    
+                    <template is="dom-repeat" items="[[docData.docTypes]]" as="docType">                
+                        <paper-item on-tap="_selectDocType">
                             <paper-item-body two-line>
                                 <div class="paper-font-body2">[[docType.name]]</div>
                                 <div secondary>[[docType.description]]</div>
@@ -79,26 +75,24 @@
                         </paper-item>
                     </template>
                     <div class="card-actions">
-                        <paper-button on-tap="searchDocs" class="primary">
+                        <paper-button on-tap="_searchDocs" class="primary">
                             Add An Existing Document
                         </paper-button>
                     </div>
                 </paper-card>
 
 
-                <paper-card hidden$="[[!selectedDocType]]" class="enter-title-card">
+                <paper-card hidden$="[[!docData.selectedDocType]]" class="enter-title-card">
                     <div class="card-content">
                         <paper-input
                             autofocus
-                            label="[[getTitleInputLabel(selectedDocType)]]"
+                            label="[[docData.titleInputLabel]]"
                             value="{{documentTitle}}"
                         ></paper-input>
-                        <div class="document-id">
-                            [[documentId]]
-                        </div>
+                        <div class="document-id">[[docData.docId]]</div>
                     </div>
                     <div class="create-action">
-                        <paper-button raised on-tap="createDocument" class="primary">
+                        <paper-button raised on-tap="_createDocument" class="primary">
                             Create
                         </paper-button>
                     </div>
@@ -116,11 +110,11 @@
     
         static get properties() {
             return {
-                config: {
+                docData: {
                     type: Object
                 },
                 /** An optional initial value for the page title */
-                title: {
+                pageTitle: {
                     type: String,
                     value: "Add Document"
                 },
@@ -128,19 +122,6 @@
                 documentTitle: {
                     type: String,
                     observer: "_documentTitleChanged"
-                },
-                /** Suggested document id when creating the document */
-                documentId: {
-                    type: String                    
-                },
-                
-                /**
-                 * Set when a doc type is selected or there is only one
-                 * Shows the name dialog.
-                 */
-                selectedDocType: {
-                    type: String,
-                    value: null
                 },
                 /**
                  * An array of valid doc types to add. If not set all will be shown.
@@ -153,62 +134,40 @@
             };
         }
 
-        getDocTypes(docTypes) {
-            const invalidTypes = this.config.invalidDocTypes;
-            
-            // filter out invalid types
-            if (invalidTypes && invalidTypes.length !== 0) {
-                docTypes = docTypes.reduce((docTypes, type) => {
-                    if (!invalidTypes.includes(type.is)) {
-                        docTypes.push(type);
-                    }
-                    return docTypes;
-                }, []);
-            }
+        connectedCallback() {
+            super.connectedCallback();
 
-            // keep only those in this.accept
-            if (this.accept && this.accept.length !== 0) {
-                docTypes = docTypes.reduce((docTypes, type) => {
-                    if (this.accept.includes(type.is)) {
-                        docTypes.push(type);
-                    }
-                    return docTypes;
-                }, []);
-            }
+            const {accept, pageTitle} = this;
 
-            if (docTypes.length === 1) {
-                this.selectedDocType = docTypes[0];
-            }
-
-            return docTypes;
+            this.shadowRoot.dispatchEvent(new CustomEvent("request-doc-types", {
+                detail: { accept, pageTitle }
+            }));
         }
 
-        getTitle(title, selectedDocType) {
-            return selectedDocType ? `${title}: ${selectedDocType.name}` : title;
+        _selectDocType(event) {
+            const doc = event.model.get("docType");
+            const {is} = doc;
+            this.shadowRoot.dispatchEvent(new CustomEvent("select-document", {
+                detail: {is}
+            }));
         }
 
-        getTitleInputLabel(selectedDocType) {
-            return selectedDocType ? `Enter ${selectedDocType.name} title` : "Enter title";
+        _documentTitleChanged(documentTitle) {
+            this.shadowRoot.dispatchEvent(new CustomEvent("document-title-changed", {
+                detail: {documentTitle}
+            }));
         }
 
-        selectDocType(event) {
-            this.selectedDocType = event.model.get("docType");
-        }
-
-        _documentTitleChanged(title) {
-            this.documentId = hb.DocumentCreator.getDocumentId(this.selectedDocType.route, title);
-        }
-
-        searchDocs(event) {
+        _searchDocs(event) {
             setTimeout(() => alert("Add existing"), 300);
             // event.detail.doc
         }
 
-        createDocument(event) {
+        _createDocument(event) {
             this.dispatchEvent(new CustomEvent("add-new", {
                 detail: {
                     title: this.documentTitle,
-                    is: this.selectedDocType.is   
+                    is: this.docData.selectedDocType.is   
                 }
             }));
         }
