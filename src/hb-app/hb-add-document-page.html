@@ -11,6 +11,7 @@
 <link rel="import" href="../../bower_components/paper-input/paper-input.html">
 <link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../hb-styles/hb-styles.html">
+<link rel="import" href="../hb-styles/hb-no-results.html">
 <link rel="import" href="../hb/hb.DocumentCreator.html">
 <link rel="import" href="hb-menu.html">
 <link rel="import" href="hb-add-document-data.html">
@@ -65,7 +66,7 @@
             </app-header>
             <main>
                 
-                <paper-card hidden$="[[docData.selectedDocType]]">                    
+                <paper-card hidden$="[[!docData.showSelector]]">                    
                     <template is="dom-repeat" items="[[docData.docTypes]]" as="docType">                
                         <paper-item on-tap="_selectDocType">
                             <paper-item-body two-line>
@@ -82,7 +83,7 @@
                 </paper-card>
 
 
-                <paper-card hidden$="[[!docData.selectedDocType]]" class="enter-title-card">
+                <paper-card hidden$="[[!docData.showTitleEntry]]" class="enter-title-card">
                     <div class="card-content">
                         <paper-input
                             autofocus
@@ -94,6 +95,28 @@
                     <div class="create-action">
                         <paper-button raised on-tap="_createDocument" class="primary">
                             Create
+                        </paper-button>
+                    </div>
+                </paper-card>
+
+
+                <paper-card hidden$="[[!docData.showSearch]]" class="enter-title-card">
+                    <app-toolbar>
+                        Search
+                    </app-toolbar>
+                    <div class="card-content">
+                        <paper-input
+                            autofocus
+                            label="Search"
+                            value="{{searchText}}"
+                        ></paper-input>
+                    </div>
+                    <div>
+                        <hb-no-results hidden$="[[!docData.noSearchResults]]"></hb-no-results>
+                    </div>
+                    <div class="create-action">
+                        <paper-button raised on-tap="_createDocument" class="primary">
+                            Add
                         </paper-button>
                     </div>
                 </paper-card>
@@ -122,6 +145,10 @@
                 documentTitle: {
                     type: String,
                     observer: "_documentTitleChanged"
+                },
+                searchText: {
+                    type: String,
+                    observer: "_searchTextChanged"
                 },
                 /**
                  * An array of valid doc types to add. If not set all will be shown.
@@ -158,9 +185,14 @@
             }));
         }
 
+        _searchTextChanged(searchText) {
+            this.shadowRoot.dispatchEvent(new CustomEvent("search-text-changed", {
+                detail: {searchText}
+            }));
+        }
+
         _searchDocs(event) {
-            setTimeout(() => alert("Add existing"), 300);
-            // event.detail.doc
+            this.shadowRoot.dispatchEvent(new CustomEvent("show-search"));
         }
 
         _createDocument(event) {

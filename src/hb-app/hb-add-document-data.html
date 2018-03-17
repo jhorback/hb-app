@@ -33,12 +33,17 @@
                     notify: true,
                     value: {
                         pageTitle: "Add document",
+                        showSelector: true,
+                        showTitleSelector: false,
+                        showSearch: false,
                         titleInputLabel: "",
                         accept: "",
                         selectedDocType: null,
                         docName: "",
                         docId: "",
-                        docTypes: []
+                        docTypes: [],
+                        searchResults: [],
+                        noSearchResults: false
                     }
                }
             };
@@ -51,7 +56,9 @@
         static get events() {
             return {
                 "request-doc-types": "_requestDocTypes",
-                "select-document": "_selectDocument"
+                "select-document": "_selectDocument",
+                "show-search": "_showSearch",
+                "search-text-changed": "_searchTextChanged"
             };
         }
 
@@ -87,6 +94,8 @@
             this.set("docData.docTypes", docTypes);
             this.set("docData.pageTitle", pageTitle);
             this.set("docData.selectedDocType", null);
+            this._clearShow();            
+            this.set("docData.showSelector", true);            
         }
 
         _selectDocument(event) {
@@ -95,6 +104,8 @@
             this.set("docData.selectedDocType", selectedDocType);
             this.set("docData.pageTitle", `${this.docData.pageTitle}: ${selectedDocType.name}`);
             this.set("docData.titleInputLabel", `Enter ${selectedDocType.name} title`);
+            this._clearShow();            
+            this.set("docData.showTitleEntry", true);
         }
 
         _documentTitleChanged(event) {
@@ -103,6 +114,22 @@
             this.set("docData.docId", docId); 
         }
 
+        _showSearch(event) {
+            this._clearShow();
+            this.set("docData.showSearch", true);            
+        }
+
+        _clearShow() {
+            this.set("docData.showSelector", false);
+            this.set("docData.showTitleEntry", false);
+            this.set("docData.showSearch", false);  
+        }
+
+        _searchTextChanged(event) {
+            const {searchText} = event.detail;
+            // have hb.debounce(fn, wait)
+            console.log("search", searchText);
+        }
     }
 
     window.customElements.define(HbAddDocumentData.is, HbAddDocumentData);
