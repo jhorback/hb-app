@@ -112,27 +112,31 @@
                 return;
             }
 
-            const hasHome = this.app.homeDoc && this.app.homeDoc.docId;
-            this.set("appState.hasHome", hasHome);
-            this.set("appState.showNoHome", !hasHome);
-            this.set("appState.hasMenuItems", this.app.menu && this.app.menu.length > 0);
+            const appState = Object.assign({}, this.appState);
+            const hasHome = !!(this.app.homeDoc && this.app.homeDoc.docId);
+            appState.hasHome = hasHome;
+            appState.showNoHome = !hasHome;
+            appState.hasMenuItems = !!(this.app.menu && this.app.menu.length > 0);
+            this.set("appState", appState);
         }
 
         async _createHomePage(event) {
             const {is, title} = event.detail;
             const progressTracker = this._createHomePageProgressTracker("Creating the home page");
             const {app, docId, doc} = await this.systemApp.createHomePage({is, title, progressTracker});
+            this.app = app;
             this.set("appState.homePageProgress", null);
             progressTracker.save({dbPath: `system/app`});
-            this._appChanged();
         }       
 
         async _removeHomePage(event) {
             const progressTracker = this._createHomePageProgressTracker("Removing the home page");
             const app = await this.systemApp.removeHomePage(progressTracker);
+            this.app = app;
             this.set("appState.homePageProgress", null);
             progressTracker.save({dbPath: `system/app`});
-            this._appChanged();
+            this.set("appState.hasHome", false);
+            this.set("appState.showNoHome", true);
         }
         
 
@@ -164,9 +168,9 @@
             
             const progressTracker = this._createHomePageProgressTracker("Setting the home page");
             const app = await this.systemApp.setHomePage({doc, progressTracker});
+            this.app = app;
             this.set("appState.homePageProgress", null);
             progressTracker.save({dbPath: `system/app`});
-            this._appChanged();
         }
     }
 

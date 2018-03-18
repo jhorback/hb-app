@@ -15,6 +15,8 @@
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../hb-styles/hb-no-results.html">
 <link rel="import" href="../hb-app/hb-system-data.html">
+<link rel="import" href="../hb-app/hb-add-document-page.html">
+<link rel="import" href="../hb-system-elements/hb-system-feedback.html">
 
 <dom-module id="hb-menu-config-page">
   <template>
@@ -80,18 +82,20 @@
                Home
            </app-toolbar>
            <hr class="divider">
-            <iron-selector hidden$="[[!appState.hasHome]]">
-                <paper-icon-item>
-                    <paper-icon-button
-                        slot="item-icon"
-                        icon="hb:delete"
-                        on-tap="_removeHomePage">
-                    </paper-icon-button>
-                    <paper-item-body>
-                        <div>[[app.homeDoc.title]]</div>
-                    </paper-item-body>
-                </paper-icon-item>
-            </iron-selector>
+           <div hidden$="[[!appState.hasHome]]">
+                <iron-selector>
+                    <paper-icon-item>
+                        <paper-icon-button
+                            slot="item-icon"
+                            icon="hb:delete"
+                            on-tap="_removeHomePage">
+                        </paper-icon-button>
+                        <paper-item-body>
+                            <div>[[app.homeDoc.title]]</div>
+                        </paper-item-body>
+                    </paper-icon-item>
+                </iron-selector>
+            </div>
             <hb-no-results
                 hidden$="[[appState.hasHome]]"
                 text="There is no home page">
@@ -151,7 +155,33 @@
         }
 
         _updateHomePage(event) {
-            alert("update home page");
+            const closeAddDoc = () => {
+                addDoc.remove();
+                document.body.appendChild(this);
+            };
+            
+            const addDoc = document.createElement("hb-add-document-page");
+            addDoc.pageTitle = "Add the home page";
+
+            addDoc.addEventListener("closed", () =>  closeAddDoc());
+            addDoc.addEventListener("add-new", event => {
+                closeAddDoc();
+                const {title, is} = event.detail;
+                this.shadowRoot.dispatchEvent(new CustomEvent("create-home-page", {
+                    detail: {title, is}
+                }));
+            });
+            
+            addDoc.addEventListener("add-existing", event => {
+                closeAddDoc();
+                const {doc} = event.detail;
+                this.shadowRoot.dispatchEvent(new CustomEvent("set-home-page", {
+                    detail: {doc}
+                }));
+            });
+
+            this.remove();
+            document.body.appendChild(addDoc);
         }
     }
 
