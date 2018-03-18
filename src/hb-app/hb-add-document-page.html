@@ -53,7 +53,7 @@
                 padding: 16px 8px;
             }
             .enter-title-card {
-                padding-top: 2em;
+                padding-top: 1em;
             }
         </style>
         <hb-add-document-data doc-data="{{docData}}"></hb-add-document-data>
@@ -101,9 +101,9 @@
 
 
                 <paper-card hidden$="[[!docData.showSearch]]" class="enter-title-card">
-                    <app-toolbar>
+                    <!-- <app-toolbar>
                         Search
-                    </app-toolbar>
+                    </app-toolbar> -->
                     <div class="card-content">
                         <paper-input
                             autofocus
@@ -111,14 +111,21 @@
                             value="{{searchText}}"
                         ></paper-input>
                     </div>
-                    <div>
+                    <div class="card-content">
                         <hb-no-results hidden$="[[!docData.noSearchResults]]"></hb-no-results>
+                        <template is="dom-repeat" items="[[docData.searchResults]]" as="doc">
+                            <paper-item on-tap="_selectSearchResult">
+                                <paper-item-body>
+                                    <div class="paper-font-body2">[[doc.title]]</div>
+                                </paper-item-body>
+                            </paper-item>
+                        </template>
                     </div>
-                    <div class="create-action">
+                    <!-- <div class="create-action">
                         <paper-button raised on-tap="_createDocument" class="primary">
                             Add
                         </paper-button>
-                    </div>
+                    </div> -->
                 </paper-card>
             </main>
         </app-header-layout>
@@ -172,10 +179,17 @@
         }
 
         _selectDocType(event) {
-            const doc = event.model.get("docType");
-            const {is} = doc;
-            this.shadowRoot.dispatchEvent(new CustomEvent("select-document", {
+            const docType = event.model.get("docType");
+            const {is} = docType;
+            this.shadowRoot.dispatchEvent(new CustomEvent("select-doc-type", {
                 detail: {is}
+            }));
+        }
+
+        _selectSearchResult(event) {
+            const doc = event.model.get("doc");
+            this.dispatchEvent(new CustomEvent("add-existing", {
+                detail: {doc}
             }));
         }
 

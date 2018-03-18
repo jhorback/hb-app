@@ -137,6 +137,8 @@
             
             addDoc.addEventListener("add-existing", event => {
                 closeAddDoc();
+                const {doc} = event.detail;
+                console.log(doc);
                 alert("TODO: Add exising document from no home page...");
             });
 

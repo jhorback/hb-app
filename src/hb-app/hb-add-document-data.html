@@ -31,21 +31,25 @@
                docData: {
                     type: Object,
                     notify: true,
-                    value: {
-                        pageTitle: "Add document",
-                        showSelector: true,
-                        showTitleSelector: false,
-                        showSearch: false,
-                        titleInputLabel: "",
-                        accept: "",
-                        selectedDocType: null,
-                        docName: "",
-                        docId: "",
-                        docTypes: [],
-                        searchResults: [],
-                        noSearchResults: false
-                    }
+                    value: HbAddDocumentData.defaultDocData
                }
+            };
+        }
+
+        static get defaultDocData() {
+            return {
+                pageTitle: "Add document",
+                showSelector: true,
+                showTitleSelector: false,
+                showSearch: false,
+                titleInputLabel: "",
+                accept: "",
+                selectedDocType: null,
+                docName: "",
+                docId: "",
+                docTypes: [],
+                searchResults: [],
+                noSearchResults: false
             };
         }
 
@@ -56,16 +60,24 @@
         static get events() {
             return {
                 "request-doc-types": "_requestDocTypes",
-                "select-document": "_selectDocument",
+                "select-doc-type": "_selectDocType",
                 "show-search": "_showSearch",
                 "search-text-changed": "_searchTextChanged"
             };
+        }
+
+        constructor() {
+            super();
+            this._searchTextChanged = hb.debounce(this._searchTextChanged, 300);
         }
 
         _requestDocTypes(event) {
             const {accept, pageTitle} = event.detail;
             const invalidTypes = this.config.invalidDocTypes;
             let docTypes = this.config.docTypes;
+
+            this.docData = Object.assign({}, HbAddDocumentData.defaultDocData); 
+            
             
             // filter out invalid types
             if (invalidTypes && invalidTypes.length !== 0) {
@@ -88,17 +100,14 @@
             }
 
             if (docTypes.length === 1) {
-                this.selectedDocType = docTypes[0];
+                this.set("docData.selectedDocType", docTypes[0]);
             }
 
-            this.set("docData.docTypes", docTypes);
+            this.set("docData.docTypes", docTypes); 
             this.set("docData.pageTitle", pageTitle);
-            this.set("docData.selectedDocType", null);
-            this._clearShow();            
-            this.set("docData.showSelector", true);            
         }
 
-        _selectDocument(event) {
+        _selectDocType(event) {
             const {is} = event.detail;
             const selectedDocType = this.config.docTypes.find(d => d.is === is);
             this.set("docData.selectedDocType", selectedDocType);
@@ -125,10 +134,15 @@
             this.set("docData.showSearch", false);  
         }
 
-        _searchTextChanged(event) {
-            const {searchText} = event.detail;
-            // have hb.debounce(fn, wait)
-            console.log("search", searchText);
+        async _searchTextChanged(event) {
+            const searchText = event.detail.searchText.toUpperCase();
+            const docRef = hb.db.collection("doc");
+            const snapshot = await docRef.where("title_UPPERCASE", ">", searchText)
+                .where("title_UPPERCASE", "<", `${searchText}z`)
+                .get();
+            const docs = snapshot.docs.map(d => d.data());
+            this.set("docData.searchResults", docs);
+            this.set("docData.noSearchResults", docs.length === 0);
         }
     }
 

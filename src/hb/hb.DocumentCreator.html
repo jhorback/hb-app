@@ -40,7 +40,8 @@ hb.DocumentCreator = class {
             progressLayer.next("Creating document");
             const {uid, photoURL, displayName} = this.currentAuthor;
             doc.docId = docId;
-            doc.title = title;        
+            doc.title = title;
+            doc.title_UPPERCASE = title.toUpperCase(); 
             doc.author = {uid, photoURL, displayName};
             await this.db.doc(`doc/${docId}`).set(doc);
             progressLayer.done("Document created");
