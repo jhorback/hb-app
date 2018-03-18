@@ -93,7 +93,9 @@
             return {
                 "create-home-page": "_createHomePage",
                 "remove-home-page": "_removeHomePage",
-                "set-home-page": "_setHomePage"
+                "set-home-page": "_setHomePage",
+                "create-menu-page": "_createMenuPage",
+                "add-menu-page": "_addMenuPage"
             };
         }
 
@@ -108,7 +110,7 @@
         }
 
         _appChanged() {
-            if (this.appReady === false) {
+            if (!this.appReady) {
                 return;
             }
 
@@ -171,6 +173,31 @@
             this.app = app;
             this.set("appState.homePageProgress", null);
             progressTracker.save({dbPath: `system/app`});
+        }
+
+        _createMenuPage(event) {
+
+        }
+
+        async _addMenuPage(event) {
+            const {doc} = event.detail;
+            const activityId = this.startSystemActivity("Adding a menu item");
+
+            try {
+                const progressTracker = new ProgressTracker("Adding a menu item");
+                progressTracker.onUpdate = update => {
+                    const {event} = update;
+                    if (event.type === "error") {
+                        this.systemError(event.error);
+                    }
+                };
+                const app = await this.systemApp.addMenuItem({doc, progressTracker});
+                this.app = app;
+                progressTracker.save({dbPath: `system/app`});
+            } catch(error) {
+                this.systemError(error);
+            }            
+            this.endSystemActivity(activityId);
         }
     }
 

@@ -1,9 +1,24 @@
 <link rel="import" href="hb.DomainObj.html">
+<link rel="import" href="hb.config.html">
 <script>
 /**
  * Base class for doc documents
  */
-hb.Doc = class extends hb.DomainObj {     
+hb.Doc = class extends hb.DomainObj {
+    static get is() {
+        throw new Error("Not implemented");
+    }
+
+    static getUrl(docId) {
+        const route = this.docType.route;
+        const tail = docId.substring(route.length + 1, docId.length);
+        return `${route}/${tail}`;
+    }
+
+    static get docType() {
+        return hb.config.docTypes.find(dt => dt.is === this.is);
+    }
+
     constructor({db, docId}) {
         super({db, dbPath: `doc/${docId}`})
     }

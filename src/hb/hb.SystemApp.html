@@ -1,6 +1,7 @@
 <link rel="import" href="hb.html">
 <link rel="import" href="hb.DomainObj.html">
 <link rel="import" href="hb.DocumentCreator.html">
+<link rel="import" href="hb.Config.html">
 <script>
 /**
  * Base class for doc documents
@@ -98,6 +99,34 @@ hb.SystemApp = class extends hb.DomainObj {
                 progressLayer.next("No need to save");
             }, progressTracker);
             progressLayer.done("Home page removed");
+            return app;
+
+        } catch (error) {
+            progressLayer.error(error);
+        }
+    }
+
+    async addMenuItem({doc, progressTracker}) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+
+        try {
+            const docType = hb.config.docTypes.find(dt => dt.is === doc.is);          
+            const app = await this.update(app => {
+                progressLayer.next("Saving");
+
+                app.menu = app.menu || [];
+                app.menu.push({
+                    docId: doc.docId,
+                    is: doc.is,
+                    title: doc.title,
+                    url: hb[doc.is].getUrl(doc.docId)
+                });
+                
+                this.addEventListener("title-changed", `doc/${doc.docId}`, doc.is, "menuItem");
+                return app;            
+            }, progressTracker);
+            progressLayer.done("Menu item added");
             return app;
 
         } catch (error) {
