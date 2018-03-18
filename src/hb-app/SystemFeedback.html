@@ -105,6 +105,7 @@ Todo:
         systemError(error) {
             const { name, message, stack } = error;
             this.set("systemFeedback.error", { name, message, stack });
+            console.log(stack);
             this.dispatchEvent(new CustomEvent("system-error-changed", {
                 bubbles: true,
                 composed: true

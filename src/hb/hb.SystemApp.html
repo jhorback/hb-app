@@ -24,26 +24,59 @@ hb.SystemApp = class extends hb.DomainObj {
      * @returns {app, docId, doc}
      */
     async createHomePage({is, title, progressTracker}) {
-        const docCreator = new hb.DocumentCreator();
-
-        // create the document
-        const { docId, doc } = await docCreator.createDocument(is, title, progressTracker);
         const progressLayer = progressTracker.addLayer("Updating application", 3);
         progressLayer.next("Updating");
-        const app = await this.update(app => {
-            progressTracker.next("Saving");
-            app.homeDoc = {
-                docId,
-                is: doc.is,
-                title: doc.title
-            };
-            
-            this.addEventListener("title-changed", `doc/${docId}`, doc.is, "homeDoc");
 
-            return app;            
-        });
-        progressLayer.done("Home page created");
-        return {app, docId, doc};
+        try {     
+            const docCreator = new hb.DocumentCreator();
+
+            // create the document
+            const { docId, doc } = await docCreator.createDocument(is, title, progressTracker);
+            const app = await this.update(app => {
+                progressLayer.next("Saving");
+                app.homeDoc = {
+                    docId,
+                    is: doc.is,
+                    title: doc.title
+                };
+                
+                if (app.homeDoc.docId) {
+                    this.removeEventListener("title-changed", `doc/${app.homeDoc.docId}`, "homeDoc");
+                }
+                this.addEventListener("title-changed", `doc/${docId}`, doc.is, "homeDoc");
+
+                return app;            
+            }, progressTracker);
+            progressLayer.done("Home page created");
+            return {app, docId, doc};
+
+        } catch (error) {
+            progressLayer.error(error);
+        }
+    }
+
+
+    async setHomePage({doc, progressTracker}) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+
+        try {
+            const app = await this.update(app => {
+                progressLayer.next("Saving");
+                app.homeDoc = {
+                    docId: doc.docId,
+                    is: doc.is,
+                    title: doc.title
+                };
+                
+                this.addEventListener("title-changed", `doc/${doc.docId}`, doc.is, "homeDoc");
+                return app;            
+            }, progressTracker);
+            progressLayer.done("Home page created");
+            return app;
+        } catch(error) {
+            progressLayer.error(error);
+        }
     }
 
     /**
@@ -53,17 +86,23 @@ hb.SystemApp = class extends hb.DomainObj {
     async removeHomePage(progressTracker) {
         const progressLayer = progressTracker.addLayer("Updating application", 3);
         progressLayer.next("Updating");
-        const app = await this.update(app => {
-            if (app.homeDoc && app.homeDoc.docId) {
-                progressLayer.next("Saving");
-                this.removeEventListener("title-changed", `doc/${app.homeDoc.docId}`, "homeDoc");
-                app.homeDoc = {};
-                return app;
-            }
-            progressLayer.next("No need to save");
-        });
-        progressLayer.done("Home page removed");
-        return app;
+
+        try {
+            const app = await this.update(app => {
+                if (app.homeDoc && app.homeDoc.docId) {
+                    progressLayer.next("Saving");
+                    this.removeEventListener("title-changed", `doc/${app.homeDoc.docId}`, "homeDoc");
+                    app.homeDoc = {};
+                    return app;
+                }
+                progressLayer.next("No need to save");
+            }, progressTracker);
+            progressLayer.done("Home page removed");
+            return app;
+
+        } catch (error) {
+            progressLayer.error(error);
+        }
     }
 
     _homeDocTitleChanged(doc, refDoc) {

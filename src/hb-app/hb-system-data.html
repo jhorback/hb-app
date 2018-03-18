@@ -92,7 +92,8 @@
         static get events() {
             return {
                 "create-home-page": "_createHomePage",
-                "remove-home-page": "_removeHomePage"
+                "remove-home-page": "_removeHomePage",
+                "set-home-page": "_setHomePage"
             };
         }
 
@@ -149,13 +150,23 @@
                     percentage,
                     description
                 });
-
+                
                 if (event.type === "error") {
-                    this.sytemError(event.error);
+                    this.systemError(event.error);
                 }
             };
 
             return progressTracker;
+        }
+
+        async _setHomePage(event) {
+            const {doc} = event.detail;
+            
+            const progressTracker = this._createHomePageProgressTracker("Setting the home page");
+            const app = await this.systemApp.setHomePage({doc, progressTracker});
+            this.set("appState.homePageProgress", null);
+            progressTracker.save({dbPath: `system/app`});
+            this._appChanged();
         }
     }
 

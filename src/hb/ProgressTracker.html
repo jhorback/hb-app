@@ -120,7 +120,7 @@ class ProgressTracker {
 				this.totalSteps = this.totalSteps - notNeeded + 1;
 				this.isError = true;
 				this.steps.push(`Error: ${message}`);
-				this.notify({layerId, type, name, message, stack});
+				this.notify({layerId, type, error});
 				notifyLayerFinished();
 			}
 		};

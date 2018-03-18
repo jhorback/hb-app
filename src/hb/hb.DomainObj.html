@@ -147,7 +147,7 @@ hb.DomainObj  = class {
             doc = hb.DomainObj.__updateDocListeners({doc, property: "referencedBy", listeners});
             progressLayer.next("Updating references");
             doc = await docRef.update(doc);
-            progresslayer.done("References updated");
+            progressLayer.done("References updated");
             return doc;            
         });        
 
