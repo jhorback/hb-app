@@ -132,6 +132,7 @@
             this.app = app;
             this.set("appState.homePageProgress", null);
             progressTracker.save({dbPath: `system/app`});
+            this.showSystemToast({text: "Home page created"});
         }       
 
         async _removeHomePage(event) {
@@ -142,6 +143,7 @@
             progressTracker.save({dbPath: `system/app`});
             this.set("appState.hasHome", false);
             this.set("appState.showNoHome", true);
+            this.showSystemToast({text: "Home page removed"});
         }
         
 
@@ -176,6 +178,7 @@
             this.app = app;
             this.set("appState.homePageProgress", null);
             progressTracker.save({dbPath: `system/app`});
+            this.showSystemToast({text: "Home page updated"});
         }
 
         async _createMenuPage(event) {
@@ -186,6 +189,7 @@
             this.app = app;
             progressTracker.save({dbPath: `system/app`});
             this.endSystemActivity(activityId);
+            this.showSystemToast({text: "Menu item created"});
         }
 
         async _addMenuPage(event) {
@@ -196,6 +200,7 @@
             this.app = app;
             progressTracker.save({dbPath: `system/app`});         
             this.endSystemActivity(activityId);
+            this.showSystemToast({text: "Menu item added"});
         }
 
         async _removeMenuItem(event) {
@@ -211,6 +216,7 @@
             this.app = app;
             progressTracker.save({dbPath: `system/app`});         
             this.endSystemActivity(activityId);
+            this.showSystemToast({text: "Menu item removed"});
         }
 
         async _moveMenuItem(event) {
