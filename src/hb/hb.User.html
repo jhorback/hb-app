@@ -49,6 +49,9 @@ hb.User = class extends hb.DomainObj {
            user.providerDisplayName = authUser.displayName;
            user.email = authUser.email;
            user.photoURL = authUser.photoURL;
+           if (!user.firstLogin) {
+               user.firstLogin = new Date();
+           }
            user.lastLogin = new Date();
            return user;
        }, progress);
