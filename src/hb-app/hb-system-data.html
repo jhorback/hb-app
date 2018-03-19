@@ -175,29 +175,36 @@
             progressTracker.save({dbPath: `system/app`});
         }
 
-        _createMenuPage(event) {
-
+        async _createMenuPage(event) {
+            const {is, title} = event.detail;
+            const activityId = this.startSystemActivity("Creating a menu item")
+            const progressTracker = new ProgressTracker("Creating a menu item");
+            this._trackProgressError(progressTracker); 
+            const {app, docId, doc} = await this.systemApp.createMenuPage({is, title, progressTracker});
+            this.app = app;
+            progressTracker.save({dbPath: `system/app`});
+            this.endSystemActivity(activityId);
         }
 
         async _addMenuPage(event) {
             const {doc} = event.detail;
             const activityId = this.startSystemActivity("Adding a menu item");
-
-            try {
-                const progressTracker = new ProgressTracker("Adding a menu item");
-                progressTracker.onUpdate = update => {
-                    const {event} = update;
-                    if (event.type === "error") {
-                        this.systemError(event.error);
-                    }
-                };
-                const app = await this.systemApp.addMenuItem({doc, progressTracker});
-                this.app = app;
-                progressTracker.save({dbPath: `system/app`});
-            } catch(error) {
-                this.systemError(error);
-            }            
+            const progressTracker = new ProgressTracker("Adding a menu item");
+            this._trackProgressError(progressTracker);
+            debugger;            
+            const app = await this.systemApp.addMenuItem({doc, progressTracker});
+            this.app = app;
+            progressTracker.save({dbPath: `system/app`});         
             this.endSystemActivity(activityId);
+        }
+
+        _trackProgressError(progressTracker) {
+            progressTracker.onUpdate = update => {
+                const {event} = update;
+                if (event.type === "error") {
+                    this.systemError(event.error);
+                }
+            };
         }
     }
 

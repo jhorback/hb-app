@@ -35,17 +35,7 @@ hb.SystemApp = class extends hb.DomainObj {
             const { docId, doc } = await docCreator.createDocument(is, title, progressTracker);
             const app = await this.update(app => {
                 progressLayer.next("Saving");
-                app.homeDoc = {
-                    docId,
-                    is: doc.is,
-                    title: doc.title
-                };
-                
-                if (app.homeDoc.docId) {
-                    this.removeEventListener("title-changed", `doc/${app.homeDoc.docId}`, "homeDoc");
-                }
-                this.addEventListener("title-changed", `doc/${docId}`, doc.is, "homeDoc");
-
+                this._setHomePage(app, doc);
                 return app;            
             }, progressTracker);
             progressLayer.done("Home page created");
@@ -64,13 +54,10 @@ hb.SystemApp = class extends hb.DomainObj {
         try {
             const app = await this.update(app => {
                 progressLayer.next("Saving");
-                app.homeDoc = {
-                    docId: doc.docId,
-                    is: doc.is,
-                    title: doc.title
-                };
-                
-                this.addEventListener("title-changed", `doc/${doc.docId}`, doc.is, "homeDoc");
+                if (app.homeDoc.docId) {
+                    this.removeEventListener("title-changed", `doc/${app.homeDoc.docId}`, "homeDoc");
+                }
+                this._setHomePage(app, doc);
                 return app;            
             }, progressTracker);
             progressLayer.done("Home page created");
@@ -78,6 +65,15 @@ hb.SystemApp = class extends hb.DomainObj {
         } catch(error) {
             progressLayer.error(error);
         }
+    }
+
+    _setHomePage(app, doc) {
+        app.homeDoc = {
+            docId: doc.docId,
+            is: doc.is,
+            title: doc.title
+        };
+        this.addEventListener("title-changed", `doc/${doc.docId}`, doc.is, "homeDoc");
     }
 
     /**
@@ -106,6 +102,28 @@ hb.SystemApp = class extends hb.DomainObj {
         }
     }
 
+    async createMenuPage({is, title, progressTracker}) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+
+        try {     
+            const docCreator = new hb.DocumentCreator();
+
+            // create the document
+            const { docId, doc } = await docCreator.createDocument(is, title, progressTracker);
+            const app = await this.update(app => {
+                progressLayer.next("Saving");
+                this._addMenuItem(app, doc);
+                return app;            
+            }, progressTracker);
+            progressLayer.done("Home page created");
+            return {app, docId, doc};
+
+        } catch (error) {
+            progressLayer.error(error);
+        }
+    }
+
     async addMenuItem({doc, progressTracker}) {
         const progressLayer = progressTracker.addLayer("Updating application", 3);
         progressLayer.next("Updating");
@@ -114,16 +132,7 @@ hb.SystemApp = class extends hb.DomainObj {
             const docType = hb.config.docTypes.find(dt => dt.is === doc.is);          
             const app = await this.update(app => {
                 progressLayer.next("Saving");
-
-                app.menu = app.menu || [];
-                app.menu.push({
-                    docId: doc.docId,
-                    is: doc.is,
-                    title: doc.title,
-                    url: hb[doc.is].getUrl(doc.docId)
-                });
-                
-                this.addEventListener("title-changed", `doc/${doc.docId}`, doc.is, "menuItem");
+                this._addMenuItem(app, doc);
                 return app;            
             }, progressTracker);
             progressLayer.done("Menu item added");
@@ -132,6 +141,17 @@ hb.SystemApp = class extends hb.DomainObj {
         } catch (error) {
             progressLayer.error(error);
         }
+    }
+
+    _addMenuItem(app, doc) {
+        app.menu = app.menu || [];
+        app.menu.push({
+            docId: doc.docId,
+            is: doc.is,
+            title: doc.title,
+            url: hb[doc.is].getUrl(doc.docId)
+        });
+        this.addEventListener("title-changed", `doc/${doc.docId}`, doc.is, "menuItem");        
     }
 
     _homeDocTitleChanged(doc, refDoc) {
