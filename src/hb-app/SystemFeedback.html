@@ -43,13 +43,27 @@ Todo:
          * @param description {String} optional description of what the pogress is about
          * @param max {Number} optional maximum number of steps for determinant progress
          * @param value {Number} optional current value/step in progress
+         * @param progressTracker {Object} providing the progress tracker will set the appropriate updates.
          * @returns {Symbol} the id of the progress used for updating and ending progress.
          */
-        startSystemActivity({description, max, value}) {
+        startSystemActivity({description, max, value, progressTracker}) {
             const id = Symbol();
+
+            if (progressTracker) {
+                description = progressTracker.description;
+                progressTracker.onUpdate = update => {
+                    const {max, value, event} = update;
+                    this.updateSystemActivity(id, {max, value});
+                    if (event.type === "error") {
+                        this.systemError(event.error);
+                    }
+                };
+            }
+
             this.push("systemFeedback.activity", {
                 id, description, max, value
             });
+
             this.dispatchEvent(new CustomEvent("system-activity-changed", {
                 bubbles: true,
                 composed: true
