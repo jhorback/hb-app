@@ -112,7 +112,7 @@
                     <paper-icon-item>
                         <paper-icon-button slot="item-icon"
                             icon="hb:delete"
-                            on-tap="_deleteMenuItem">
+                            on-tap="_removeMenuItem">
                         </paper-icon-button>
                         <paper-item-body>
                             <div>[[menuItem.title]]</div>
@@ -207,9 +207,11 @@
             document.body.appendChild(addDoc);
         }
 
-        _deleteMenuItem(event) {
+        _removeMenuItem(event) {
             const item = event.model.get("menuItem");
-            alert("remove");
+            this.shadowRoot.dispatchEvent(new CustomEvent("remove-menu-item", {
+                detail: {docId: item.docId}
+            }));
         }
 
         _moveMenuItemUp(event) {

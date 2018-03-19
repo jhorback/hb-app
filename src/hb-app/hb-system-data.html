@@ -95,7 +95,10 @@
                 "remove-home-page": "_removeHomePage",
                 "set-home-page": "_setHomePage",
                 "create-menu-page": "_createMenuPage",
-                "add-menu-page": "_addMenuPage"
+                "add-menu-page": "_addMenuPage",
+                "remove-menu-item": "_removeMenuItem",
+                "move-menu-item-up": "_moveMenuItemUp",
+                "move-menu-item-down": "_moveMenuItemDown"
             };
         }
 
@@ -193,6 +196,29 @@
             this.app = app;
             progressTracker.save({dbPath: `system/app`});         
             this.endSystemActivity(activityId);
+        }
+
+        async _removeMenuItem(event) {
+            const {docId} = event.detail;
+            const progressTracker = new ProgressTracker("Removing a menu item");
+            const activityId = this.startSystemActivity({progressTracker});
+
+            // optimistic update
+            const itemIndex = this.app.menu.findIndex(i => i.docId === docId);
+            this.splice("app.menu", itemIndex, 1);
+
+            const app = await this.systemApp.removeMenuItem({docId, progressTracker});
+            this.app = app;
+            progressTracker.save({dbPath: `system/app`});         
+            this.endSystemActivity(activityId);
+        }
+
+        _moveMenuItemUp(event) {
+            const {docId} = event.detail;
+        }
+
+        _moveMenuItemDown(event) {
+            const {docId} = event.detail;
         }
     }
 
