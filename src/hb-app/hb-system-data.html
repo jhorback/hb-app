@@ -191,7 +191,6 @@
             const activityId = this.startSystemActivity("Adding a menu item");
             const progressTracker = new ProgressTracker("Adding a menu item");
             this._trackProgressError(progressTracker);
-            debugger;            
             const app = await this.systemApp.addMenuItem({doc, progressTracker});
             this.app = app;
             progressTracker.save({dbPath: `system/app`});         

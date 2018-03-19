@@ -4,6 +4,8 @@
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../hb-styles/hb-styles.html">
+<link rel="import" href="../hb-app/hb-system-data.html">
+<link rel="import" href="../hb-system-elements/hb-system-feedback.html">
 <link rel="import" href="hb-config.html">
 <link rel="import" href="hb-current-user.html">
 
@@ -78,6 +80,8 @@
 
         </style>
         <hb-config config="{{config}}"></hb-config>
+        <hb-system-data app="{{app}}" app-state="{{appState}}" system-feedback="{{systemFeedback}}"></hb-system-data>
+        <hb-system-feedback system-feedback="[[systemFeedback]]"></hb-system-feedback>    
         <hb-current-user user="{{user}}" for="hb-menu"></hb-current-user>
         <div class="flex-container">
             <app-header>
@@ -93,11 +97,13 @@
                         <span class="paper-font-body2">Home</span>
                     </paper-icon-item>
                 </a>
-                <a href="[[rootPath]]/" tabindex="-1">
-                    <paper-icon-item>
-                        <span class="paper-font-body2">Another item</span>
-                    </paper-icon-item>
-                </a>
+                <template is="dom-repeat" items="[[app.menu]]" as="menuItem">
+                    <a href="[[rootPath]]/[[menuItem.url]]" tabindex="-1">
+                        <paper-icon-item>
+                            <span class="paper-font-body2">[[menuItem.title]]</span>
+                        </paper-icon-item>
+                    </a>
+                </template>                
                 <hr class="divider"/>
                 <a href="[[rootPath]]/site/settings" tabindex="-1">
                     <paper-icon-item>
@@ -136,6 +142,12 @@
         static get properties() {
             return {
                 user: {
+                    type: Object
+                },
+                app: {
+                    type: Object
+                },
+                appState: {
                     type: Object
                 }
             };

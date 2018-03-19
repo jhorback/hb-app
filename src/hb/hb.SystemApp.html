@@ -1,7 +1,6 @@
 <link rel="import" href="hb.html">
 <link rel="import" href="hb.DomainObj.html">
 <link rel="import" href="hb.DocumentCreator.html">
-<link rel="import" href="hb.Config.html">
 <script>
 /**
  * Base class for doc documents
@@ -129,7 +128,6 @@ hb.SystemApp = class extends hb.DomainObj {
         progressLayer.next("Updating");
 
         try {
-            const docType = hb.config.docTypes.find(dt => dt.is === doc.is);          
             const app = await this.update(app => {
                 progressLayer.next("Saving");
                 this._addMenuItem(app, doc);
