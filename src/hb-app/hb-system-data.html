@@ -213,11 +213,9 @@
             this.endSystemActivity(activityId);
         }
 
-        _moveMenuItem(event) {
+        async _moveMenuItem(event) {
             const {docId, up, down} = event.detail;
             
-
-            // optimistic update
             const itemIndex = this.app.menu.findIndex(i => i.docId === docId);
             if (up && itemIndex === 0 || down && itemIndex === this.app.menu.length -1) {
                 return;
@@ -225,16 +223,17 @@
 
             const progressTracker = new ProgressTracker("Moving a menu item");
             const activityId = this.startSystemActivity({progressTracker});
+
+            //optimistic update
             const item = this.splice("app.menu", itemIndex, 1)[0];
             const newIndex = up ? itemIndex - 1 : itemIndex + 1;
             this.splice("app.menu", newIndex, 0, item);
             this.appState.selectedMenuItemIndex = newIndex;
             this.dispatchEvent(new CustomEvent("selected-menu-item-index-changed"));
-            // can I change the selected index for iron-selector
 
-            //const app = await this.systemApp.removeMenuItem({docId, progressTracker});
-            //this.app = app;
-            //progressTracker.save({dbPath: `system/app`});         
+            const app = await this.systemApp.moveMenuItem({docId, up, down, progressTracker});
+            this.app = app;
+            progressTracker.save({dbPath: `system/app`});         
             this.endSystemActivity(activityId);
         }
     }

@@ -153,7 +153,28 @@ hb.SystemApp = class extends hb.DomainObj {
                 this.removeEventListener("title-changed", `doc/${deletedItem.docId}`, "menuItem");                 
                 return app;
             }, progressTracker);
-            progressLayer.done("Menu item added");
+            progressLayer.done("Menu item removed");
+            return app;
+
+        } catch (error) {
+            progressLayer.error(error);
+        }
+    }
+
+    async moveMenuItem({docId, up, down, progressTracker}) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+
+        try {
+            const app = await this.update(app => {
+                progressLayer.next("Saving");                
+                const itemIndex = app.menu.findIndex(i => i.docId === docId);
+                const item = app.menu.splice(itemIndex, 1)[0];
+                const newIndex = up ? itemIndex - 1 : itemIndex + 1;
+                app.menu.splice(newIndex, 0, item);
+                return app;
+            }, progressTracker);
+            progressLayer.done("Menu item moved");
             return app;
 
         } catch (error) {
