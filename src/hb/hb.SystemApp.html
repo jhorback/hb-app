@@ -13,7 +13,8 @@ hb.SystemApp = class extends hb.DomainObj {
     static get events() {
         return {		
             "title-changed": {
-                "homeDoc": "_homeDocTitleChanged"
+                "homeDoc": "_homeDocTitleChanged",
+                "menuItem": "_menuItemTitleChanged"
             }
 	    };
 	}
@@ -194,6 +195,10 @@ hb.SystemApp = class extends hb.DomainObj {
     }
 
     _homeDocTitleChanged(doc, refDoc) {
+        throw new Error("Not implemented");
+    }
+
+    _menuItemTitleChanged(doc, refDoc) {
         throw new Error("Not implemented");
     }
 }
