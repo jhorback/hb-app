@@ -53,7 +53,11 @@
             @apply --paper-font-body2;
         }
     </style>
-    <hb-system-data app="{{app}}" app-state="{{appState}}" system-feedback="{{systemFeedback}}"></hb-system-data>
+    <hb-system-data 
+        app="{{app}}" app-state="{{appState}}" system-feedback="{{systemFeedback}}"
+        on-selected-menu-item-index-changed="_selectedMenuItemIndexChagned"
+    >
+    </hb-system-data>
     <hb-system-feedback system-feedback="[[systemFeedback]]"></hb-system-feedback>    
     <app-header-layout>
         <app-header slot="header" fixed effects="waterfall">
@@ -107,7 +111,7 @@
                 Menu
             </app-toolbar>
             <hr class="divider">
-            <iron-selector hidden$="[[!appState.hasMenuItems]]">
+            <iron-selector hidden$="[[!appState.hasMenuItems]]" id="menuItems">
                 <template is="dom-repeat" items="[[app.menu]]" as="menuItem">
                     <paper-icon-item>
                         <paper-icon-button slot="item-icon"
@@ -216,12 +220,23 @@
 
         _moveMenuItemUp(event) {
             const item = event.model.get("menuItem");
-            alert("move up");
+            this.shadowRoot.dispatchEvent(new CustomEvent("move-menu-item", {
+                detail: {docId: item.docId, up: true}
+            }));
         }
 
         _moveMenuItemDown(event) {
             const item = event.model.get("menuItem");
-            alert("move down");
+            this.shadowRoot.dispatchEvent(new CustomEvent("move-menu-item", {
+                detail: {docId: item.docId, down: true}
+            }));
+        }
+
+        _selectedMenuItemIndexChagned(event) {
+            setTimeout(() => {
+                this.$.menuItems.selected = this.appState.selectedMenuItemIndex;
+                this.$.menuItems.selectedItem.focus();
+            }, 0)
         }
     }
 
