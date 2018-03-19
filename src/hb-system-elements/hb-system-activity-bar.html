@@ -48,20 +48,36 @@
             }
         }
 
-        _getDescription() {
-            const descriptions = this.activity.map(item => item.description);
-            return descriptions.join(", ");
-        }
-
         showActivity() {
             if (!this._bar) {
-                this._bar = document.createElement("paper-progress");
-                this._bar.indeterminate = true;
+                this._bar = document.createElement("paper-progress");                
                 this._bar.classList.add("system-activity");
                 document.body.appendChild(this._bar);
             }
+            
+            const state = this.activity.reduce((state, item) => {
+                state.description.push(item.description);
+                if (item.max || item.value) {
+                    state.max = state.max + item.max;
+                    state.value = state.value + item.value;
+                } else {
+                    state.hasIndeterminant = true;
+                }
+                return state;
+            }, {
+                max: 0,
+                value: 0,
+                hasIndeterminant: false,
+                description: []
+            });
 
-            this._bar.title = this._getDescription();
+            if (state.max) {
+                this._bar.max = state.max;
+                this._bar.value = state.value;
+                this._bar.secondaryProgress = state.value;
+            }
+            this._bar.indeterminate = state.hasIndeterminant;
+            this._bar.title = state.description.join(", ");
         }
 
         hideActivity() {
