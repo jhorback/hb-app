@@ -59,7 +59,7 @@
           const testDispatchEventDocData = {
             title: "TestDispatchEvent",
             referencedBy: {
-              "doc/TestHandleEvent": {
+              "docs/TestHandleEvent": {
                 is: "TestHandleEvent",
                 events: {
                   "": ["some-event", "notcalled-event"]
@@ -100,9 +100,9 @@
           beforeEach(() => {
             db = new MockDb({
               snapshotData: (path) => {
-                if (path === "doc/TestDispatchEvent") {
+                if (path === "docs/TestDispatchEvent") {
                   return testDispatchEventDocData;
-                } else if (path === "doc/TestHandleEvent") {
+                } else if (path === "docs/TestHandleEvent") {
                   return testHandleEventData;
                 }
               },
@@ -241,7 +241,7 @@
               },
               update: (dbPath, doc) => {}
             });
-            const testDoc = new hb.testDoc({db, dbPath: "doc/testDoc"});
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});
             
             testDoc.update(doc => {
               doc.foo = "baz";
@@ -260,7 +260,7 @@
               },
               update: (dbPath, doc) => {}
             });
-            const testDoc = new hb.testDoc({db, dbPath: "doc/testDoc"});
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});
             
             testDoc.update(doc => {
               doc.foo = "baz";
@@ -278,16 +278,16 @@
             const db = new MockDb({
               snapshotData: dbPath => { return {}; },
               update: (dbPath, doc) => {
-                if (dbPath === "doc/testDoc") {
-                  expect(doc.references["doc/testRefDoc"].events[""][0]).to.be.equal("test-event");
+                if (dbPath === "docs/testDoc") {
+                  expect(doc.references["docs/testRefDoc"].events[""][0]).to.be.equal("test-event");
                   done();
                 }
               }
             });
 
-            const testDoc = new hb.testDoc({db, dbPath: "doc/testDoc"});            
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});            
             testDoc.update(doc => {
-              testDoc.addEventListener("test-event", "doc/testRefDoc", "testRefDoc");
+              testDoc.addEventListener("test-event", "docs/testRefDoc", "testRefDoc");
               return doc;
             });
           });
@@ -296,16 +296,16 @@
             const db = new MockDb({
               snapshotData: dbPath => { return {}; },
               update: (dbPath, doc) => {
-                if (dbPath === "doc/testRefDoc") {
-                  expect(doc.referencedBy["doc/testDoc"].events[""][0]).to.be.equal("test-event");
+                if (dbPath === "docs/testRefDoc") {
+                  expect(doc.referencedBy["docs/testDoc"].events[""][0]).to.be.equal("test-event");
                   done();
                 }
               }
             });
 
-            const testDoc = new hb.testDoc({db, dbPath: "doc/testDoc"});            
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});            
             testDoc.update(doc => {
-              testDoc.addEventListener("test-event", "doc/testRefDoc", "testRefDoc");
+              testDoc.addEventListener("test-event", "docs/testRefDoc", "testRefDoc");
               return doc;
             });
           });
@@ -316,7 +316,7 @@
         describe("events", () => {        
 
           it("can dispatch an event", async () => {
-            const dbPath = "doc/TestDispatchEvent";
+            const dbPath = "docs/TestDispatchEvent";
             const doc = new hb.TestDispatchEvent({db, dbPath});            
             const someEventSpy = sinon.spy(hb.TestHandleEvent.prototype, "_someEvent");
             const notcalledEventSpy = sinon.spy(hb.TestHandleEvent.prototype, "_notCalledEvent");
@@ -329,19 +329,19 @@
           });
           
           it ("updates the referenced doc if the event handler returns a doc", async () => {
-            const dbPath = "doc/TestDispatchEvent";
+            const dbPath = "docs/TestDispatchEvent";
             const doc = new hb.TestDispatchEvent({db, dbPath});
             const updateSpy = sinon.spy(db, "update");
 
             await doc.doSomethingThatDispatchesAnEvent();            
             expect(updateSpy.calledTwice).to.be.true;
-            expect(updateSpy.getCall(0).args[0]).to.be.equal("doc/TestDispatchEvent");
-            expect(updateSpy.getCall(1).args[0]).to.be.equal("doc/TestHandleEvent");
+            expect(updateSpy.getCall(0).args[0]).to.be.equal("docs/TestDispatchEvent");
+            expect(updateSpy.getCall(1).args[0]).to.be.equal("docs/TestHandleEvent");
           });
 
           // if _someEvent returns a doc update is called          
           it ("does not update the referenced doc if the event handler does not return a doc", async () => {
-            const dbPath = "doc/TestDispatchEvent";
+            const dbPath = "docs/TestDispatchEvent";
             const doc = new hb.TestDispatchEvent({db, dbPath});
             const updateSpy = sinon.spy(db, "update");
             const someEventStub = sinon.stub(hb.TestHandleEvent.prototype, "_someEvent", (doc, docRef) => {
@@ -350,7 +350,7 @@
 
             await doc.doSomethingThatDispatchesAnEvent();            
             expect(updateSpy.calledOnce).to.be.true;
-            expect(updateSpy.getCall(0).args[0]).to.be.equal("doc/TestDispatchEvent");
+            expect(updateSpy.getCall(0).args[0]).to.be.equal("docs/TestDispatchEvent");
             someEventStub.restore();
           });
         });
@@ -358,10 +358,10 @@
 
         describe("progressTracker", () => {
           it("Provides a description", async () => {
-            const dbPath = "doc/TestDispatchEvent";
+            const dbPath = "docs/TestDispatchEvent";
             const doc = new hb.TestDispatchEvent({db, dbPath});
             await doc.doSomethingThatDispatchesAnEvent();
-            expect(doc.progressTracker.stepsDescription).to.be.equal("Update: Loading document, Update: Updating, Update: Updating references, Update: Dispatching events, Handling events for doc/TestHandleEvent: Loading document, Handling events for doc/TestHandleEvent: Updating document, Handling events for doc/TestHandleEvent: Dispatching events, Handling events for doc/TestHandleEvent: Finished handling events, Update: Document updated");
+            expect(doc.progressTracker.stepsDescription).to.be.equal("Update: Loading document, Update: Updating, Update: Updating references, Update: Dispatching events, Handling events for docs/TestHandleEvent: Loading document, Handling events for docs/TestHandleEvent: Updating document, Handling events for docs/TestHandleEvent: Dispatching events, Handling events for docs/TestHandleEvent: Finished handling events, Update: Document updated");
           });
         });
       });

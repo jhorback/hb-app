@@ -137,7 +137,7 @@
 
         async _searchTextChanged(event) {
             const searchText = event.detail.searchText.toUpperCase();
-            const docRef = hb.db.collection("doc");
+            const docRef = hb.db.collection("docs");
             const snapshot = await docRef.where("title_UPPERCASE", ">", searchText)
                 .where("title_UPPERCASE", "<", `${searchText}z`)
                 .get();

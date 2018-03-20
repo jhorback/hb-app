@@ -55,7 +55,7 @@ hb.SystemApp = class extends hb.DomainObj {
             const app = await this.update(app => {
                 progressLayer.next("Saving");
                 if (app.homeDoc.docId) {
-                    this.removeEventListener("title-changed", `doc/${app.homeDoc.docId}`, "homeDoc");
+                    this.removeEventListener("title-changed", `docs/${app.homeDoc.docId}`, "homeDoc");
                 }
                 this._setHomePage(app, doc);
                 return app;            
@@ -73,7 +73,7 @@ hb.SystemApp = class extends hb.DomainObj {
             is: doc.is,
             title: doc.title
         };
-        this.addEventListener("title-changed", `doc/${doc.docId}`, doc.is, "homeDoc");
+        this.addEventListener("title-changed", `docs/${doc.docId}`, doc.is, "homeDoc");
     }
 
     /**
@@ -88,7 +88,7 @@ hb.SystemApp = class extends hb.DomainObj {
             const app = await this.update(app => {
                 if (app.homeDoc && app.homeDoc.docId) {
                     progressLayer.next("Saving");
-                    this.removeEventListener("title-changed", `doc/${app.homeDoc.docId}`, "homeDoc");
+                    this.removeEventListener("title-changed", `docs/${app.homeDoc.docId}`, "homeDoc");
                     app.homeDoc = {};
                     return app;
                 }
@@ -151,7 +151,7 @@ hb.SystemApp = class extends hb.DomainObj {
                 progressLayer.next("Saving");                
                 const itemIndex = app.menu.findIndex(i => i.docId === docId);
                 const deletedItem = app.menu.splice(itemIndex, 1)[0];
-                this.removeEventListener("title-changed", `doc/${deletedItem.docId}`, "menuItem");                 
+                this.removeEventListener("title-changed", `docs/${deletedItem.docId}`, "menuItem");                 
                 return app;
             }, progressTracker);
             progressLayer.done("Menu item removed");
@@ -191,7 +191,7 @@ hb.SystemApp = class extends hb.DomainObj {
             title: doc.title,
             url: hb[doc.is].getUrl(doc.docId)
         });
-        this.addEventListener("title-changed", `doc/${doc.docId}`, doc.is, "menuItem");        
+        this.addEventListener("title-changed", `docs/${doc.docId}`, doc.is, "menuItem");        
     }
 
     _homeDocTitleChanged(doc, refDoc) {
