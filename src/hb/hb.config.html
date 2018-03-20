@@ -1,11 +1,6 @@
 <link rel="import" href="hb.html">
 <script>
 hb.config = {
-    currentVersion: {
-        version: "v0.9",
-        description: "Menu and log update (in progress)"
-    },
-
     docTypes: [
         {
             is: "hb-doc",
@@ -65,7 +60,6 @@ hb.config = {
     current: () => {
         let config = hb.config[location.origin];
         config = config || hb.config[hb.config.default];
-        config.currentVersion = hb.config.currentVersion;
         config.docTypes = hb.config.docTypes;
         return config;
     }

@@ -30,7 +30,7 @@
             cursor: pointer;
         }
     </style>
-    <hb-config config="{{config}}"></hb-config>
+    <hb-config about="{{about}}"></hb-config>
     <app-drawer-layout id="drawerLayout" force-narrow>
         <app-drawer id="drawer" slot="drawer" swipe-open>
             <hb-menu></hb-menu>
@@ -75,12 +75,14 @@
                             </paper-item-body>
                         </paper-item>
                     </a>
-                    <paper-item>
-                        <paper-item-body two-line>
-                            <div class="paper-font-body2">Application version</div>
-                            <div secondary>[[config.currentVersion.version]] - [[config.currentVersion.description]]</div>
-                        </paper-item-body>
-                    </paper-item>
+                    <a href="[[rootPath]]/site/about" tabindex="-1">
+                        <paper-item>
+                            <paper-item-body two-line>
+                                <div class="paper-font-body2">Application version</div>
+                                <div secondary>[[about.currentVersion.version]] - [[about.currentVersion.description]]</div>
+                            </paper-item-body>
+                        </paper-item>
+                    </a>
                 </div>
 
             </main>
@@ -95,11 +97,6 @@
     */
     class HbSettingsPage extends Polymer.Element {
         static get is() { return 'hb-settings-page'; }
-        
-        static get properties() {
-            return {
-            };
-        }
     }
 
     window.customElements.define(HbSettingsPage.is, HbSettingsPage);

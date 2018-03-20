@@ -1,5 +1,6 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
 <link rel="import" href="../hb/hb.config.html">
+<link rel="import" href="../hb/hb.about.html">
 
 <script>
 /**
@@ -13,6 +14,10 @@ class HbConfig extends Polymer.Element {
             config: {
                 type: Object,
                 notify: true
+            },
+            about: {
+                type: Object,
+                notify: true
             }
         };
     }
@@ -20,6 +25,7 @@ class HbConfig extends Polymer.Element {
     constructor() {
         super();
         this.config = hb.config.current();
+        this.about = hb.about;
     }
 }
 

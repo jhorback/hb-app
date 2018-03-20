@@ -5,6 +5,7 @@
 <link rel="import" href="hb-settings-page.html">
 <link rel="import" href="hb-user-profile-page.html">
 <link rel="import" href="hb-users-page.html">
+<link rel="import" href="hb-about-page.html">
 
 <dom-module id="hb-site-app">
   <template>
@@ -60,6 +61,16 @@
     </app-route>
     <template is="dom-if" if="[[_hasPermission(user, logsRouteActive)]]" restamp>
         <hb-logs-page></hb-logs-page>
+    </template>
+
+     <!-- About page route -->    
+     <app-route
+        route="[[route]]"
+        pattern="/about"
+        active="{{aboutPageActive}}">
+    </app-route>
+    <template is="dom-if" if="[[_hasPermission(user, aboutPageActive)]]" restamp>
+        <hb-about-page></hb-about-page>
     </template>
   </template>
 
