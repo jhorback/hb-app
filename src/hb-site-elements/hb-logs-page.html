@@ -9,9 +9,12 @@
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../../bower_components/google-chart/google-chart.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
 <link rel="import" href="../hb-system-elements/hb-progress-bar.html">
 <link rel="import" href="../hb-app/hb-menu.html">
 <link rel="import" href="hb-logs-data.html">
@@ -42,6 +45,9 @@
         .flex-grow span {
             @apply --paper-font-caption;
         }
+        paper-card {
+            width: 100%;
+        }
         paper-icon-item.error {
             color: var(--error-color);
         }
@@ -49,7 +55,14 @@
             height: 300px;
             width: 800px;
             max-width: 100%;
-        }        
+        }
+        .toggle-container {
+            display: flex;
+            @apply --paper-font-caption;
+        }
+        .toggle-container .label {
+            padding-right: 1rem;
+        }
     </style>
     <hb-logs-data
         logs="{{logs}}"
@@ -66,46 +79,59 @@
             </app-toolbar>
         </app-header>
         <main>
-        <!-- main content -->
+            
+            <hb-progress-bar hidden$="[[logsState.isReady]]"></hb-progress-bar>
 
-        <hb-progress-bar hidden$="[[logsState.isReady]]"></hb-progress-bar>
-
-        <div class="logs-list" hidden$="[[!logsState.isReady]]">
-            <template is="dom-repeat" items="[[logs]]" as="log">
-                <paper-icon-item class$="[[_getLogClass(log)]]" on-tap="_selectLog">
-                    <div class="avatar" slot="item-icon"
-                        title="[[_getUserDisplayName(log)]]"
-                        style="[[_getAvatarBackground(log)]]">
-                    </div>
-                    <paper-item-body two-line>
-                        <div class="flex">
-                            <div class="flex-grow">
-                                [[_getLogDescription(log)]]
-                                <span>([[log.dbPath]])</span>
-                            </div>
-                            <div>[[log.seconds]]s</div>
-                        </div>
-                        <div secondary class="flex">
-                            <div class="flex-grow">[[_getStarted(log)]]</div>
-                            <div title="[[_getLayerTitle(log)]]">
-                                ([[log.layers.length]].[[log.events.length]])
-                            </div>
-                        </div>
-                    </paper-item-body>
-                </paper-icon-item>
-            </template>
-        </div>
+            <div class="logs-list" hidden$="[[!logsState.isReady]]">
+                <paper-card>
+                    <iron-selector>
+                        <template is="dom-repeat" items="[[logs]]" as="log">
+                            <paper-icon-item class$="[[_getLogClass(log)]]" on-tap="_selectLog">
+                                <div class="avatar" slot="item-icon"
+                                    title="[[_getUserDisplayName(log)]]"
+                                    style="[[_getAvatarBackground(log)]]">
+                                </div>
+                                <paper-item-body two-line>
+                                    <div class="flex">
+                                        <div class="flex-grow">
+                                            [[_getLogDescription(log)]]
+                                            <span>([[log.dbPath]])</span>
+                                        </div>
+                                        <div>[[log.seconds]]s</div>
+                                    </div>
+                                    <div secondary class="flex">
+                                        <div class="flex-grow">[[_getStarted(log)]]</div>
+                                        <div title="[[_getLayerTitle(log)]]">
+                                            ([[log.layers.length]].[[log.events.length]])
+                                        </div>
+                                    </div>
+                                </paper-item-body>
+                            </paper-icon-item>
+                        </template>
+                    </iron-selector>
+                </paper-card>
+            </div>
         </main>
     </app-header-layout>
 
     <paper-dialog id="logDialog">
         <h2>[[logsState.selectedLog.description]]</h2>
-            <google-chart
-                id="chart"
-                type="timeline"
-                cols="[[logsState.chartCols]]"
-                rows="[[logsState.chartRows]]"
-            ></google-chart>
+        <google-chart
+            id="chart"
+            type="timeline"
+            cols="[[logsState.chartCols]]"
+            rows="[[logsState.chartRows]]"
+        ></google-chart>
+        <div class="toggle-container">
+            <div class="flex-grow">
+                Events that take 0ms can cause a chart error
+            </div>
+            <div class="label">Adjust time</div>
+            <paper-toggle-button
+                checked="[[logsState.adjustChartTime]]"
+                on-tap="_toggleAdjustChartTime">
+            </paper-toggle-button>
+        </div>
     </paper-dialog>
 
   </template>
@@ -167,7 +193,10 @@
             setTimeout(() => {
                 this.$.chart.redraw();
             }, 100);
+        }
 
+        _toggleAdjustChartTime() {
+            this.shadowRoot.dispatchEvent(new CustomEvent("toggle-chart-time"));
         }
     }
 
