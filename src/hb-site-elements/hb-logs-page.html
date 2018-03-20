@@ -9,6 +9,10 @@
 <link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/google-chart/google-chart.html">
+<link rel="import" href="../hb-system-elements/hb-progress-bar.html">
 <link rel="import" href="../hb-app/hb-menu.html">
 <link rel="import" href="hb-logs-data.html">
 
@@ -41,8 +45,17 @@
         paper-icon-item.error {
             color: var(--error-color);
         }
+        google-chart {
+            height: 300px;
+            width: 800px;
+            max-width: 100%;
+        }        
     </style>
-    <hb-logs-data logs="{{logs}}" logs-state="{{logsState}}"></hb-logs-data>
+    <hb-logs-data
+        logs="{{logs}}"
+        logs-state="{{logsState}}"
+        on-selected-log-changed="_selectedLogChanged"
+    ></hb-logs-data>
     <app-header-layout>
         <app-header slot="header" fixed effects="waterfall">
             <app-toolbar>
@@ -54,12 +67,12 @@
         </app-header>
         <main>
         <!-- main content -->
-        <div hidden$="[[logsState.isReady]]">
 
-        </div>
+        <hb-progress-bar hidden$="[[logsState.isReady]]"></hb-progress-bar>
+
         <div class="logs-list" hidden$="[[!logsState.isReady]]">
             <template is="dom-repeat" items="[[logs]]" as="log">
-                <paper-icon-item class$="[[_getLogClass(log)]]" on-tap="_logLog">
+                <paper-icon-item class$="[[_getLogClass(log)]]" on-tap="_selectLog">
                     <div class="avatar" slot="item-icon"
                         title="[[_getUserDisplayName(log)]]"
                         style="[[_getAvatarBackground(log)]]">
@@ -84,6 +97,17 @@
         </div>
         </main>
     </app-header-layout>
+
+    <paper-dialog id="logDialog">
+        <h2>[[logsState.selectedLog.description]]</h2>
+            <google-chart
+                id="chart"
+                type="timeline"
+                cols="[[logsState.chartCols]]"
+                rows="[[logsState.chartRows]]"
+            ></google-chart>
+    </paper-dialog>
+
   </template>
 
     <script>
@@ -129,9 +153,21 @@
             return log.isError ? "error" : "";
         }
 
-        _logLog(event) {
+        _selectLog(event) {
             const log = event.model.get("log");
+            const {__id__: id} = log;
             console.log(log);
+            this.shadowRoot.dispatchEvent(new CustomEvent("log-selected", {
+                detail: {id}
+            }))
+        }
+
+        _selectedLogChanged(event) {
+            this.$.logDialog.open();
+            setTimeout(() => {
+                this.$.chart.redraw();
+            }, 100);
+
         }
     }
 

@@ -33,7 +33,10 @@ class HbLogsData extends
                 type: Object,
                 notify: true,
                 value: {
-                    isReady: false
+                    isReady: false,
+                    selectedLog: null,
+                    chartCols: null,
+                    chartRows: null
                 }
             }
         };
@@ -45,11 +48,64 @@ class HbLogsData extends
     
     static get events() {
         return {
+            "log-selected": "_logSelected"
         };
     }
 
     _logsReadyChanged() {
         this.set("logsState.isReady", this.logsReady);
+    }
+
+    _logSelected(event) {
+        const {id} = event.detail;
+        const log = this.logs.find(l => l.__id__ === id);
+        this.set("logsState.selectedLog", log);
+        this._setChartData(log);
+        this.dispatchEvent(new CustomEvent("selected-log-changed"));        
+    }
+
+    _setChartData(log) {
+        const cols = [{
+            label: "Layer",
+            type: "string"
+        }, {
+            label: "Description",
+            type: "string"
+        }, {
+            label: "Start",
+            type: "date"
+        }, {
+            label: "End",
+            type: "date"
+        }];
+
+        const rows = log.events.map((event, index) => {
+            const row = [];
+            const {layerId, description, dateTime, type} = event;
+            const  nextEvent = log.events[index + 1];
+            const layer = log.layers[layerId];
+
+            const start = dateTime;
+            let end = nextEvent ? nextEvent.dateTime : layer.finished;
+            if (end.getTime() - start.getTime() === 0) {
+                end = new Date(start.getTime() + 5);
+            }
+
+            // const rolwLabel = `${layer.description} (${layerId}-${index})`;
+            const rowLabel = `${type} ${description} ${index}`;
+            //const rowLabel = String(index);
+            // const itemLabel = description || type;
+            const itemLabel = `${layer.description}-${layerId}`;
+            
+            row[0] = rowLabel;
+            row[1] = itemLabel;
+            row[2] = start;
+            row[3] = end;
+            return row;
+        });
+
+        this.set("logsState.chartCols", cols);
+        this.set("logsState.chartRows", rows);        
     }
   
 }
