@@ -19,7 +19,8 @@
     "polymerfire": "https://github.com/firebase/polymerfire.git#firestore",
     "paper-progress": "PolymerElements/paper-progress#^2.1.0",
     "paper-toggle-button": "PolymerElements/paper-toggle-button#^2.0.0",
-    "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.2.0"
+    "paper-dialog-scrollable": "PolymerElements/paper-dialog-scrollable#^2.2.0",
+    "google-chart": "GoogleWebComponents/google-chart#^2.0.0"
   },
   "devDependencies": {
     "iron-demo-helpers": "PolymerElements/iron-demo-helpers#^2.0.0",

@@ -12,17 +12,25 @@
     <link rel="import" href="../SystemFeedback.html">
     <link rel="import" href="../EventMap.html">
     <link rel="import" href="../../hb-system-elements/hb-system-feedback.html">
+    <link rel="import" href="../../hb-system-elements/hb-progress-bar.html">
 </head>
 
 <body unresolved>
     <dom-module id="system-activity-demo">
         <template>
             <div style="margin:2em auto; max-width:300px; display:flex; flex-direction: column;">
+                <h4>System feedback</h4>
                 <paper-button raised on-tap="activityTest">Start activity</paper-button>
                 <paper-button raised on-tap="toastTest">Show toast</paper-button>
                 <paper-button raised on-tap="toastTest2">Show toast with action</paper-button>
                 <paper-button raised on-tap="errorTest">System error</paper-button>
+                <h4>Progress bar</h4>
+                <paper-button raised on-tap="setProgressBarValue">Set by value</paper-button>
+                <paper-button raised on-tap="setProgressBarIndeterminate">Set indeterminate</paper-button>
+                <paper-button raised on-tap="setProgressBarTitle">Set title and description</paper-button>
             </div>
+
+            <hb-progress-bar id="progressBar"></hb-progress-bar>
         </template>
         <script>
             class SystemActivityDemo extends EventMap(SystemFeedback(Polymer.Element)) {
@@ -77,6 +85,30 @@
 
                 errorTest(event) {
                     this.systemError(new Error("System error example"));
+                }
+
+                setProgressBarValue(event) {
+                    this.$.progressBar.value = 0;
+                    this.$.progressBar.indeterminate = false;
+                    this.pbInterval = window.setInterval(() => {
+                        let {value} = this.$.progressBar;
+                        value = value + 3;
+                        if (value > 100) {
+                            value = 0;
+                        }
+                        this.$.progressBar.value = value;
+                    }, 50);
+                }
+
+                setProgressBarIndeterminate(event) {
+                    window.clearInterval(this.pbInterval);
+                    this.$.progressBar.value = 0;
+                    this.$.progressBar.indeterminate = true;
+                }
+
+                setProgressBarTitle(event) {
+                    this.$.progressBar.title = "Progress title";
+                    this.$.progressBar.text = "Progress text";
                 }
             }
             window.customElements.define(SystemActivityDemo.is, SystemActivityDemo);    

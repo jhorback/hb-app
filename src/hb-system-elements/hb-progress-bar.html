@@ -1,0 +1,67 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../hb-styles/hb-styles.html">
+<!--
+
+-->
+<dom-module id="hb-progress-bar">
+    <template>
+        <style>
+            #progress-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 20px 0 30px;
+            }
+
+            #progress-container h3 {
+                margin: 0;
+                padding: 10px 0 5px;
+                color: var(--secondary-text-color);
+            }
+            #progress-container .text {
+                color: var(--secondary-text-color);
+                @apply --paper-font-subhead;
+            }
+        </style>
+        <div id="progress-container">
+            <h3 hidden$="[[!title]]">[[title]]</h3>
+            <paper-progress indeterminate="[[indeterminate]]" value="[[value]]"></paper-progress>
+            <div class="text">[[text]]</div>
+        </div>
+    </template>
+
+    <script>
+       /**
+        * @polymer
+        * @demo ../src/hb-app/demo/SystemFeedback.html
+        */
+        class HbProgressBar extends Polymer.Element {
+            static get is() { return 'hb-progress-bar'; }
+
+            static get properties() {
+                return {
+                    title: {
+                        type: String,
+                        value: null
+                    },
+                    text: {
+                        type: String,
+                        value: "Loading"
+                    },
+                    indeterminate: {
+                        type: Boolean,
+                        value: true
+                    },
+                    value: {
+                        type: Number,
+                        value: null
+                    }
+                };
+            }
+        }
+
+        window.customElements.define(HbProgressBar.is, HbProgressBar);
+    </script>
+</dom-module>

@@ -42,7 +42,7 @@
             color: var(--error-color);
         }
     </style>
-    <hb-logs-data logs="{{logs}}"></hb-logs-data>
+    <hb-logs-data logs="{{logs}}" logs-state="{{logsState}}"></hb-logs-data>
     <app-header-layout>
         <app-header slot="header" fixed effects="waterfall">
             <app-toolbar>
@@ -54,7 +54,10 @@
         </app-header>
         <main>
         <!-- main content -->
-        <div class="logs-list">
+        <div hidden$="[[logsState.isReady]]">
+
+        </div>
+        <div class="logs-list" hidden$="[[!logsState.isReady]]">
             <template is="dom-repeat" items="[[logs]]" as="log">
                 <paper-icon-item class$="[[_getLogClass(log)]]" on-tap="_logLog">
                     <div class="avatar" slot="item-icon"

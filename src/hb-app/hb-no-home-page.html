@@ -10,6 +10,7 @@
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
 <link rel="import" href="../hb-styles/hb-styles.html">
+<link rel="import" href="../hb-system-elements/hb-progress-bar.html">
 <link rel="import" href="../hb-system-elements/hb-system-feedback.html">
 <link rel="import" href="hb-add-document-page.html">
 <link rel="import" href="hb-menu.html">
@@ -44,14 +45,7 @@
                 font-weight: normal;
                 color: var(--message-text-color);
             }
-            .home-page-progress {
-                margin: 3em 0;
-            }
-            .home-page-progress .container {
-                display: table;
-                margin: 0 auto;
-                @apply --paper-font-body2;
-            }
+            
         </style>
         <hb-config config="{{config}}"></hb-config>
         <hb-current-user user="{{user}}" for="hb-no-home-page"></hb-current-user>
@@ -85,15 +79,13 @@
                             <paper-button on-tap="addHome">Add the home page</paper-button>
                         </div>
                     </div>
-                    <div hidden$="[[!appState.homePageProgress]]" class="home-page-progress">
-                        <div class="container">
-                            <h3>[[appState.homePageProgress.title]]</h3>
-                            <paper-progress value="[[appState.homePageProgress.percentage]]"></paper-progress>
-                            <div>
-                                [[appState.homePageProgress.description]]
-                            </div>
-                        </div>
-                    </div>
+
+
+                    <hb-progress-bar hidden$="[[!appState.homePageProgress]]"
+                        title="[[appState.homePageProgress.title]]"
+                        value="[[appState.homePageProgress.percentage]]"
+                        text="[[appState.homePageProgress.description]]"
+                    ></hb-progress-bar>
                 </main>
             </app-header-layout>
         </app-drawer-layout> 
