@@ -30,7 +30,7 @@ hb.DocumentCreator = class {
     async createDocument(is, title, progressTracker) {
         const config = hb.config.current();
         const docType = config.docTypes.find(dt => dt.is === is);
-        const doc = hb[is].defaultValue;
+        const doc = hb[is].default;
         const progressLayer = progressTracker.addLayer("Creating document", 3);
         progressLayer.next("Getting id");
         try {

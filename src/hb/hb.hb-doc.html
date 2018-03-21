@@ -15,19 +15,12 @@ hb["hb-doc"] = class extends hb.Doc {
         };
     }
 
-    static get defaultValue() {
-        return {
-            docId: null,
-            title: "",
-            is: this.is,
-            author: {/*{userId, displayName}*/},
-            permissions: {},
-            thumb: {},
-            generatedThumb: {},
-            description: "",
-            generatedDescription: "",
-            content: []
-        };
+    static get default() {
+        return Object.assign({}, super.default, {
+            content: [{
+                foo: "bar"
+            }]
+        });
     }
 
     _arworkThumbnailChanged(doc, refDoc) {
