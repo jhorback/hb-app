@@ -26,20 +26,7 @@
                     live: true,
                     notify: true,
                     observer: "_appChanged",
-                    value: HbSystemData.defaultApp
-                    /* {
-                        homeDoc: {
-                            docId: String,
-                            is: String,
-                            title: String
-                        },
-                        menu: [{
-                            docId: String,
-                            is: String,
-                            title: String,
-                            url: String
-                        }]
-                    }*/
+                    value: hb.SystemApp.default
                 },
                 appState: {
                     type: Object,
@@ -63,26 +50,6 @@
                     value: false,
                     observer: "_appReadyChanged"
                 }
-            };
-        }
-
-        static get defaultApp() {
-            return {
-               homeDoc: {},
-               menu: [],
-               permissions: [{
-                 key: "sysAdmin",
-                 name: "System Administrator",
-                 description: "Can change system level settings."
-               }, {
-                 key: "siteAdmin",
-                 name: "Site Administrator",
-                 description: "Can change site settings."
-               }, {
-                 key: "author",
-                 name: "Author",
-                 description: "Can create documents and upload content."
-               }]
             };
         }
 

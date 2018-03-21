@@ -36,7 +36,7 @@ class HbDocData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
 
     constructor() {
         super();
-        this.domain = new hb["hb-doc"]({db: hb.db, docId: this.docId});
+        this.domain = new hb["hb-doc"]({db: hb.db, id: this.docId});
         //constructor({db, docId}) {
         // create the domain object?!?!?!
     }

@@ -5,9 +5,6 @@
  * Base class for doc documents
  */
 hb.Doc = class extends hb.DomainObj {
-    static get is() {
-        throw new Error("Not implemented");
-    }
 
     static getUrl(docId) {
         const route = this.docType.route;
@@ -19,8 +16,11 @@ hb.Doc = class extends hb.DomainObj {
         return hb.config.docTypes.find(dt => dt.is === this.is);
     }
 
-    constructor({db, docId}) {
-        super({db, dbPath: `docs/${docId}`})
+    /**
+     * 
+     */
+    constructor({db, id}) {      
+        super({db, dbPath: `docs/${id}`});
     }
 }
 </script>

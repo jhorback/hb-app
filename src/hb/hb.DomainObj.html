@@ -20,18 +20,22 @@
  *	
  *	_someEvent(doc, refDoc) {
  *		// update the doc and return it
- *		// can call this.dispatchEvent("event-name");
+ *		// can call this.dispatchDomainEvent("event-name");
  *		// return the new doc or falsy if nothing was done
  *	}
  * ```
  */
 hb.DomainObj  = class {
     static get is() { 
-        throw new Error("doc.is not defined");
+        throw new Error("is is not defined");
+    }
+
+    static get default() {
+        throw new Error("default is not defined");
     }
 
     constructor({db, dbPath}) {
-        this.db = db;
+        this.db = db || hb.db;
         this.dbPath = dbPath;
         this.docRef = db.doc(dbPath);
         
@@ -81,15 +85,15 @@ hb.DomainObj  = class {
         }
     }
 
-    dispatchEvent(event) {
+    dispatchDomainEvent(event) {
         this._eventsToHandle.push(event);
     }
 
-    addEventListener(event, dbPath, is, scope) {
+    addDomainEventListener(dbPath, is, event, scope) {
         this._listenersToHandle.push({add: true, event, dbPath, is, scope});
     }
 
-    removeEventListener(event, dbPath, scope) {
+    removeDomainEventListener(dbPath, event, scope) {
         this._listenersToHandle.push({remove: true, event, dbPath, scope});
     }
 

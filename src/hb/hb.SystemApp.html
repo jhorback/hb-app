@@ -5,9 +5,40 @@
 /**
  * Base class for doc documents
  */
-hb.SystemApp = class extends hb.DomainObj {     
-    constructor({db}) {
-        super({db, dbPath: "system/app"})
+hb.SystemApp = class extends hb.DomainObj { 
+    static get is() { 
+        return "SystemApp";
+    }
+
+    static get default() {
+        return {
+            homeDoc: {/*                
+                docId: String,
+                is: String,
+                title: String                        
+            */},
+            menu: [/*{
+                docId: String,
+                is: String,
+                title: String,
+                url: String
+            }*/],
+
+            // move these permissions out, where? config?
+            permissions: [{
+                key: "sysAdmin",
+                name: "System Administrator",
+                description: "Can change system level settings."
+            }, {
+                key: "siteAdmin",
+                name: "Site Administrator",
+                description: "Can change site settings."
+            }, {
+                key: "author",
+                name: "Author",
+                description: "Can create documents and upload content."
+            }]
+        };
     }
 
     static get events() {
@@ -19,6 +50,9 @@ hb.SystemApp = class extends hb.DomainObj {
 	    };
 	}
 
+    constructor({db}) {
+        super({db, dbPath: "system/app"})
+    }
 
     /**
      * Creates the document and adds it as the System.App.homeDoc.
@@ -55,7 +89,8 @@ hb.SystemApp = class extends hb.DomainObj {
             const app = await this.update(app => {
                 progressLayer.next("Saving");
                 if (app.homeDoc.docId) {
-                    this.removeEventListener("title-changed", `docs/${app.homeDoc.docId}`, "homeDoc");
+                    const dobj = new hb[app.homeDoc.is]({id: app.homeDoc.docId});
+                    this.removeDomainEventListener(dobj.dbPath, "title-changed", "homeDoc");
                 }
                 this._setHomePage(app, doc);
                 return app;            
@@ -73,7 +108,7 @@ hb.SystemApp = class extends hb.DomainObj {
             is: doc.is,
             title: doc.title
         };
-        this.addEventListener("title-changed", `docs/${doc.docId}`, doc.is, "homeDoc");
+        this.addDomainEventListener(`docs/${doc.docId}`, doc.is, "title-changed", "homeDoc");
     }
 
     /**
@@ -88,7 +123,8 @@ hb.SystemApp = class extends hb.DomainObj {
             const app = await this.update(app => {
                 if (app.homeDoc && app.homeDoc.docId) {
                     progressLayer.next("Saving");
-                    this.removeEventListener("title-changed", `docs/${app.homeDoc.docId}`, "homeDoc");
+                    const dobj = new hb[app.homeDoc.is]({id: app.homeDoc.docId});
+                    this.removeDomainEventListener(dobj.dbPath, "title-changed", "homeDoc");
                     app.homeDoc = {};
                     return app;
                 }
@@ -151,7 +187,8 @@ hb.SystemApp = class extends hb.DomainObj {
                 progressLayer.next("Saving");                
                 const itemIndex = app.menu.findIndex(i => i.docId === docId);
                 const deletedItem = app.menu.splice(itemIndex, 1)[0];
-                this.removeEventListener("title-changed", `docs/${deletedItem.docId}`, "menuItem");                 
+                const dobj = new hb[app.deletedItem.is](deletedItem.docId)                
+                this.removeDomainEventListener(dobj.dbPath, "title-changed", "menuItem");                 
                 return app;
             }, progressTracker);
             progressLayer.done("Menu item removed");
@@ -191,7 +228,7 @@ hb.SystemApp = class extends hb.DomainObj {
             title: doc.title,
             url: hb[doc.is].getUrl(doc.docId)
         });
-        this.addEventListener("title-changed", `docs/${doc.docId}`, doc.is, "menuItem");        
+        this.addDomainEventListener(`docs/${doc.docId}`, doc.is, "title-changed", "menuItem");        
     }
 
     _homeDocTitleChanged(doc, refDoc) {

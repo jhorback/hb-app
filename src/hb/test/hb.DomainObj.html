@@ -77,7 +77,7 @@
             doSomethingThatDispatchesAnEvent() {
               this.progressTracker = new ProgressTracker();
               return this.update(doc => {
-                this.dispatchEvent("some-event");
+                this.dispatchDomainEvent("some-event");
                 return doc;
               }, this.progressTracker);
             }
@@ -126,7 +126,7 @@
           const isNotDefined = () => {
             return hb.DomainObj.is;
           };
-          expect(isNotDefined).to.throw("doc.is not defined");
+          expect(isNotDefined).to.throw("is is not defined");
         });
 
 
@@ -154,22 +154,22 @@
             
             it("can add a listener", () => {
               const obj = new hb.DomainObj({db});
-              obj.addEventListener("test-event", "somedb/path", "test-object");
+              obj.addDomainEventListener("somedb/path", "test-object", "test-event");
               const newObj = obj._updateReferences({});
               expect(newObj).to.deep.equal(testDoc);
             });
 
             it("keeps listeners unique", () => {
               const obj = new hb.DomainObj({db});
-              obj.addEventListener("test-event", "somedb/path", "test-object");
-              obj.addEventListener("test-event", "somedb/path", "test-object");
+              obj.addDomainEventListener("somedb/path", "test-object", "test-event");
+              obj.addDomainEventListener("somedb/path", "test-object", "test-event");
               const newObj = obj._updateReferences(testDoc);
               expect(newObj).to.deep.equal(testDoc);
             });
 
             it("can add multiple listeners", () => {
               const obj = new hb.DomainObj({db});
-              obj.addEventListener("test-event2", "somedb/path", "test-object");             
+              obj.addDomainEventListener("somedb/path", "test-object", "test-event2");             
               const expected = clone(testDoc);
               expected.references["somedb/path"].events[""] = ["test-event", "test-event2"];
               const newObj = obj._updateReferences(testDoc);
@@ -178,7 +178,7 @@
 
             it("can add a scoped listener", () => {
               const obj = new hb.DomainObj({db});
-              obj.addEventListener("test-scoped-event", "somedb/path", "test-object", "testScope");
+              obj.addDomainEventListener("somedb/path", "test-object", "test-scoped-event", "testScope");
               const expected = clone(testDoc);
               expected.references["somedb/path"].events["testScope"] = ["test-scoped-event"];
               const newObj = obj._updateReferences(testDoc);
@@ -193,7 +193,7 @@
 
             it("can remove a listner", () => {
               const obj = new hb.DomainObj({db});
-              obj.removeEventListener("test-evet", "somedb/path");
+              obj.removeDomainEventListener("somedb/path", "test-evet");
               expect(testDoc.references["somedb/path"].events[""].length).to.be.equal(1);              
               const newObj = obj._updateReferences(testDoc);
               expect(newObj.references["somedb/path"].events[""].length).to.be.equal(0);
@@ -201,7 +201,7 @@
             
             it("removes the reference if no event", () => {
               const obj = new hb.DomainObj({db});
-              obj.removeEventListener(null, "somedb/path");
+              obj.removeDomainEventListener("somedb/path");
               expect(testDoc.references["somedb/path"].events[""].length).to.be.equal(1);              
               const newObj = obj._updateReferences(testDoc);
               expect(newObj.references["somedb/path"]).to.be.undefined;
@@ -209,7 +209,7 @@
             
             it("removes a listener from a scope", () => {
               const obj = new hb.DomainObj({db});
-              obj.removeEventListener("some-event", "somedb/path", "scoped");
+              obj.removeDomainEventListener("somedb/path", "some-event", "scoped");
               testDoc.references["somedb/path"].events["scoped"] = ["some-event"];
               expect(testDoc.references["somedb/path"].events["scoped"].length).to.be.equal(1);              
               const newObj = obj._updateReferences(testDoc);
@@ -219,7 +219,7 @@
             // not a real use case?
             // it("removes all listener from a scope", () => {
             //   const obj = new hb.DomainObj({db});
-            //   obj.removeEventListener(null, "somedb/path", "scoped");
+            //   obj.removeDomainEventListener(null, "somedb/path", "scoped");
             //   testDoc.references["somedb/path"].events["scoped"] = ["some-event"];
             //   expect(testDoc.references["somedb/path"].events["scoped"].length).to.be.equal(1);              
             //   const newObj = obj._updateReferences(testDoc);
@@ -287,7 +287,7 @@
 
             const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});            
             testDoc.update(doc => {
-              testDoc.addEventListener("test-event", "docs/testRefDoc", "testRefDoc");
+              testDoc.addDomainEventListener("docs/testRefDoc", "testRefDoc", "test-event");
               return doc;
             });
           });
@@ -305,7 +305,7 @@
 
             const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});            
             testDoc.update(doc => {
-              testDoc.addEventListener("test-event", "docs/testRefDoc", "testRefDoc");
+              testDoc.addDomainEventListener("docs/testRefDoc", "testRefDoc", "test-event");
               return doc;
             });
           });
