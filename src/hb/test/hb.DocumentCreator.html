@@ -46,7 +46,7 @@
           const progressTracker = new ProgressTracker();
           const {doc, docId} = await creator.createDocument(is, title, progressTracker)
           
-          expect(docId).to.be.equal("doc-test-title");
+          expect(docId).to.be.equal("docs-test-title");
           expect(doc.title).to.be.equal("Test title");
           expect(doc.is).to.be.equal("hb-doc");
         });
