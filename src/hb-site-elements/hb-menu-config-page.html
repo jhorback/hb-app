@@ -23,6 +23,9 @@
   <template>
     <style include="hb-page-layout-shared-styles"></style>
     <style>
+        :host {
+            display: block;                
+        }
         paper-card {
             display: block;
             max-width: 800px;
@@ -171,7 +174,7 @@
         _addDocumentToApp({title, createEvent, addEvent}) {
             const closeAddDoc = () => {
                 addDoc.remove();
-                document.body.appendChild(this);
+                this.style.display = "block";
             };
             
             const addDoc = document.createElement("hb-add-document-page");
@@ -194,7 +197,7 @@
                 }));
             });
 
-            this.remove();
+            this.style.display = "none";
             document.body.appendChild(addDoc);
         }
 

@@ -91,14 +91,16 @@
             }
 
             const {docId, is} = this.app.homeDoc;
-            if (this.home) {
+            if (this.home && this.home.docId !== docId) {
                 this.home.remove();
             }
 
-            this.home = document.createElement(is);
-            this.home.docId = docId;
-            this.home.route = this.route;
-            this.shadowRoot.appendChild(this.home);
+            if (!this.home) {
+                this.home = document.createElement(is);
+                this.home.docId = docId;
+                this.home.route = this.route;
+                this.shadowRoot.appendChild(this.home);
+            }
         }
 
         _routeChanged() {
