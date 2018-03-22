@@ -1,0 +1,77 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../hb-app/hb-menu.html">
+<link rel="import" href="../hb/hb.hb-doc.html">
+<link rel="import" href="hb-doc-data.html">
+
+<dom-module id="hb-doc">
+
+  <template>
+    <style include="hb-page-layout-shared-styles"></style>
+    <style>
+    </style>
+    <hb-doc-data doc="{{doc}}" doc-id="[[docId]]"></hb-doc-data>
+    <app-drawer-layout id="drawerLayout" force-narrow>
+        <app-drawer id="drawer" slot="drawer" swipe-open>
+            <hb-menu></hb-menu>
+        </app-drawer>
+        <app-header-layout>
+            <app-header slot="header" fixed effects="waterfall">
+                <app-toolbar>
+                    <paper-icon-button icon="hb:menu" drawer-toggle></paper-icon-button>
+                    <div main-title>[[doc.title]]</div>
+                </app-toolbar>
+            </app-header>
+            <main>
+            <!-- main content -->
+                <div style="text-align:center;margin:2em;">
+                    Author: [[doc.author.displayName]]<br>
+                    <img src="[[doc.author.photoURL]]" width="100">
+                </div>
+            </main>
+        </app-header-layout>
+    </app-drawer-layout> 
+  </template>
+
+    <script>
+    /**
+    * @customElement
+    * @polymer
+    */
+    class HbDoc extends Polymer.Element {
+        static get is() { return 'hb-doc'; }
+        
+        static get properties() {
+            return {
+                docId: {
+                    type: String,
+                    reflectToAttribute: true
+                },
+                doc: {                
+                    type: Object
+                }
+            };
+        }
+
+        // connectedCallback() {
+        //     super.connectedCallback();
+        //     // this.dispatchEvent(new CustomEvent("request-art", {
+        //     //     bubbles: true,
+        //     //     composed: true,
+        //     //     detail: {
+        //     //         uid: this.uid
+        //     //     }
+        //     // }));
+        // }
+    }
+
+    window.customElements.define(HbDoc.is, HbDoc);
+    </script>
+</dom-module>

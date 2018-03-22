@@ -1,0 +1,125 @@
+<script>
+/*
+Todo: 
+    Add Tests
+*/
+    let SystemFeedback = (superclass) => class extends superclass {
+
+        static get properties() {
+            return {
+                systemFeedback: {
+                    type: Object,
+                    notify: true,
+                    value: {
+                        toast: null,
+                        error: null,
+                        activity: []
+                    }
+                }
+            }
+        }
+
+        /**
+         * Shows a toast.
+         * @param text {String} the toast text
+         * @param action {Object} an optional object to add an action to the toast.
+         * @param action.text {String} the text to show for the action
+         * @param action.eventName {String} the name of the event to fire when the action is clicked.
+         */
+        showSystemToast({text, action}) {
+            this.set("systemFeedback.toast", { text, action });
+            this.dispatchEvent(new CustomEvent("system-toast-changed", {
+                bubbles: true,
+                composed: true
+            }));
+        }
+
+        /**
+         * Starts system activity progress.
+         * @param description {String} optional description of what the pogress is about
+         * @param max {Number} optional maximum number of steps for determinant progress
+         * @param value {Number} optional current value/step in progress
+         * @param progressTracker {Object} providing the progress tracker will set the appropriate updates.
+         * @returns {Symbol} the id of the progress used for updating and ending progress.
+         */
+        startSystemActivity({description, max, value, progressTracker}) {
+            const id = Symbol();
+
+            if (progressTracker) {
+                description = progressTracker.description;
+                progressTracker.onUpdate = update => {
+                    const {max, value, event} = update;
+                    this.updateSystemActivity(id, {max, value});
+                    if (event.type === "error") {
+                        this.systemError(event.error);
+                    }
+                };
+            }
+
+            this.push("systemFeedback.activity", {
+                id, description, max, value
+            });
+
+            this.dispatchEvent(new CustomEvent("system-activity-changed", {
+                bubbles: true,
+                composed: true
+            }));
+        }
+
+        updateSystemActivity(id, {max, value}) {
+            let activityIndex = null;
+            const activity = this.systemFeedback.activity.find((activity, index) => {
+                if (activity.id === id) {
+                    activityIndex = index;
+                    return true;
+                }
+            });
+
+            if (!activity) {
+                console.warn("Could not find system activity.");
+                return;
+            }
+
+            activity.max = max;
+            activity.value = value;
+
+            this.dispatchEvent(new CustomEvent("system-activity-changed", {
+                bubbles: true,
+                composed: true
+            }));
+        }
+
+        /**
+         * Removes the system activity.
+         * @param id {Symbol} the id of the activity to end
+         */
+        endSystemActivity(id) {
+            let activityIndex = null;
+            const activity = this.systemFeedback.activity.find((activity, index) => {
+                if (activity.id === id) {
+                    activityIndex = index;
+                    return true;
+                }
+            });
+            this.systemFeedback.activity.splice(activityIndex, 1);
+            this.dispatchEvent(new CustomEvent("system-activity-changed", {
+                bubbles: true,
+                composed: true
+            }));
+        }
+
+        /**
+         * Use for unrecoverable system errors.
+         * @param error {Error} the error to handle.
+         */
+        systemError(error) {
+            const { name, message, stack } = error;
+            this.set("systemFeedback.error", { name, message, stack });
+            console.log(stack);
+            this.dispatchEvent(new CustomEvent("system-error-changed", {
+                bubbles: true,
+                composed: true
+            }));
+        }
+    };
+</script>

@@ -11,7 +11,7 @@
     <link rel="import" href="../bower_components/paper-item/paper-item.html">
     <link rel="import" href="../bower_components/marked-element/marked-element.html">
 
-    <title>WebDev - ipt-app</title>
+    <title>WebDev - hb-app</title>
 
     <style>
         html, body {
@@ -79,7 +79,7 @@
 <body>
     <app-header reveals style="height: 64px;">
         <app-toolbar style="height:64px;">            
-            <div main-title>WebDev - ipt-app</div>
+            <div main-title>WebDev - hb-app</div>
         </app-toolbar>
     </app-header>
 
@@ -95,15 +95,23 @@
          <section>
             <h2>Demos</h2>
             <paper-card>
-                <a href="../src/ipt-app/demo/ipt-app.html"><paper-item>Ipt App</paper-item></a>                
+                <a href="../src/hb-app/demo/hb-app.html"><paper-item>HB App</paper-item></a>                
+                <a href="../src/hb-app/demo/SystemFeedback.html"><paper-item>System Feedback</paper-item></a>                
             </paper-card>
         </section>
 
         <section>
             <h2>Run tests</h2>
             <paper-card>
-                <a href="../test/index.html"><paper-item>All</paper-item></a>
-                <a href="../src/ipt-app/test/index.html"><paper-item>ipt-app</paper-item></a>
+                <a href="../test/index.html"><paper-item>All tests</paper-item></a>
+                <a href="../src/hb-app/test/index.html"><paper-item>hb-app tests</paper-item></a>
+                <a href="../src/hb/test/index.html"><paper-item>hb tests</paper-item></a>
+                <a href="../src/hb-system-elements/test/index.html"><paper-item>hb-system-elements tests</paper-item></a>
+            </paper-card>
+            <paper-card>
+                <a href="../src/hb/test/index.html?grep=hb%5C.DomainObj%5C.html"><paper-item>hb.DomainObj</paper-item></a>
+                <a href="../src/hb/test/index.html?grep=ProgressTracker%5C.html"><paper-item>ProgressTracker</paper-item></a>
+                <a href="../src/hb/test/index.html?grep=hb%5C.DocumentCreator%5C.html"><paper-item>hb.DocumentCreator</paper-item></a>
             </paper-card>
         </section>
     </main>

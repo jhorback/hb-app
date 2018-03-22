@@ -1,0 +1,74 @@
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../hb-styles/hb-styles.html">
+
+<!--
+
+@element hb-page-layout
+@demo hb-app/demo/hb-app.html
+-->
+
+<dom-module id="hb-page-layout">
+    <template>
+        <style include="hb-page-layout-shared-styles"></style>
+        <style>
+
+        </style>
+
+        <app-drawer-layout id="drawerLayout" force-narrow="[[forceNarrow]]">
+            <app-drawer id="drawer" slot="drawer">
+                MENU CONTENT
+            </app-drawer>
+            <app-header-layout>
+                <app-header slot="header" reveals condenses effects="waterfall">
+                    <app-toolbar>
+                        <paper-icon-button icon="hb:menu" drawer-toggle></paper-icon-button>
+                        <div main-title>
+                            <slot name="title"></slot>
+                        </div>
+                        <slot name="app-toolbar"></slot>
+                    </app-toolbar>
+                    <app-toolbar sticky>
+                        HERE IS ANOTHER LINE
+                    </app-toolbar>
+                </app-header>
+                <slot></slot>
+            </app-header-layout>
+        </app-drawer-layout>
+    </template>
+
+    <script>
+        /**
+         * @polymer
+         */
+        class HbPageLayout extends Polymer.Element {
+
+            static get is() { return "hb-page-layout" }
+
+            static get properties() {
+                return {
+                    /**
+                     * Forces the menu to be an overlay regardless of browser width.
+                     */
+                    forceNarrow: {
+                        type: Boolean,
+                        value: false
+                    }
+                }
+            }
+
+            resetLayout() {
+                this.$.drawerLayout.resetLayout();
+            }
+        }
+
+        customElements.define(HbPageLayout.is, HbPageLayout);
+    </script>
+</dom-module>

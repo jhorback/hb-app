@@ -1,0 +1,354 @@
+<link rel="import" href="hb.html">
+<link rel="import" href="ProgressTracker.html">
+<script>
+/**
+ * Base class for all domain objects.
+ *
+ * @description
+ * Handling events
+ * ```
+ * 	static get events() {
+ *	    return {
+ *		  "some-event":  "_someEvent",
+ *		  // scoped
+ *		  "thumbnail-changed": {
+ *			"": "_someThumbnailChanged",
+ *			"artwork": "_artworkThumbnailChanged"
+ *		  }
+ *	    };
+ *	}
+ *	
+ *	_someEvent(doc, refDoc) {
+ *		// update the doc and return it
+ *		// can call this.dispatchDomainEvent("event-name");
+ *		// return the new doc or falsy if nothing was done
+ *	}
+ * ```
+ */
+hb.DomainObj  = class {
+    static get is() { 
+        throw new Error("is is not defined");
+    }
+
+    static get default() {
+        throw new Error("default is not defined");
+    }
+
+    constructor({db, dbPath}) {
+        this.db = db || hb.db;
+        this.dbPath = dbPath;
+        this.docRef = db.doc(dbPath);
+        
+        // [{add: true, event, dbPath, is, scope}]
+        this._listenersToHandle = [];
+        
+        //[event-name]
+        this._eventsToHandle = [];
+    }
+    
+    /**
+     * Supports api method updates
+     * @param update
+     * A method that recieves its document which can make changes to
+     * and return the document.
+     * The method can make calls to dispatchEvent, addEventListener, and  removeDomainEventListener.
+     * If the return value is falsy, no updates will occur.
+     * @param progressTracker
+     * An optional ProgressTracker to listen for the progress of the update.
+     * @returns Object the updated (or not) document
+     */
+    async update(update, progressTracker = new ProgressTracker()) {
+        const progressLayer = progressTracker.addLayer("Update", 5);
+        progressLayer.next("Loading document");
+        
+        try {
+            const snapshot = await this.docRef.get();
+            progressLayer.next("Updating");
+            let doc = snapshot.data();
+            let newDoc = update(doc);           
+            if (!newDoc) {
+                progressLayer.done("No updates needed");
+                return newDoc;
+            }
+            this._updateReferences(newDoc);
+            
+            // update the doc
+            await this.docRef.update(newDoc);
+            progressLayer.next("Updating references");
+            await this._updateReferencedBy(newDoc, progressTracker);
+            progressLayer.next("Dispatching events");
+            await this._dispatchEvents(newDoc, progressTracker);
+            progressLayer.done("Document updated");
+            return newDoc;
+        } catch(error) {
+            progressLayer.error(error);
+        }
+    }
+
+    dispatchDomainEvent(event) {
+        this._eventsToHandle.push(event);
+    }
+
+    addDomainEventListener(dbPath, is, event, scope) {
+        this._listenersToHandle.push({add: true, event, dbPath, is, scope});
+    }
+
+    removeDomainEventListener(dbPath, event, scope) {
+        this._listenersToHandle.push({remove: true, event, dbPath, scope});
+    }
+
+    /**
+     * A syncronous method which adds or removes
+     * references using _listenersToHandle
+     * @param doc
+     * The document to update.
+     * @returns Object - The updated doc.
+     */
+    _updateReferences(doc) {
+        // _listenersToHandle: [{add: true, event, dbPath, is, scope}]
+        // references: {
+        //     "docs/gallery-1": {
+        //         is: "hb-art-gallery-doc",
+        //         events: {
+        //             "": ["description-changed"]
+        //             "artwork": ["thumbnail-changed"]
+        //         }
+        //     }
+        // }
+        doc.references = doc.references || {};
+        const property = "references";
+        const listeners = [...this._listenersToHandle];
+        doc = hb.DomainObj.__updateDocListeners({doc, property, listeners});
+        return doc;
+    }
+
+    async _updateReferencedBy(doc, progressTracker) {
+        // _listenersToHandle: [{add: true, event, dbPath, is, scope}]
+        // referencedBy: {
+        //     "docs/gallery-1": {
+        //         is: "hb-art-gallery-doc",
+        //         events: {
+        //             "": ["description-changed"]
+        //             "artwork": ["thumbnail-changed"]
+        //         }
+        //     }
+        // }
+        const thisDbPath = this.dbPath;
+        const byDbPath = [...this._listenersToHandle].reduce((byDbPath, listener) => {
+            const {dbPath, add, remove, event, is, scope} = listener;
+            byDbPath[dbPath] = byDbPath[dbPath] || [];
+            byDbPath[dbPath].push({add, remove, event, is, scope, dbPath: thisDbPath});
+            return byDbPath;
+        }, {});
+
+        const promises = Object.keys(byDbPath).map(async dbPath => {
+            const progressLayer = progressTracker.addLayer(`Updating references for ${dbPath}`, 3); 
+            const docRef = this.db.doc(dbPath);
+            const listeners = byDbPath[dbPath];
+            progressLayer.next("Loading document");
+            const snapshot = await docRef.get();
+            let doc = snapshot.data();
+            doc = hb.DomainObj.__updateDocListeners({doc, property: "referencedBy", listeners});
+            progressLayer.next("Updating references");
+            doc = await docRef.update(doc);
+            progressLayer.done("References updated");
+            return doc;            
+        });        
+
+        await Promise.all(promises);
+        this._listenersToHandle = [];
+        return doc;
+    }
+
+    static __updateDocListeners({doc, property, listeners}) {
+        listeners.forEach(listener => {
+            if (listener.add === true) {
+                doc = hb.DomainObj.__addListener(doc, property, listener);
+            } else if (listener.remove === true) {
+                doc = hb.DomainObj.__removeListener(doc, property, listener);   
+            }
+        });
+        return doc;
+    }
+
+    static __addListener(doc, property, {event, dbPath, scope = "", is}) {
+        doc[property] =  doc[property] || {};
+        const reference = doc[property][dbPath] || {};
+        const events = reference.events || {};
+        const scoped = events[scope] || [];
+        // make sure the event is added just once
+        if (scoped.includes(event) === false) {
+            scoped.push(event);        
+        }
+        // rebuild the reference
+        events[scope] = scoped;
+        reference.is = is;                
+        reference.events = events;                
+        doc[property][dbPath] = reference;
+        return doc;
+    }
+
+    static __removeListener(doc, property, {event, dbPath, scope = ""}) {
+        const reference = doc[property][dbPath];
+        if (!reference) {
+            return;
+        }
+        // if event is null, remove all for the dbPath
+        if (!event) {
+            delete doc[property][dbPath];
+        // remove the specified event
+        } else if (reference.events) {
+            const scoped = reference.events[scope || ""];
+            if (scoped) {
+                scoped.splice(scoped.indexOf(event), 1);
+            }
+
+
+            // remove the dbPath listener if no events
+            const events = Object.keys(reference.events).find(key => {
+                const events = reference.events[key] || [];
+                return events.length > 0 ? true : false;
+            });
+
+            if (!events) {
+                delete doc[property][dbPath];
+            }
+        }
+
+        return doc;
+    }
+
+    /**
+     * For every referencedBy entry, create the DomainObj
+     * and then call _handleEvents on that DomainObj.
+     * @param doc the data for this domainObj
+     * @returns async doc
+     */
+    async _dispatchEvents(doc, progressTracker) {
+        if (!doc.referencedBy) {
+            return Promise.resolve();
+        }
+
+        // notify objects of a reference change
+        const promises = Object.keys(doc.referencedBy).map(async dbPath => {
+            const reference = doc.referencedBy[dbPath];
+            const eventHandlers = hb[reference.is].events;
+            const eventsToHandle = Object.keys(reference.events).reduce((toHandle, scope) => {
+                const scopedEvents = reference.events[scope];
+                // find the intersection of scopedEvents and this._eventsToHandle
+                toHandle[scope] = [...new Set(scopedEvents)].filter(e => new Set(this._eventsToHandle).has(e));
+                return toHandle;
+            }, {});
+
+            if (!eventHandlers || !eventsToHandle) {
+                return Promise.resolve();
+            }
+
+            const domainObj = new hb[reference.is]({db: this.db, dbPath});
+            const exists = await domainObj._handleEvents({
+                eventHandlers,
+                eventsToHandle,
+                refDoc: doc,
+                progressTracker
+            });
+
+            // // if the document does not exist, remove it
+            // // where? is this still needed
+            // // cleans up dead references...
+            // if (exists === false) {
+                
+            // }
+        });
+
+        await Promise.all(promises);
+        return doc;
+    }
+
+    /**
+     * See if there are any methods to call.
+     * If so, load the doc from the db and call each method.
+     * If any handler returns a new doc it doc will updated / saved.
+     * If an update is required, then call _dispatchEvents.
+     * @param eventHandlers the statically declared handlers on this domainObj
+     * Example:
+     * {
+	 *   "some-event":  "_someEvent",
+	 *   // scoped
+	 *   "thumbnail-changed": {
+	 *     "": "_someThumbnailChanged",
+	 *     "artwork": "_artworkThumbnailChanged"
+	 *   }
+	 * };
+     * @param eventsToHandle the key is the scope and the value is an array of
+     * Example:
+     * {
+	 *   "": ["description-changed"]
+	 *   "artwork": ["thumbnail-changed"]
+	 * }
+     * @param refDoc the document that triggered the events.
+     * @returns async true if the doc exists, false otherwise
+     */
+    async _handleEvents({eventHandlers, eventsToHandle, refDoc, progressTracker}) {
+
+        const methodsToCall = Object.keys(eventsToHandle).reduce((methods, scope) => {
+            const events = eventsToHandle[scope];
+            events.forEach(eventName => {
+                const handler = eventHandlers[eventName];
+                if (!handler) {
+                    return;
+                }
+
+                let method = null;
+                if (scope === "" && typeof handler === "string") {
+                    method = handler;
+                } else if (handler[scope]) {
+                   method = handler[scope];
+                }
+                
+                // only add the method to call if it exists on this domainObj
+                if (method && this[method]) {
+                    methods.push(method);
+                }
+            });
+            return methods;
+        }, []);
+
+        if (methodsToCall.length === 0) {
+            return;
+        }
+        
+        // we have methods to call, load the doc and call the methods
+        const progressLayer = progressTracker.addLayer(`Handling events for ${this.dbPath}`, 4);
+        progressLayer.next("Loading document");
+        const snapshot = await this.docRef.get();
+        if (!snapshot.exists) {
+            return false;
+        }
+
+        let doc = snapshot.data();        
+        const needUpdate = methodsToCall.reduce((needUpdate, method) => {
+            const newDoc = this[method](doc, refDoc);
+            if (newDoc) {
+                doc = newDoc;
+                needUpdate = true;
+            }
+            return needUpdate;            
+        }, false);
+        
+        if (needUpdate === false) {
+            progressLayer.done("Update not needed");        
+            return;
+        }
+        
+        // we need to update the doc
+        progressLayer.next("Updating document");
+        await this.docRef.update(doc);
+
+        // handle any additional events
+        progressLayer.next("Dispatching events");
+        await this._dispatchEvents(doc, progressTracker);
+        progressLayer.done("Finished handling events");
+        return true;
+    }
+}
+</script>

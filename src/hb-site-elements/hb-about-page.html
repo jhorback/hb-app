@@ -1,0 +1,151 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../hb-app/hb-menu.html">
+<link rel="import" href="../hb-app/hb-config.html">
+
+<dom-module id="hb-about-page">
+  <template>
+    <style include="hb-page-layout-shared-styles"></style>
+    <style>
+        /* why no space? and isn't this built in? */
+        [main-title][spacer] {
+            margin-left: 64px;
+        }
+        .about-contents {
+            max-width: 800px;
+            margin: 2em auto;
+        }
+        .version-item {
+            margin-bottom: 1.5rem;
+        }
+        .version-item h2 {
+            @apply --paper-font-body2;
+            font-size: 1rem;
+            margin-bottom: 0;
+        }
+        .version-item h3 {
+            @apply --paper-font-caption;
+            margin: 0 0 0.3rem 0;
+        }
+        .version-item ul {
+            margin: 0;
+            @apply --paper-font-body1;
+        }
+    </style>
+    <hb-config config="{{config}}" about="{{about}}"></hb-config>
+    <app-drawer-layout id="drawerLayout" force-narrow>
+        <app-drawer id="drawer" slot="drawer" swipe-open>
+            <hb-menu></hb-menu>
+        </app-drawer>
+        <app-header-layout>
+            <app-header slot="header" fixed condenses effects="waterfall">
+                <app-toolbar>
+                    <a href="[[rootPath]]/site/settings" tabindex="-1">
+                        <paper-icon-button icon="hb:arrow-back"></paper-icon-button>
+                    </a>                    
+                </app-toolbar>
+                <app-toolbar>
+                    <div spacer main-title>[[about.currentVersion.version]] - [[about.currentVersion.description]]</div>
+                </app-toolbar>
+            </app-header>
+            <main>
+                <div class="about-contents">
+                    <template is="dom-repeat" items="[[about.versions]]" as="version">
+                        <div class="version-item">
+                            <h2>[[version.version]] - [[version.title]]</h2>
+                            <h3>
+                                [[version.released]] - [[version.goal]]
+                            </h3>
+                            <ul>
+                                <template is="dom-repeat" items="[[version.notes]]" as="note">
+                                    <li>[[note]]</li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+
+<pre hidden>
+<b>HB v0.8 - Site Elements</b>
+3/14/18
+Goal: Build out the settings pages
+    • Site app
+    • Users, profile, menu, logs pages
+    • User data update
+    
+
+HB v0.7 - Feedback / hb-system
+3/6/18
+Goal: Provide a common pattern for system feedback
+    • hb-system-feedback ui element
+    • SystemFeedback data mixin element
+    • Toast, system activity, and error UI elements
+
+HB v0.6 - Add Document
+3/3/2018
+Goal: Add a document
+    • Document creation with tokenization
+    • Add home page
+    • Progress tracker phase 2
+
+HB v0.5 - Domain
+2/27/2018
+Goal: Work out the core domain objects
+    • Domain base objects
+    • Add reference, update methods
+    • Event handling
+
+HB v0.4 - Home
+2/18/2018
+Goal: Get a page layout and menu.
+    • Page layout
+    • Menu
+    • hb-no-home-page element
+
+HB v0.3 - Connections
+2/13/2018
+Goal: Database and authentication connections
+    • Tested firebase-auth
+    • Pull system/app from firebase to know the home page
+    • Initialization flow: app, home/no home page
+
+HB v0.2 - UX design
+2/11/2018
+Goal: Basic UX/XD and domain architecture design
+    • Wireframes of the initial screens and document types
+
+HB v0.1 - Online
+2/8/2018
+Goal: get a basic screen showing online while connected to firebase and the dev server.
+    • Deploy a polymer build
+    • Get the build to work with polymer and with a hosted site
+    • Get a storage connection
+
+
+</pre>
+                </div>
+            </main>
+        </app-header-layout>
+    </app-drawer-layout> 
+  </template>
+
+    <script>
+    /**
+    * @customElement
+    * @polymer
+    */
+    class HbAboutPage extends Polymer.Element {
+        static get is() { return 'hb-about-page'; }
+    }
+
+    window.customElements.define(HbAboutPage.is, HbAboutPage);
+    </script>
+</dom-module>

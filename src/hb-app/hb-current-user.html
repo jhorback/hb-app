@@ -1,0 +1,139 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../hb/hb.User.html">
+<link rel="import" href="EventMap.html">
+
+<dom-module id="hb-current-user">
+  <template>
+    <firebase-auth id="auth" user="{{authUser}}" status-known="{{statusKnown}}" provider="google"></firebase-auth>
+  </template>
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbCurrentUser extends EventMap(
+        Polymer.FirestoreMixin(Polymer.Element)
+    ) {
+      
+      static get is() { return 'hb-current-user'; }
+
+      static get properties() {
+            return {
+                uid: {
+                    type: String
+                },
+
+                for: {
+                    type: String,
+                    value: "NA"
+                },
+
+                authUser: {
+                    type: Object,
+                    observer: "_userChanged"
+                },
+
+                statusKnown: {
+                    type: Boolean,
+                    value: false,
+                    observer: "_userChanged"
+                },
+
+                dbUser: {
+                    type: Object,
+                    doc: "users/{uid}",
+                    live: true,
+                    observer: "_userChanged"
+                },
+
+                dbUserReady: {
+                    type: Boolean,
+                    value: false,
+                    observer: "_userChanged"
+                },              
+
+                user: {
+                    type: Object,
+                    notify: true,
+                    value: HbCurrentUser.defaultUser
+                }
+            };
+        }
+
+        static get defaultUser() {
+            return {
+                uid: "anonymous",
+                displayName: null,
+                isAnonymous: true,
+                permissions: {
+                    isSysAdmin: false,
+                    isSiteAdmin: false,
+                    isAuthor: false
+                }
+            };
+        }
+
+        static get eventsListenAt() {
+            return "parent";
+        }
+
+        static get events() {
+            return {
+                "user-sign-in": "_userSignIn",
+                "user-sign-out": {
+                    listenAt: "window",
+                    handler: "_userSignOut"
+                }
+            };
+        }
+
+        async _userSignIn() {
+            const response = await this.$.auth.signInWithPopup();
+            const {user:authUser} = response;
+            const userDO = new hb.User({db: hb.db, uid: authUser.uid});
+            const user = await userDO.recordLogin({authUser});
+        }
+
+        _userSignOut() {
+            this.$.auth.signOut();
+        }
+
+        _userChanged() {
+            // this._logInfo();
+            
+            if (!this.isConnected || !this.statusKnown) {
+                return;
+            }
+
+            if (!this.authUser) {
+                this.user = HbCurrentUser.defaultUser;
+                this.uid = "anonymous";
+                return;
+            }
+            
+            this.uid = this.authUser.uid;
+            
+            // not sure why this.uid can be out of sync with __id__
+            // seems like a bug
+            if (this.authUser && this.dbUserReady && this.dbUser && this.uid === this.dbUser.__id__) {
+                this.user = Object.assign({}, this.dbUser);                
+            }
+        }
+
+        _logInfo() {
+            console.log({
+                for: this.for,
+                connected: this.isConnected,
+                statusKnown: this.statusKnown,
+                dbUserReady: this.dbUserReady,
+                uid: this.uid,
+                dbUserId: this.dbUser && this.dbUser.__id__
+            });
+        }
+    }
+
+    window.customElements.define(HbCurrentUser.is, HbCurrentUser);
+  </script>
+</dom-module>

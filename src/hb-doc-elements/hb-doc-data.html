@@ -1,0 +1,46 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../hb/hb.html">
+<link rel="import" href="../hb-app/EventMap.html">
+<script>
+/**
+    * @customElement
+    * @polymer
+    */
+class HbDocData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
+    static get is() { return 'hb-doc-data'; }
+
+    static get properties() {
+        return {
+            docId: {
+                type: String
+            },
+            
+            doc: {
+                type: Object,
+                notify: true,
+                doc: "docs/{docId}",
+                live: true
+            }
+        };
+    }
+
+    static get eventsListenAt() {
+        return "parent";
+    }
+    
+    static get events() {
+        return {
+            
+        };
+    }
+
+    constructor() {
+        super();
+        this.domain = new hb["hb-doc"]({db: hb.db, id: this.docId});
+        //constructor({db, docId}) {
+        // create the domain object?!?!?!
+    }
+}
+
+window.customElements.define(HbDocData.is, HbDocData);
+</script>

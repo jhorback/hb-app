@@ -1,0 +1,46 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="hb-art-data.html">
+
+<dom-module id="hb-art">
+
+  <template>
+    <h1>[[art.title]]</h1>
+    <b>Testing...</b>
+    <hb-art-data doc="{{art}}" doc-id="[[docId]]"></hb-art-data>
+  </template>
+
+    <script>
+    /**
+    * @customElement
+    * @polymer
+    */
+    class HbArt extends Polymer.Element {
+        static get is() { return 'hb-art'; }
+        
+        static get properties() {
+            return {
+                docId: {
+                    type: String,
+                    reflectToAttribute: true
+                },
+                art: {                
+                    type: Object
+                }
+            };
+        }
+
+        connectedCallback() {
+            super.connectedCallback();
+            this.dispatchEvent(new CustomEvent("request-art", {
+                bubbles: true,
+                composed: true,
+                detail: {
+                    uid: this.uid
+                }
+            }));
+        }
+    }
+
+    window.customElements.define(HbArt.is, HbArt);
+    </script>
+</dom-module>

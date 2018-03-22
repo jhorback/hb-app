@@ -1,0 +1,216 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-firestore-mixin.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-auth.html">
+<link rel="import" href="../hb/hb.SystemApp.html">
+<link rel="import" href="SystemFeedback.html">
+<link rel="import" href="EventMap.html">
+
+<dom-module id="hb-system-data">
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbSystemData extends EventMap(
+        SystemFeedback(
+        Polymer.FirestoreMixin(Polymer.Element)
+    )) {
+      
+      static get is() { return 'hb-system-data'; }
+
+      static get properties() {
+            return {
+                app: {
+                    type: Object,
+                    doc: "system/app",
+                    live: true,
+                    notify: true,
+                    observer: "_appChanged",
+                    value: hb.SystemApp.default
+                },
+                appState: {
+                    type: Object,
+                    notify: true,
+                    value: {
+                        isReady: false,
+                        showNoHome: false,
+                        hasHome: false,
+                        hasMenuItems: false,
+                        selectedMenuItemIndex: null,
+                        homePageProgress: null, /*{
+                            title: "",
+                            description: "",
+                            percentage: 0
+                        }*/
+                    }
+                },
+                /** provided by the FirestoreMixin */
+                appReady: {
+                    type: Boolean,
+                    value: false,
+                    observer: "_appReadyChanged"
+                }
+            };
+        }
+
+        static get eventsListenAt() {
+            return "parent";
+        }
+
+        static get events() {
+            return {
+                "create-home-page": "_createHomePage",
+                "remove-home-page": "_removeHomePage",
+                "set-home-page": "_setHomePage",
+                "create-menu-page": "_createMenuPage",
+                "add-menu-page": "_addMenuPage",
+                "remove-menu-item": "_removeMenuItem",
+                "move-menu-item": "_moveMenuItem"
+            };
+        }
+
+        constructor() {
+            super();
+            this.systemApp = new hb.SystemApp({db: hb.db});
+        }
+
+        _appReadyChanged() {
+            this.set("appState.isReady", this.appReady);
+            this._appChanged();
+        }
+
+        _appChanged() {
+            if (!this.appReady) {
+                return;
+            }
+
+            const appState = Object.assign({}, this.appState);
+            const hasHome = !!(this.app.homeDoc && this.app.homeDoc.docId);
+            appState.hasHome = hasHome;
+            appState.showNoHome = !hasHome;
+            appState.hasMenuItems = !!(this.app.menu && this.app.menu.length > 0);
+            this.set("appState", appState);
+        }
+
+        async _createHomePage(event) {
+            const {is, title} = event.detail;
+            const progressTracker = this._createHomePageProgressTracker("Creating the home page");
+            const {app, docId, doc} = await this.systemApp.createHomePage({is, title, progressTracker});
+            this.app = app;
+            this.set("appState.homePageProgress", null);
+            progressTracker.save({dbPath: `system/app`});
+            this.showSystemToast({text: "Home page created"});
+        }       
+
+        async _removeHomePage(event) {
+            const progressTracker = this._createHomePageProgressTracker("Removing the home page");
+            const app = await this.systemApp.removeHomePage(progressTracker);
+            this.app = app;
+            this.set("appState.homePageProgress", null);
+            progressTracker.save({dbPath: `system/app`});
+            this.set("appState.hasHome", false);
+            this.set("appState.showNoHome", true);
+            this.showSystemToast({text: "Home page removed"});
+        }
+        
+
+         _createHomePageProgressTracker(title) {
+            this.set("appState.homePageProgress", {
+                title,
+                percentage: 0
+            });
+
+            const progressTracker = new ProgressTracker(title);
+            progressTracker.onUpdate = (update) => {
+                const { percentage, description, event } = update;
+                this.set("appState.homePageProgress", {
+                    title,
+                    percentage,
+                    description
+                });
+                
+                if (event.type === "error") {
+                    this.systemError(event.error);
+                }
+            };
+
+            return progressTracker;
+        }
+
+        async _setHomePage(event) {
+            const {doc} = event.detail;
+            
+            const progressTracker = this._createHomePageProgressTracker("Setting the home page");
+            const app = await this.systemApp.setHomePage({doc, progressTracker});
+            this.app = app;
+            this.set("appState.homePageProgress", null);
+            progressTracker.save({dbPath: `system/app`});
+            this.showSystemToast({text: "Home page updated"});
+        }
+
+        async _createMenuPage(event) {
+            const {is, title} = event.detail;
+            const progressTracker = new ProgressTracker("Creating a menu item");
+            const activityId = this.startSystemActivity({progressTracker});
+            const {app, docId, doc} = await this.systemApp.createMenuPage({is, title, progressTracker});
+            this.app = app;
+            progressTracker.save({dbPath: `system/app`});
+            this.endSystemActivity(activityId);
+            this.showSystemToast({text: "Menu item created"});
+        }
+
+        async _addMenuPage(event) {
+            const {doc} = event.detail;
+            const progressTracker = new ProgressTracker("Adding a menu item");
+            const activityId = this.startSystemActivity({progressTracker});
+            const app = await this.systemApp.addMenuItem({doc, progressTracker});
+            this.app = app;
+            progressTracker.save({dbPath: `system/app`});         
+            this.endSystemActivity(activityId);
+            this.showSystemToast({text: "Menu item added"});
+        }
+
+        async _removeMenuItem(event) {
+            const {docId} = event.detail;
+            const progressTracker = new ProgressTracker("Removing a menu item");
+            const activityId = this.startSystemActivity({progressTracker});
+
+            // optimistic update
+            const itemIndex = this.app.menu.findIndex(i => i.docId === docId);
+            this.splice("app.menu", itemIndex, 1);
+
+            const app = await this.systemApp.removeMenuItem({docId, progressTracker});
+            this.app = app;
+            progressTracker.save({dbPath: `system/app`});         
+            this.endSystemActivity(activityId);
+            this.showSystemToast({text: "Menu item removed"});
+        }
+
+        async _moveMenuItem(event) {
+            const {docId, up, down} = event.detail;
+            
+            const itemIndex = this.app.menu.findIndex(i => i.docId === docId);
+            if (up && itemIndex === 0 || down && itemIndex === this.app.menu.length -1) {
+                return;
+            }
+
+            const progressTracker = new ProgressTracker("Moving a menu item");
+            const activityId = this.startSystemActivity({progressTracker});
+
+            //optimistic update
+            const item = this.splice("app.menu", itemIndex, 1)[0];
+            const newIndex = up ? itemIndex - 1 : itemIndex + 1;
+            this.splice("app.menu", newIndex, 0, item);
+            this.appState.selectedMenuItemIndex = newIndex;
+            this.dispatchEvent(new CustomEvent("selected-menu-item-index-changed"));
+
+            const app = await this.systemApp.moveMenuItem({docId, up, down, progressTracker});
+            this.app = app;
+            progressTracker.save({dbPath: `system/app`});         
+            this.endSystemActivity(activityId);
+        }
+    }
+
+    window.customElements.define(HbSystemData.is, HbSystemData);
+  </script>
+</dom-module>

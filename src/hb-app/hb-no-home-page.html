@@ -1,0 +1,146 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../hb-styles/hb-styles.html">
+<link rel="import" href="../hb-system-elements/hb-progress-bar.html">
+<link rel="import" href="../hb-system-elements/hb-system-feedback.html">
+<link rel="import" href="hb-add-document-page.html">
+<link rel="import" href="hb-menu.html">
+<link rel="import" href="hb-config.html">
+<link rel="import" href="hb-current-user.html">
+<link rel="import" href="hb-system-data.html">
+
+<dom-module id="hb-no-home-page">
+    <template>
+        <style include="hb-page-layout-shared-styles"></style>
+        <style>
+            :host {
+                --message-text-color: rgba(255,255,255, 0.9);
+            }
+
+            .message {
+                cursor: default;
+                margin: .5rem;
+                padding: 4rem 1rem;                
+                text-align: center;
+                background: rgba(0, 0, 0, 0.6);
+                border-radius: 3px;
+            }
+
+            .message .text {
+                font-size: 2rem;
+                color: var(--message-text-color);
+            }
+
+            .message paper-button {
+                margin-top: 2em;
+                font-weight: normal;
+                color: var(--message-text-color);
+            }
+            
+        </style>
+        <hb-config config="{{config}}"></hb-config>
+        <hb-current-user user="{{user}}" for="hb-no-home-page"></hb-current-user>
+        <hb-system-feedback system-feedback="[[systemFeedback]]"></hb-system-feedback>
+        <hb-system-data app-state="{{appState}}" system-feedback="{{systemFeedback}}"></hb-system-data>
+        <app-drawer-layout id="drawerLayout" force-narrow>
+            <app-drawer id="drawer" slot="drawer" swipe-open>
+                <hb-menu></hb-menu>
+            </app-drawer>
+            <app-header-layout>
+                <app-header slot="header" fixed effects="waterfall">
+                    <app-toolbar>
+                        <paper-icon-button icon="hb:menu" drawer-toggle></paper-icon-button>
+                        <div main-title>
+                            [[config.applicationTitle]]
+                        </div>
+                    </app-toolbar>
+                </app-header>
+                <main>
+                <!-- main content -->
+                    <div hidden$="[[appState.homePageProgress]]">
+                        <div class="message" hidden$="[[user.permissions.isSiteAdmin]]">
+                            <div class="text">
+                                Coming soon...
+                            </div>
+                        </div>
+                        <div class="message" hidden$="[[!user.permissions.isSiteAdmin]]">
+                            <div class="text">
+                                No home
+                            </div>
+                            <paper-button on-tap="addHome">Add the home page</paper-button>
+                        </div>
+                    </div>
+
+
+                    <hb-progress-bar hidden$="[[!appState.homePageProgress]]"
+                        title="[[appState.homePageProgress.title]]"
+                        value="[[appState.homePageProgress.percentage]]"
+                        text="[[appState.homePageProgress.description]]"
+                    ></hb-progress-bar>
+                </main>
+            </app-header-layout>
+        </app-drawer-layout> 
+    </template>
+    <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbNoHomePage extends Polymer.Element {
+        static get is() { return 'hb-no-home-page'; }
+    
+        static get properties() {
+            return {
+                user: {
+                    type: Object
+                },
+                appState: {
+                    type: Object
+                }
+            };
+        }
+
+        addHome(event) {
+            const closeAddDoc = () => {
+                addDoc.remove();
+                document.body.appendChild(this);
+            };
+            
+            const addDoc = document.createElement("hb-add-document-page");
+            addDoc.pageTitle = "Add the home page";
+
+            addDoc.addEventListener("closed", () =>  closeAddDoc());
+            addDoc.addEventListener("add-new", event => {
+                closeAddDoc();
+                const {title, is} = event.detail;
+                this.shadowRoot.dispatchEvent(new CustomEvent("create-home-page", {
+                    detail: {title, is}
+                }));
+            });
+            
+            addDoc.addEventListener("add-existing", event => {
+                closeAddDoc();
+                const {doc} = event.detail;
+                this.shadowRoot.dispatchEvent(new CustomEvent("set-home-page", {
+                    detail: {doc}
+                }));
+            });
+
+            this.remove();
+            document.body.appendChild(addDoc);
+        }    
+    }
+    
+    window.customElements.define(HbNoHomePage.is, HbNoHomePage);
+    </script>
+            
+</dom-module>

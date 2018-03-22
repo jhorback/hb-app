@@ -1,0 +1,29 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../hb-doc-elements/hb-doc-route.html">
+<link rel="import" href="../hb-art-elements/hb-art-route.html">
+
+<dom-module id="hb-doc-routing">
+  <template>
+    <hb-doc-route route="[[route]]"></hb-doc-route>
+    <hb-art-route route="[[route]]"></hb-art-route>
+    <!-- <hb-gallery-route route="[[route]]"></hb-gallery-route> -->
+  </template>
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbDocRouting extends Polymer.Element {
+      static get is() { return 'hb-doc-routing'; }
+      static get properties() {
+        return {
+          route: {
+              type: Object
+          }
+        };
+      }      
+    }
+
+    window.customElements.define(HbDocRouting.is, HbDocRouting);
+  </script>
+</dom-module>

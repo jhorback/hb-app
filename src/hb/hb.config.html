@@ -1,0 +1,67 @@
+<link rel="import" href="hb.html">
+<script>
+hb.config = {
+    docTypes: [
+        {
+            is: "hb-doc",
+            route: "docs",
+            name: "Document",
+            description: "Text and links to other documents."
+        }, {
+            is: "hb-art-gallery-doc",
+            route: "art-gallery",
+            name: "Art Gallery",
+            description: "A collection of artwork."
+        }, {
+            is: "hb-art-doc",
+            route: "art",
+            name: "Artwork",
+            description: "Images and description of artwork."
+        }
+    ],
+
+    "https://harbor-staging.firebaseapp.com": {
+        theme: "",
+        applicationTitle: "Harbor",
+        // harbor-staging
+        firebase: {
+            authDomain: "harbor-staging.firebaseapp.com",
+            databaseUrl: "https://harbor-staging.firebaseio.com",
+            apiKey: "AIzaSyDWh26rJrV-cdL43DB8BSW4YVrxe5st7d8",
+            storageBucket: "harbor-staging.appspot.com",
+            messagingSenderId: "926265757745",
+            projectId: "harbor-staging"
+        },
+        invalidDocTypes: []
+    },
+
+    "https://bjroyster-staging.firebaseapp.com": {
+        theme: "bjroyster",
+        applicationTitle: "BJ Royster Art",
+        // harbor-staging
+        firebase: {
+            authDomain: "harbor-staging.firebaseapp.com",
+            databaseUrl: "https://harbor-staging.firebaseio.com",
+            apiKey: "AIzaSyDWh26rJrV-cdL43DB8BSW4YVrxe5st7d8",
+            storageBucket: "harbor-staging.appspot.com",
+            messagingSenderId: "926265757745",
+            projectId: "harbor-staging"
+        },
+        invalidDocTypes: []
+    },
+
+    default: "https://bjroyster-staging.firebaseapp.com",
+    //default: "https://harbor-staging.firebaseapp.com",
+   
+    /**
+     * Use the config that matches the current domain
+     * or the default config.
+     */
+    current: () => {
+        let config = hb.config[location.origin];
+        config = config || hb.config[hb.config.default];
+        config.docTypes = hb.config.docTypes;
+        return config;
+    }
+};
+</script>

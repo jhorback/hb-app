@@ -1,4 +1,11 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-route/app-location.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="../../bower_components/polymerfire/firebase-app.html">
+<link rel="import" href="../hb-site-elements/hb-site-app.html">
+<link rel="import" href="hb-home.html">
+<link rel="import" href="hb-config.html">
+<link rel="import" href="hb-doc-routing.html">
 
 <dom-module id="hb-app">
   <template>
@@ -6,11 +13,52 @@
       :host {
         display: block;
       }
-      [hidden] { display: none; }
     </style>
-    <h1>HB App</h1>
-  </template>
 
+    <hb-config config="{{config}}"></hb-config>
+
+    <firebase-app
+      auth-domain="[[config.firebase.authDomain]]"
+      database-url="[[config.firebase.databaseUrl]]"
+      api-key="[[config.firebase.apiKey]]"
+      storage-bucket="[[config.firebase.storageBucket]]"
+      messaging-sender-id="[[config.firebase.messagingSenderId]]"
+      project-id="[[config.firebase.projectId]]"
+      on-app-changed="_firebaseAppChanged">
+    </firebase-app>
+
+
+    <app-location route="{{route}}"></app-location>
+    <app-route
+      route="[[route]]"
+      pattern="/components/hb-app"
+      tail="{{routeTail}}"
+      active="{{routeActive}}"
+    ></app-route>
+    <app-route
+      route="[[_getRootRoute(route, routeTail)]]"
+      pattern="/site"
+      tail="{{siteRouteTail}}"
+      active="{{siteRouteActive}}">
+    </app-route>
+
+    <template is="dom-if" if="[[siteRouteActive]]" restamp>
+      <hb-site-app route="[[siteRouteTail]]"></hb-site-app>
+    </template>
+
+    <template is="dom-if" if="[[!isInitialized]]" restamp>
+      Application initializing...
+    </template>
+
+    <template is="dom-if" if="[[isInitialized]]">       
+        <hb-doc-routing route="[[_getRootRoute(route, routeTail)]]"></hb-doc-routing>      
+    </template>
+
+    <template is="dom-if" if="[[_showHomePage(route, isInitialized)]]" xrestamp>
+        <hb-home route="[[_getRootRoute(route, routeTail)]]"></hb-home>
+    </template>
+    
+  </template>
   <script>
     /**
      * @customElement
@@ -20,9 +68,59 @@
       static get is() { return 'hb-app'; }
       static get properties() {
         return {
-          
+          config: {
+            type: Object
+          },
+
+          isInitialized: {
+            type: Boolean,
+            value: false
+          },
+
+          route: {
+            type: Object
+          },
+
+          routeTail: {
+            type: Object
+          },
+
+          routeActive: {
+            type: Boolean
+          },
+
+          siteRouteTail: {
+            type: Object
+          },
+
+          siteRouteActive: {
+            type: Boolean
+          }
         };
-      }      
+      }
+
+      connectedCallback() {
+        super.connectedCallback();
+        document.querySelector("html").classList.add(this.config.theme);
+      }
+
+      /**
+       * Determine the starting route differently
+       * if we are in the "components" directory
+       */
+      _getRootRoute(route, routeTail) {
+        return this.routeActive ? this.routeTail : this.route;
+        return root;
+      }
+
+      _showHomePage(route, isInitialized) {
+        return isInitialized && window.location.href === `${this.rootPath}/`;
+      }
+
+      _firebaseAppChanged(event) {
+        const {value: app} = event.detail;
+        this.isInitialized = !!app;
+      }
     }
 
     window.customElements.define(HbApp.is, HbApp);

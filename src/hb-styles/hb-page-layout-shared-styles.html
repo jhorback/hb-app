@@ -1,0 +1,68 @@
+<dom-module id="hb-page-layout-shared-styles">
+    <template>
+        <style>
+        :host {
+            display: block;
+            height: 100%;
+            @apply --paper-font-common-base;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        app-drawer-layout:not([narrow]) [drawer-toggle] {
+            display: none;
+        }
+
+        app-drawer-layout,
+        app-header-layout {
+            height: 100%;
+        }
+
+        app-header {
+            background-color: var(--primary-header-background-color);
+            color: var(--primary-header-color);
+        }
+
+        app-header.secondary {
+            color: var(--primary-text-color);
+            background: var(--primary-body-color);
+        }
+        
+        app-header [main-title] {
+            margin-left: .5rem
+        }
+
+        app-header a {
+            color: inherit;
+        }
+
+        [hidden] {
+            display: none !important;
+        }
+
+        paper-button.primary,
+        paper-icon-button.primary {
+            color: var(--primary-color);
+        }
+        paper-button.primary[raised],
+        paper-icon-button.primary[raised] {
+            background-color: var(--primary-header-background-color);
+            color: var(--primary-header-color);
+        }
+        
+        hr.divider {
+            display: block;
+            height: 1px;
+            min-height: 1px;
+            max-height: 1px;
+            background-color: var(--divider-color);
+            margin: 8px 0px;
+            border: 0;
+        }
+        
+        </style>
+    </template>
+</dom-module>
+    

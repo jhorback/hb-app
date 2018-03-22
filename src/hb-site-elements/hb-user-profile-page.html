@@ -1,0 +1,156 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../hb/hb.User.html">
+<link rel="import" href="hb-user-profile-data.html">
+
+<dom-module id="hb-user-profile-page">
+
+  <template>
+    <style include="hb-page-layout-shared-styles"></style>
+    <style>
+        .profile-name {
+            padding-top: 5rem;
+            max-width: 800px;
+            margin: 2rem auto;
+            @apply --paper-font-subhead;
+            font-size: 2rem;
+            text-align: center;
+            color: var(--primary-text-color);
+        }
+        .profile-name .avatar {
+            border-radius:50%;
+            width: 150px;
+            margin-bottom: 1rem;
+        }
+        .profile-details {
+            max-width: 800px;
+            margin: auto;
+            margin-top: 9rem;
+            margin-bottom: 2rem;
+        }
+        .no-avatar-spacer {
+            margin-top: 2.5em;
+        }
+        .logout-button {
+            font-size: 1rem;
+        }
+    </style>
+    <hb-user-profile-data uid="[[uid]]" user="{{user}}"></hb-user-profile-data>
+    <app-header-layout>
+        <app-header slot="header" effects="waterfall">
+            <app-toolbar>
+                <paper-icon-button icon="[[_getBackIcon()]]" on-tap="_goBack"></paper-icon-button>
+                <div main-title></div>
+                <paper-button
+                    hidden$="[[!isCurrentUser]]"
+                    class="logout-button"
+                    on-tap="_signOut">
+                        Sign Out
+                </paper-button>            
+            </app-toolbar>
+            <app-toolbar>                
+                <div class="profile-name">
+                    <img class="avatar" src="[[user.photoURL]]" hidden$="[[!user.photoURL]]">
+                    <div class="no-avatar-spacer" hidden$="[[user.photoURL]]"></div>
+                    <div>
+                        [[user.displayName]]
+                    </div>
+                </div>
+            </app-toolbar>
+        </app-header>
+        <main>
+        <!-- main content -->
+        
+        <div class="profile-details">
+            <div>
+                <paper-item>                
+                    <paper-item-body two-line>
+                        <div>Last login</div>
+                        <div secondary>[[_getLastLogin(user)]]</div>
+                    </paper-item-body>    
+                </paper-item>
+                <paper-item hidden$="[[!user.email]]">                
+                    <paper-item-body two-line>
+                        <div>Email</div>
+                        <div secondary>[[user.email]]</div>
+                    </paper-item-body>    
+                </paper-item>
+                <paper-item>                
+                    <paper-item-body two-line>
+                        <div>Permissions</div>
+                        <div secondary>[[_getPermissionsDescription(user)]]</div>
+                    </paper-item-body>    
+                </paper-item>
+            </div>
+        </div>
+        
+        <!-- logout button ?? where -->
+        
+        
+        </main>
+    </app-header-layout>
+  </template>
+
+    <script>
+    /**
+    * @customElement
+    * @polymer
+    */
+    class HbUserProfilePage extends Polymer.Element {
+        static get is() { return 'hb-user-profile-page'; }
+        
+        static get properties() {
+            return {
+                uid: {
+                    type: String
+                },
+                isCurrentUser: {
+                    type: Boolean,
+                    value: false
+                }
+            };
+        }
+
+        constructor() {
+            super();
+            const {search: qs} = window.location;
+            if (qs === "?profile") {
+                this.isCurrentUser = true;
+            }
+        }
+
+        _goBack(event) {
+            window.history.back();
+        }
+
+        _signOut(event) {
+            window.dispatchEvent(new CustomEvent("user-sign-out"));
+            window.location = this.rootPath;
+        }
+
+        _getBackIcon() {
+            return this.isCurrentUser ? "hb:close" : "hb:arrow-back";
+        }
+
+        _getPermissionsDescription(user) {
+            return hb.User.getPermissionsDescription(user);
+        }
+
+        _getLastLogin(user) {
+            return hb.User.getLastLogin(user);
+        }
+    }
+
+    window.customElements.define(HbUserProfilePage.is, HbUserProfilePage);
+    </script>
+</dom-module>

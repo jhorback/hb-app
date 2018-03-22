@@ -1,8 +1,9 @@
 {
   "entrypoint": "index.html",
-  "shell": "src/ipt-app/ipt-app.html",
+  "shell": "src/hb-app/hb-app.html",
   "sources": [
-    "src/**/*"
+    "src/**/*",
+    "manifest.json"
    ],
   "extraDependencies": [
     "bower_components/webcomponentsjs/*"
@@ -13,17 +14,17 @@
     ]
   },
   "builds": [{
-    "xxxpreset": "es5-bundled",
+    "xxxpreset": "es6-bundled",
     "name": "default",
     "bundle": {
-        "xxxsourcemaps": true,
-        "js": { "minify": false, "compile": false },
-        "css": { "minify": false },
-        "html": { "minify": false },
-        "bundle": true,
-        "addServiceWorker": false,
-        "addPushManifest": false,
-        "insertPrefetchLinks": false
+        "sourcemaps": true,
+        "js": { "minify": false, "compile": true },
+        "css": { "minify": true },
+        "html": { "minify": true },
+        "bundle": false,
+        "addServiceWorker": true,
+        "addPushManifest": true,
+        "insertPrefetchLinks": true
     }
   }]
 }

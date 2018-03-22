@@ -16,5 +16,13 @@
         "destination": "/index.html"
       }
     ]
+  },
+  "functions": {
+    "xxxpredeploy": [
+      "npm --prefix $RESOURCE_DIR run lint"
+    ]
+  },
+  "storage": {
+    "rules": "storage.rules"
   }
 }

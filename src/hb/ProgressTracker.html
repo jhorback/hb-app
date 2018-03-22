@@ -1,0 +1,204 @@
+<script>
+/**
+ * Managing steps
+ * Create the layer with one more step then is needed.
+ * The number of steps should be the number of "await" lines plus one.
+ * Create the layer and immediately call next();
+ * Each next call should describe what we are waiting on.
+ * When done, add the final step.
+ * 
+ * Errors
+ * Errors can be caught and logged in the tracker.
+ * Since every event causes an update/notify, code can check
+ * the event type and handle errors as needed.
+ */
+class ProgressTracker {
+	constructor(description) {
+		this.description = description;
+		this.isError = false;
+		this.onUpdate = null;
+		this.steps = [];
+		this.totalSteps = 0;
+		this.currentUser = null;
+		this.started = new Date();
+		this.finished = undefined;
+		this.layers = [];
+		this.events = [];
+	}
+
+	static get eventType() {
+		return {
+			layerCreated: "layerCreated",
+			layerFinished: "layerFinished",
+			addSteps: "addSteps",
+			next: "next",
+			done: "done",
+			error: "error"
+		};
+	}
+
+	onUpdate(onUpdate) {
+		this.onUpdate = onUpdate;		
+	}
+
+	addLayer(layerDescription, totalSteps) {
+		const layerId = this.layers.length;
+        let currentLayerStep = 0;
+		this.totalSteps = this.totalSteps + totalSteps;
+
+		this.layers.push({
+			layerId,
+			description: layerDescription,
+			started: new Date()
+		});
+
+		this.notify({
+			layerId,
+			type: ProgressTracker.eventType.layerCreated,
+			description: layerDescription
+		});
+
+		const notifyLayerFinished = () => {
+			const layer = this.layers[layerId];
+			layer.finished = new Date();
+			layer.seconds = this._getSeconds(layer);
+			this.notify({
+				layerId,
+				type: ProgressTracker.eventType.layerFinished
+			});
+		}
+
+		const addSteps = (count) => {
+			this.totalSteps = this.totalSteps + count;
+			totalSteps = totalSteps + count;
+		};
+
+		return {
+            addSteps: (count) => {
+                addSteps(count);
+                this.notify({
+					layerId,
+					type: ProgressTracker.eventType.addSteps,
+					count
+				});                
+            },
+
+			next: (stepDescription) => {
+				const event = {
+					layerId,
+					type: ProgressTracker.eventType.next,
+					description: stepDescription
+				};
+
+                if (currentLayerStep === totalSteps) {
+					event.warn = `Total steps reached for layer ${layerDescription}: ${stepDescription}`;
+                    console.warn(event.warn);
+				    addSteps(1);
+                }
+
+				this.steps.push(`${layerDescription}: ${stepDescription}`);
+                currentLayerStep = currentLayerStep + 1;				
+				this.notify(event);
+			},
+
+			done: (stepDescription) => {
+				const notNeeded = totalSteps - currentLayerStep;
+				this.totalSteps = this.totalSteps - notNeeded + 1;
+				this.steps.push(`${layerDescription}: ${stepDescription}`);
+				this.notify({
+					layerId,
+					type: ProgressTracker.eventType.done,
+					description: stepDescription
+				});
+				notifyLayerFinished();
+			},
+
+			error: (error) => {
+				const {name, message, stack} = error;
+				const notNeeded = totalSteps - currentLayerStep;
+				const type = ProgressTracker.eventType.error;
+				this.totalSteps = this.totalSteps - notNeeded + 1;
+				this.isError = true;
+				this.steps.push(`Error: ${message}`);
+				this.notify({layerId, type, error});
+				notifyLayerFinished();
+			}
+		};
+	}
+
+	notify(event) {
+		event.dateTime = new Date();
+		this.events.push(event);
+
+		const {steps, totalSteps:max} = this;
+		const description = steps[steps.length - 1];
+		const value = steps.length;
+        const percentage = Math.round((value / max) * 100);		
+		this.onUpdate && this.onUpdate({
+			max,
+			value,
+			description,
+            percentage,
+			event
+		});
+   }
+
+   toJSON() {
+	   return {
+		   description: this.description,
+		   user: this.currentUser,
+		   started: this.started,
+		   finished: this.finished,
+		   seconds: this._getSeconds(this),
+		   dbPath: this.dbPath,
+		   layers: this.layers,
+		   events: this.events,
+		   isError: this.isError
+	   }
+   }
+
+   /**
+    * Saves the progress to the database.
+	* This performs the db update on a yield timeout to allow
+	* code to continue executing so this does not block.
+	* @param db {Firestore} used to save the data 
+	* @param dbPath {String} an optional dbPath to indicate what
+	* document was being saved to the database.
+	* @Returns {String} the id of the progress log added.
+	*/
+   async save({
+		db = hb.db,
+		currentUser = hb.currentUser,
+		dbPath = null
+	}) {
+	   this.finished = new Date();
+	   const {uid, photoURL, displayName} = currentUser;
+	   this.currentUser = {uid, photoURL, displayName};
+	   this.dbPath = dbPath;
+	   if (!dbPath) {
+		   throw new Error("dbPath is required to save a ProgressTracker");
+	   }
+	   const log = this.toJSON();
+
+	   return new Promise((resolve, reject) => {
+			setTimeout(async () => {
+				try  {
+					const docRef = await db.collection("progressLogs").add(log);
+					resolve(docRef.id);
+				} catch (error) {
+					reject(error);
+				}
+			}, 0);
+	   });
+   }
+
+   _getSeconds(ref) {
+	   let {started, finished = new Date()} = ref;
+	   return Math.abs((started.getTime() - finished.getTime()) / 1000);
+   }
+
+   get stepsDescription() {
+      return this.steps.join(", ");
+	}
+}
+</script>

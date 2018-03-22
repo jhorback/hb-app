@@ -1,0 +1,106 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../hb/hb.html">
+<link rel="import" href="../hb/hb.User.html">
+<link rel="import" href="../hb-app/EventMap.html">
+<script>
+/**
+ * @customElement
+ * @polymer
+ */
+class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
+    static get is() { return 'hb-users-data'; }
+
+    static get properties() {
+        return {
+            users: {
+                type: Array,
+                collection: "users",
+                value: [],
+                notify: true,
+                live: true
+            },
+
+            usersReady: {
+                type: Boolean,
+                observer: "_usersReadyChanged"
+            },
+
+            usersState: {
+                type: Object,
+                notify: true,
+                value: {
+                    isReady: false,
+                    showUnregistered: false,
+                    filteredUsers: [],
+                    noRestuls: false,
+                    noUsersMessage: "",
+                    selectedUser: null
+                }
+            }
+        };
+    }
+
+    static get eventsListenAt() {
+        return "parent";
+    }
+    
+    static get events() {
+        return {
+            "filter-changed": "_filterChanged",
+            "select-user": "_selectUser",
+            "update-permissions": "_updatePermissions"
+        };
+    }
+
+    _usersReadyChanged(currentValue, oldValue) {        
+        this.set("usersState.isReady", this.usersReady);
+        if (this.usersReady) {
+            this._filterUsers();
+        }
+    }
+
+    _filterChanged(event) {
+        const {showUnregistered} = event.detail;
+        this.set("usersState.showUnregistered", showUnregistered);
+        this._filterUsers();
+    }
+
+    _filterUsers() {
+        const {showUnregistered} = this.usersState;
+        
+        if (!this.users) {
+            return;
+        }
+
+        const users = this.users.reduce((users, user) => {
+            if (!user.isRegistered === showUnregistered) {
+                users.push(user);
+            }
+            return users;
+        }, []);
+
+       const noUsersMessage = users.length !== 0 ? "" :
+                showUnregistered ? "There are no unregistered users" :
+                "There are no registered users";
+        const noResults = users.length === 0;
+        this.set("usersState.noResults", noResults);
+        this.set("usersState.noUsersMessage", noUsersMessage);
+        this.set("usersState.filteredUsers", users);
+    }
+
+    _selectUser(event) {
+        const {uid} = event.detail;
+        const user = this.users.find(u => u.uid === uid);
+        this.set("usersState.selectedUser", user);
+    }
+
+    async _updatePermissions(event) {
+        const {uid, isRegistered, isSysAdmin, isSiteAdmin, isAuthor} = event.detail;
+        const userDO = new hb.User({db: hb.db, uid});
+        const user = await userDO.updatePermissions({isRegistered, isSysAdmin, isSiteAdmin, isAuthor});
+        this._filterUsers();
+    }
+}
+
+window.customElements.define(HbUsersData.is, HbUsersData);
+</script>

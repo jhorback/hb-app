@@ -1,0 +1,196 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../hb-styles/hb-no-results.html">
+<link rel="import" href="../hb-app/hb-menu.html">
+<link rel="import" href="../hb/hb.User.html">
+<link rel="import" href="hb-users-data.html">
+
+<dom-module id="hb-users-page">
+
+  <template>
+    <style include="hb-page-layout-shared-styles"></style>
+    <style>
+        paper-toggle-button {
+            --primary-color: var(--accent-color);
+        }
+        .users-list {
+            max-width: 800px;
+            margin: 2em auto;
+        }
+        .users-list a {
+            color: inherit;
+            text-decoration: inherit;
+            cursor: pointer;
+        }
+        .avatar {
+            display: inline-block;
+            box-sizing: border-box;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: contain;
+        }
+    </style>
+    <hb-users-data users="{{users}}" users-state="{{usersState}}"></hb-users-data>
+    <app-header-layout>
+        <app-header slot="header" fixed effects="waterfall">
+            <app-toolbar>
+                <a href="[[rootPath]]/site/settings" tabindex="-1">
+                    <paper-icon-button icon="hb:arrow-back"></paper-icon-button>
+                </a>
+                <div main-title>Users</div>
+                <paper-toggle-button
+                    title="Show unregistered users"
+                    checked="[[usersState.showUnregistered]]"
+                    on-tap="_showUnregisteredTapped">
+                </paper-toggle-button>
+            </app-toolbar>
+        </app-header>
+        <main>
+        <!-- main content -->
+            <div hidden$="[[!usersState.isReady]]" class="users-list">
+                <hb-no-results hidden$="[[!usersState.noResults]]" text="[[usersState.noUsersMessage]]"></hb-no-results>
+                <template is="dom-repeat" items="[[usersState.filteredUsers]]" as="user">
+                <a href="[[rootPath]]/site/profile/[[user.uid]]" tabindex="-1">
+
+                    <paper-icon-item>
+                        <div class="avatar" slot="item-icon"
+                            style="[[_getAvatarBackground(user)]]">
+                        </div>
+                        <paper-item-body three-line>
+                            <div>[[user.displayName]]</div>
+                            <div secondary>
+                                [[_getPermissionsDescription(user)]]
+                            </div>
+                            <div secondary>
+                                [[_getLastLogin(user)]]
+                            </div>
+                        </paper-item-body>
+                        <paper-icon-button
+                            on-tap="_showUserMenu"
+                            icon="hb:more-vert"
+                            title="Update">
+                        </paper-icon-button>
+                    </paper-icon-item>
+                </a>
+                </template>
+                <paper-dialog id="permissionsDialog">
+                    <h2>[[usersState.selectedUser.displayName]] Permissions</h2>
+                    <paper-dialog-scrollable>
+                        <paper-item>
+                            <paper-item-body>Registered</paper-item-body>
+                            <paper-toggle-button
+                                checked="{{usersState.selectedUser.isRegistered}}">
+                            </paper-toggle-button>
+                        </paper-item>
+                        <hr class="divider">
+                        <paper-item>
+                            <paper-item-body>System admin</paper-item-body>
+                            <paper-toggle-button
+                                checked="{{usersState.selectedUser.permissions.isSysAdmin}}"> 
+                            </paper-toggle-button>
+                        </paper-item>
+                        <paper-item>
+                            <paper-item-body>Site admin</paper-item-body>
+                            <paper-toggle-button
+                                checked="{{usersState.selectedUser.permissions.isSiteAdmin}}">
+                            </paper-toggle-button>
+                        </paper-item>
+                        <paper-item>
+                            <paper-item-body>Author</paper-item-body>
+                            <paper-toggle-button
+                                checked="{{usersState.selectedUser.permissions.isAuthor}}">
+                            </paper-toggle-button>
+                        </paper-item>
+                    </paper-dialog-scrollable>
+                    <div class="buttons">
+                        <paper-button on-tap="_updateSelectedUsersPermissions">
+                            Update
+                        </paper-button>
+                    </div>
+                </paper-dialog>
+            </div>
+        </main>
+    </app-header-layout>    
+  </template>
+
+    <script>
+    /**
+    * @customElement
+    * @polymer
+    */
+    class HbUsersPage extends Polymer.Element {
+        static get is() { return 'hb-users-page'; }
+        
+        static get properties() {
+            return {
+                users: {
+                    type: Array
+                },
+                usersState: {
+                    type: Object
+                }
+            };
+        }
+
+        _getAvatarBackground(user) {
+            return user.photoURL ?
+                `background-image: url(${user.photoURL})` :
+                "background-color: var(--accent-color)";
+        }
+
+        _getPermissionsDescription(user) {
+            return hb.User.getPermissionsDescription(user);
+        }
+
+        _getLastLogin(user) {
+            return hb.User.getLastLogin(user);
+        }
+
+        _showUnregisteredTapped(event) {
+            const {checked:showUnregistered} = event.target;
+            this.shadowRoot.dispatchEvent(new CustomEvent("filter-changed", {
+                detail: {showUnregistered}
+            }));
+        }
+        
+        _showUserMenu(event) {
+            event.detail.sourceEvent.preventDefault();
+            const {uid} = event.model.get("user");
+            this.shadowRoot.dispatchEvent(new CustomEvent("select-user", {
+                detail: { uid }
+            }))
+            document.body.appendChild(this.$.permissionsDialog);
+            this.$.permissionsDialog.positionTarget = event.target;
+            this.$.permissionsDialog.open();
+        }
+
+        _updateSelectedUsersPermissions(event) {
+            this.$.permissionsDialog.close();
+            const {uid, isRegistered} = this.usersState.selectedUser;
+            const {isSysAdmin, isSiteAdmin, isAuthor} = this.usersState.selectedUser.permissions;
+            this.shadowRoot.dispatchEvent(new CustomEvent("update-permissions", {
+                detail: {
+                    uid, isRegistered, isSysAdmin, isSiteAdmin, isAuthor
+                 }
+            }))
+        }
+    }
+
+    window.customElements.define(HbUsersPage.is, HbUsersPage);
+    </script>
+</dom-module>

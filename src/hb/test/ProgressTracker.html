@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>hb-app test</title>
+
+    <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../../bower_components/web-component-tester/browser.js"></script>
+    <script src="../../../bower_components/test-fixture/test-fixture-mocha.js"></script>
+    
+    <link rel="import" href="../ProgressTracker.html">
+  </head>
+  <body>
+
+    <script>
+      describe("ProgressTracker", () => {
+
+        it("exists", () => {
+          expect(ProgressTracker).not.to.be.null;
+        });
+
+        it("can be created", () => {
+          const tracker = new ProgressTracker();
+          expect(tracker).not.to.be.null;
+        });
+
+        it("can create a layer with steps", () => {
+          const tracker = new ProgressTracker();
+          tracker.addLayer("Test", 2);
+          expect(tracker.totalSteps).to.equal(2);
+        });
+
+        it("notifies when creating a layer", () => {
+          const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
+            expect(update.max).to.equal(2);
+          };
+          tracker.addLayer("Test", 2);
+        });
+
+        describe("layer", () => {
+        it("can add steps", () => {
+            let count = 0;
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
+              count = count + 1;
+              switch(count) {
+                case 1:
+                  expect(update.max).to.equal(2);
+                  break;
+                case 2: 
+                  expect(update.max).to.equal(5);
+                  break;
+              }
+            };
+            const layer = tracker.addLayer("Test", 2);
+            layer.addSteps(3);
+          });
+
+          it("can call next", () => {
+            let count = 0;
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
+              count = count + 1;
+              switch(count) {
+                case 1:
+                  expect(update.max).to.equal(2);
+                  break;
+                case 2: 
+                  expect(update.description).to.equal("Test: step 1");
+                  break;
+              }
+            };
+            const layer = tracker.addLayer("Test", 2);
+            layer.next("step 1");
+          });
+
+          it("adds more steps and warns if going over the number defined", () => {
+            let count = 0;
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
+              count = count + 1;
+              switch(count) {
+                case 1:
+                  expect(update.max).to.equal(2);
+                  break;
+                case 2: 
+                  expect(update.description).to.equal("Test: step 1");
+                  break;
+                case 4:
+                  expect(update.event.warn).to.not.be.undefined;                  
+                  break;
+              }
+            };
+            const layer = tracker.addLayer("Test", 2);
+            layer.next("step 1");
+            layer.next("step 2");
+            layer.next("step 3");
+            expect(tracker.stepsDescription).to.equal("Test: step 1, Test: step 2, Test: step 3");
+          });
+
+          it("can call done", () => {
+            let count = 0;
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
+              count = count + 1;
+              switch(count) {
+                case 1:
+                  expect(update.max).to.equal(5);
+                  break;
+                case 2: 
+                  expect(update.description).to.equal("Test: step 1");
+                  break;
+              }
+            };
+            const layer = tracker.addLayer("Test", 5);
+            layer.next("step 1");
+            expect(tracker.totalSteps).to.equal(5);            
+            layer.done("done");
+            expect(tracker.stepsDescription).to.equal("Test: step 1, Test: done");
+            expect(tracker.totalSteps).to.equal(2);
+          });
+
+          it("can call error", () => {
+            let count = 0;
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
+              count = count + 1;
+              switch(count) {
+                case 1:
+                  expect(update.max).to.equal(5);
+                  break;
+                case 2: 
+                  expect(update.description).to.equal("Test: step 1");
+                  break;
+              }
+            };
+            const layer = tracker.addLayer("Test", 5);
+            layer.next("step 1");
+            expect(tracker.totalSteps).to.equal(5);            
+            layer.error({message: "An error occurred."});
+            expect(tracker.stepsDescription).to.equal("Test: step 1, Error: An error occurred.");
+            expect(tracker.totalSteps).to.equal(2);
+          });
+        });
+
+        describe("multiple layers", () => {
+          it("can track multiple layers", () => {
+            let count = 0;
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
+              count = count + 1;
+              switch(count) {
+                case 1:
+                  expect(update.max).to.equal(5);
+                  break;
+                case 2: 
+                  expect(update.max).to.equal(8);
+                  break;
+              }
+            };
+            const layer = tracker.addLayer("Test", 5);
+            const layer2 = tracker.addLayer("Test2", 3);
+          });
+
+          it("can handle next for multiple layers", () => {
+            let count = 0;
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
+              count = count + 1;
+              switch(count) {
+                case 1:
+                  expect(update.max).to.equal(5);
+                  break;
+                case 2: 
+                  expect(update.max).to.equal(8);
+                  break;
+              }
+            };
+            const layer = tracker.addLayer("Test", 5);
+            const layer2 = tracker.addLayer("Test2", 3);
+            layer.next("one");
+            layer2.next("two");
+            layer.next("three");
+            layer2.next("four");            
+           
+            expect(tracker.stepsDescription).to.equal("Test: one, Test2: two, Test: three, Test2: four");
+          });
+
+        it("can handle done for multiple layers", () => {
+            let count = 0;
+            const tracker = new ProgressTracker("test");
+            tracker.onUpdate = (update) => {
+              count = count + 1;
+              switch(count) {
+                case 1:
+                  expect(update.max).to.equal(5);
+                  break;
+                case 2: 
+                  expect(update.max).to.equal(8);
+                  break;
+              }
+            };
+            const layer = tracker.addLayer("Test", 5);
+            const layer2 = tracker.addLayer("Test2", 3);
+            layer.next("one");
+            layer2.next("two");
+            layer.next("three");
+            layer2.next("four");
+            layer.done("done");
+            expect(tracker.stepsDescription).to.equal("Test: one, Test2: two, Test: three, Test2: four, Test: done");
+            expect(tracker.totalSteps).to.be.equal(6);
+          });
+        });
+
+        describe("toJSON", () => {
+
+          it("supports a toJSON call", () => {
+            const tracker = new ProgressTracker();
+            const layer = tracker.addLayer("Test", 5);
+            const layer2 = tracker.addLayer("Test2", 3);
+            layer.next("one");
+            layer2.next("two");
+            layer.next("three");
+            layer2.next("four");
+            layer.done("done");
+            const json = tracker.toJSON();
+            expect(json.layers.length).to.be.equal(2);
+            expect(json.events.length).to.be.equal(8);
+            expect(json.user).to.be.null;
+            expect(json.started).to.not.be.null;
+          });
+
+          it("has a top level description", () => {
+            const tracker = new ProgressTracker("Test description");
+            const json = tracker.toJSON();
+            expect(json.description).to.be.equal("Test description");
+          });
+
+          it("has a top level isError property", () => {
+            const tracker = new ProgressTracker();
+            const layer = tracker.addLayer("Test", 5);
+            layer.next("one");
+            const noErrorJson = tracker.toJSON();
+            expect(noErrorJson.isError).to.be.false;
+            layer.error(new Error("Testing"));
+            const json = tracker.toJSON();
+            expect(json.isError).to.be.true;
+          });
+        });
+
+        describe("save", () => {
+          it("can save to the database", async () => {
+            const tracker = new ProgressTracker();
+            const dbId = await tracker.save({
+              db: {
+                collection: (name) => {
+                  expect(name).to.be.equal("progressLogs");
+                  return {
+                    add: (log) => {
+                      expect(log.user.uid).to.be.equal("uid");
+                      expect(log.user.photoURL).to.be.equal("photoURL");
+                      expect(log.user.displayName).to.be.equal("displayName");
+                      expect(log.dbPath).to.be.equal("some/dbPath");
+                      return {
+                        id: "someDbId"
+                      };
+                    }
+                  }
+                }
+              },
+              currentUser: {
+                uid: "uid",
+                photoURL: "photoURL",
+                displayName: "displayName"
+              },
+              dbPath: "some/dbPath"
+            });
+            expect(dbId).to.be.equal("someDbId");
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

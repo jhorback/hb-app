@@ -1,0 +1,37 @@
+<link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/paper-styles/shadow.html">
+
+<!-- paper-styles-classes contains classes for typography and shadow
+<link rel="import" href="../bower_components/paper-styles/paper-styles-classes.html">
+-->
+
+<custom-style>
+    <style>
+        paper-toast {
+            display: flex;
+            align-items: center;
+        }
+
+        paper-toast paper-button {
+            flex: 1;
+            margin: 0 0 0 20px;
+            color: var(--primary-color);
+        }
+        
+        [hidden] {
+            display: none !important;
+        }
+
+        .system-activity {
+            position: fixed;
+            top: 0;
+            width: 100%;
+
+            --paper-progress-height: 3px;
+            --paper-progress-container-color: transparent;
+            --paper-progress-active-color: var(--accent-color);
+        }
+    </style>
+</custom-style>

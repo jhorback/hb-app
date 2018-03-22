@@ -1,0 +1,42 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="../hb-app/hb-doc-routing.html">
+<link rel="import" href="hb-doc.html">
+
+<dom-module id="hb-doc-route">
+  <template>
+    <app-route
+        route="[[route]]"
+        pattern="/docs/:uid"
+        data="{{routeData}}"
+        active="{{routeActive}}"
+        tail="{{routeTail}}"
+    ></app-route>
+    <template is="dom-if" if="[[routeActive]]">        
+        <hb-doc doc-id="[[getDocId(routeData.uid)]]"></hb-doc>
+        <hb-doc-routing route="[[routeTail]]"></hb-doc-routing>
+    </template>
+  </template>
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbDocRoute extends Polymer.Element {
+      static get is() { return 'hb-doc-route'; }
+      static get properties() {
+        return {
+          route: {
+              type: Object
+          }
+        };
+      }
+
+      getDocId(uid) {
+        return `doc-${uid}`;
+      }
+    }
+
+    window.customElements.define(HbDocRoute.is, HbDocRoute);
+  </script>
+</dom-module>

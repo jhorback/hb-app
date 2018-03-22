@@ -1,0 +1,35 @@
+<link rel="import" href="hb.Doc.html">
+<script>
+/*
+ *
+ */
+hb["hb-doc"] = class extends hb.Doc {
+    static get is() { return "hb-doc"; }
+
+    static get events() {
+        return {
+            "thumbnail-changed": "_arworkThumbnailChanged",
+            "description-changed": {
+                artwork: "_artworkDescriptionChanged"
+            }
+        };
+    }
+
+    static get default() {
+        return Object.assign({}, super.default, {
+            content: [{
+                foo: "bar"
+            }]
+        });
+    }
+
+    _arworkThumbnailChanged(doc, refDoc) {
+        // update and return doc
+        // should this return wether or not anything was changed?
+        //      could do this by returning a falsy value other than a promise.
+        //      this would allow the shortcutting of the update call as well as the _handleEvents call
+        // call this.dispatchEvent if needed
+    }
+}
+
+</script>

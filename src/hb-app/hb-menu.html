@@ -1,0 +1,189 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../hb-styles/hb-styles.html">
+<link rel="import" href="../hb-app/hb-system-data.html">
+<link rel="import" href="../hb-system-elements/hb-system-feedback.html">
+<link rel="import" href="hb-config.html">
+<link rel="import" href="hb-current-user.html">
+
+<dom-module id="hb-menu">
+    <template>
+        <style include="hb-page-layout-shared-styles"></style>        
+        <style>
+            :host {
+                display: block;
+                height: 100%;
+            }
+
+            .flex-container {
+                display: flex;
+                flex-direction: column;
+                height: 100%;                
+            }
+
+            app-toolbar {
+                margin: 0;
+            }
+
+            a,
+            a:visited  {
+                color: inherit;
+                text-decoration: none;
+            }
+
+            .bottom-bar {
+                margin-top: auto;
+                @apply --paper-font-body2;
+                cursor: default;
+            }
+
+            .paper-font-body2 {
+                @apply --paper-font-body2;
+            }
+
+            .paper-font-body1 {
+                @apply --paper-font-body1;
+            }
+
+            paper-icon-item:focus,
+            paper-icon-item:hover,
+            paper-item:hover {
+                cursor: pointer;
+                background: var(--item-color);
+            }
+
+            .sign-in-text {
+                opacity: 0.6;
+            }
+
+            .avatar {
+                display: inline-block;
+                box-sizing: border-box;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-size: contain;
+            }
+
+            hr.divider {
+                display: block;
+                height: 1px;
+                min-height: 1px;
+                max-height: 1px;
+                background-color: var(--paper-divider-color, #000);
+                opacity: 0.12;
+                @apply --paper-divider;
+            }
+
+        </style>
+        <hb-config config="{{config}}"></hb-config>
+        <hb-system-data app="{{app}}" app-state="{{appState}}" system-feedback="{{systemFeedback}}"></hb-system-data>
+        <hb-system-feedback system-feedback="[[systemFeedback]]"></hb-system-feedback>    
+        <hb-current-user user="{{user}}" for="hb-menu"></hb-current-user>
+        <div class="flex-container">
+            <app-header>
+                <app-toolbar></app-toolbar>
+                <app-toolbar>                                
+                    <div main-title>[[config.applicationTitle]]</div>
+                </app-toolbar>
+            </app-header>
+            <div on-tap="close">               
+                <a href="[[rootPath]]/" tabindex="-1">
+                    <paper-icon-item>
+                        <iron-icon icon="hb:home" item-icon slot="item-icon"></iron-icon>
+                        <span class="paper-font-body2">Home</span>
+                    </paper-icon-item>
+                </a>
+                <template is="dom-repeat" items="[[app.menu]]" as="menuItem">
+                    <a href="[[rootPath]]/[[menuItem.url]]" tabindex="-1">
+                        <paper-icon-item>
+                            <span class="paper-font-body2">[[menuItem.title]]</span>
+                        </paper-icon-item>
+                    </a>
+                </template>                
+                <hr class="divider"/>
+                <a href="[[rootPath]]/site/settings" tabindex="-1">
+                    <paper-icon-item>
+                        <iron-icon icon="hb:settings" item-icon slot="item-icon"></iron-icon>
+                        <span class="paper-font-body2">Settings</span>
+                    </paper-icon-item>
+                </a>
+            </div>
+            <div class="bottom-bar">
+                <hr class="divider"/>
+                <a href="[[rootPath]]/site/profile/[[user.uid]]?profile" hidden$="[[user.isAnonymous]]"> 
+                    <paper-icon-item>
+                        <div class="avatar" slot="item-icon"
+                            style="background-image: url([[user.photoURL]]);"
+                        ></div>
+                        <div class="sign-in-text">[[user.displayName]]</div>
+                    </paper-icon-item>
+                </a>
+                <paper-icon-item on-tap="signIn" hidden$="[[!user.isAnonymous]]">
+                    <div class="avatar" slot="item-icon"
+                        style="background-image: url([[importPath]]/assets/google.svg);"
+                    ></div>
+                    <div class="sign-in-text">Sign in with Google</div>
+                </paper-icon-item>
+            </div>
+        </div>
+    </template>
+    <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbMenu extends Polymer.Element {
+        static get is() { return 'hb-menu'; }
+    
+        static get properties() {
+            return {
+                user: {
+                    type: Object
+                },
+                app: {
+                    type: Object
+                },
+                appState: {
+                    type: Object
+                }
+            };
+        }
+
+        close() {
+            if (this.parentElement.tagName === "APP-DRAWER") {
+                this.parentElement.close();
+            }
+
+            this.dispatchEvent(new CustomEvent("close-menu", {
+                bubbles: true,
+                composed: true
+            }));
+        }
+
+        signIn() {
+            this.shadowRoot.dispatchEvent(new CustomEvent("user-sign-in"));
+        }
+
+        // _goToProfile(event) {
+        //     var profile = document.createElement("hb-user-profile-page");
+        //     profile.uid = this.user.uid;
+        //     profile.isCurrentUser = true;
+        //     profile.addEventListener("user-profile-closed", event => {
+        //         //document.body.appendChild(this.parentElement);
+        //         //this.close(); 
+        //     });
+        //     //this.close();
+        //     //this.parentElement.remove();
+        //     //this.remove();
+        //     document.body.appendChild(profile);
+        // }
+    }
+    
+    window.customElements.define(HbMenu.is, HbMenu);
+    </script>
+            
+</dom-module>

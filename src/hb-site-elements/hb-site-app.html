@@ -1,0 +1,103 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-route/app-route.html">
+<link rel="import" href="hb-logs-page.html">
+<link rel="import" href="hb-menu-config-page.html">
+<link rel="import" href="hb-settings-page.html">
+<link rel="import" href="hb-user-profile-page.html">
+<link rel="import" href="hb-users-page.html">
+<link rel="import" href="hb-about-page.html">
+
+<dom-module id="hb-site-app">
+  <template>
+     <hb-current-user user="{{user}}" for="hb-site-app"></hb-current-user>
+
+     <!-- Settings page route -->
+     <app-route
+        route="[[route]]"
+        pattern="/settings"
+        active="{{settingsRouteActive}}">
+    </app-route>
+    <template is="dom-if" if="[[_hasPermission(user, settingsRouteActive)]]" restamp>
+        <hb-settings-page></hb-settings-page>
+    </template>
+
+    <!-- Users page route -->    
+    <app-route
+        route="[[route]]"
+        pattern="/users"
+        active="{{usersRouteActive}}">
+    </app-route>
+    <template is="dom-if" if="[[usersRouteActive]]" restamp>
+        <hb-users-page></hb-users-page>
+    </template>
+
+    <!-- Profile page route -->    
+    <app-route
+        route="[[route]]"
+        pattern="/profile/:id"
+        data="{{profileRouteData}}"
+        active="{{profileRouteActive}}">
+    </app-route>
+    <template is="dom-if" if="[[_hasPermission(user, profileRouteActive)]]" restamp>
+        <hb-user-profile-page uid="[[profileRouteData.id]]"></hb-user-profile-page>
+    </template>
+
+    <!-- Menu config page route -->    
+    <app-route
+        route="[[route]]"
+        pattern="/menu"
+        active="{{menuRouteActive}}">
+    </app-route>
+    <template is="dom-if" if="[[_hasPermission(user, menuRouteActive)]]" restamp>
+        <hb-menu-config-page></hb-menu-config-page>
+    </template>
+
+
+     <!-- Logs page route -->    
+    <app-route
+        route="[[route]]"
+        pattern="/logs"
+        active="{{logsRouteActive}}">
+    </app-route>
+    <template is="dom-if" if="[[_hasPermission(user, logsRouteActive)]]" restamp>
+        <hb-logs-page></hb-logs-page>
+    </template>
+
+     <!-- About page route -->    
+     <app-route
+        route="[[route]]"
+        pattern="/about"
+        active="{{aboutPageActive}}">
+    </app-route>
+    <template is="dom-if" if="[[_hasPermission(user, aboutPageActive)]]" restamp>
+        <hb-about-page></hb-about-page>
+    </template>
+  </template>
+
+    <script>
+    /**
+    * @customElement
+    * @polymer
+    */
+    class HbSiteApp extends Polymer.Element {
+        static get is() { return 'hb-site-app'; }
+        
+        static get properties() {
+            return {
+                route: {
+                    type: Object
+                },
+                user: {
+                    type: Object
+                }
+            };
+        }
+
+        _hasPermission(user, routeActive) {
+            return routeActive && this.user.permissions.isSiteAdmin;
+        }
+    }
+
+    window.customElements.define(HbSiteApp.is, HbSiteApp);
+    </script>
+</dom-module>

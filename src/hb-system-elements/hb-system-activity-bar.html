@@ -1,0 +1,90 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-progress/paper-progress.html">
+<link rel="import" href="../hb-styles/hb-styles.html">
+<link rel="import" href="../hb-app/EventMap.html">
+
+<script>
+   /**
+    * @polymer
+    * @demo ../src/hb-app/demo/SystemFeedback.html
+    */
+    class HbSystemActivityBar extends EventMap(Polymer.Element) {
+        static get is() { return 'hb-system-activity-bar'; }
+
+        static get properties() {
+            return {
+                activity: {
+                    type: Array,
+                    value: [/* {
+                        id: Symbol,
+                        description: String,
+                        max: Number,
+                        value: Number
+                    } */]
+                }
+            };
+        }
+
+        static get events() {
+            return {
+                "system-activity-changed": {
+                    listenAt: "parent",
+                    handler: "_systemActivityChanged"
+                }
+            };
+        }
+
+        disconnectedCallback() {
+            super.disconnectedCallback();
+
+            this.hideActivity();
+        }
+
+        _systemActivityChanged(event) {
+            if (this.activity && this.activity.length > 0) {
+                this.showActivity();
+            } else {
+                this.hideActivity();
+            }
+        }
+
+        showActivity() {
+            if (!this._bar) {
+                this._bar = document.createElement("paper-progress");                
+                this._bar.classList.add("system-activity");
+                document.body.appendChild(this._bar);
+            }
+            
+            const state = this.activity.reduce((state, item) => {
+                state.description.push(item.description);
+                if (item.max || item.value) {
+                    state.max = state.max + item.max;
+                    state.value = state.value + item.value;
+                } else {
+                    state.hasIndeterminant = true;
+                }
+                return state;
+            }, {
+                max: 0,
+                value: 0,
+                hasIndeterminant: false,
+                description: []
+            });
+
+            if (state.max) {
+                this._bar.max = state.max;
+                this._bar.value = state.value;
+                this._bar.secondaryProgress = state.value;
+            }
+            this._bar.indeterminate = state.hasIndeterminant;
+            this._bar.title = state.description.join(", ");
+        }
+
+        hideActivity() {
+            this._bar && this._bar.remove();
+            delete this._bar;
+        }
+    }
+
+    window.customElements.define(HbSystemActivityBar.is, HbSystemActivityBar);
+</script>

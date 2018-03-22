@@ -1,0 +1,56 @@
+<link rel="import" href="hb.html">
+<link rel="import" href="hb.config.html">
+<script>
+/*
+ *
+ */
+hb.DocumentCreator = class {
+    constructor(db = hb.db, currentAuthor = hb.currentAuthor) {
+        this.db = db;
+        this.currentAuthor = currentAuthor;
+    }
+
+    static getDocumentId(route, title) {
+        return `${route}-${encodeURIComponent(title.split(" ").join("-").replace(/[^a-z0-9]/gi, "-").toLowerCase())}`;
+    }
+
+    async _getDocId(docId, progressTracker) {
+        const progressLayer = progressTracker.addLayer("Getting document id", 2);
+        progressLayer.next(`Checking id ${docId}`);
+        const snapshot = await this.db.doc(`docs/${docId}`).get();
+        if (snapshot.exists) {
+            progressLayer.done("Id exists...");
+            return await this._getDocId(`${docId}-`, progressTracker);
+        } else {
+            progressLayer.done("Id found");
+            return docId;
+        }
+    }
+
+    async createDocument(is, title, progressTracker) {
+        const config = hb.config.current();
+        const docType = config.docTypes.find(dt => dt.is === is);
+        const doc = hb[is].default;
+        const progressLayer = progressTracker.addLayer("Creating document", 3);
+        progressLayer.next("Getting id");
+        try {
+            const docId = await this._getDocId(
+                hb.DocumentCreator.getDocumentId(docType.route, title),
+                progressTracker);
+            progressLayer.next("Creating document");
+            const {uid, photoURL, displayName} = this.currentAuthor;
+            doc.docId = docId;
+            doc.title = title;
+            doc.title_UPPERCASE = title.toUpperCase(); 
+            doc.author = {uid, photoURL, displayName};
+            doc.created = new Date();
+            await this.db.doc(`docs/${docId}`).set(doc);
+            progressLayer.done("Document created");
+            return { docId, doc };
+        } catch (error) {
+            progressLayer.error(error);
+        }        
+    }
+}
+
+</script>

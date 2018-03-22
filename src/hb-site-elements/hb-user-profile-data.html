@@ -1,0 +1,61 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../hb/hb.html">
+<link rel="import" href="../hb-app/EventMap.html">
+<link rel="import" href="../hb-app/SystemFeedback.html">
+<script>
+/**
+ * @customElement
+ * @polymer
+ */
+class HbUserProfileData extends
+        Polymer.FirestoreMixin(
+        SystemFeedback(
+        EventMap(Polymer.Element
+    ))) {
+    static get is() { return 'hb-user-profile-data'; }
+
+    static get properties() {
+        return {
+            uid: {
+                type: String,
+                value: null
+            },
+            user: {
+                type: Object,
+                doc: "users/{uid}",
+                value: {},
+                notify: true,
+                live: true
+            },
+            userReady: {
+                type: Boolean,
+                observer: "_userReadyChanged"
+            },
+            userState: {
+                type: Object,
+                notify: true,
+                value: {
+                    isReady: false,                    
+                }
+            }
+        };
+    }
+
+    static get eventsListenAt() {
+        return "parent";
+    }
+    
+    static get events() {
+        return {
+           
+        };
+    }
+
+    _userReadyChanged() {
+        this.set("userState.isReady", this.userReady);
+    }
+
+}
+
+window.customElements.define(HbUserProfileData.is, HbUserProfileData);
+</script>

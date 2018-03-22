@@ -1,0 +1,23 @@
+<link rel="import" href="hb.hb-doc.html">
+<script>
+/*
+ *
+ */
+hb["hb-art-doc"] = class extends hb["hb-doc"] {
+    static get is() { return "hb-art-doc"; }
+
+    static get events() {
+        return {            
+        };
+    }
+
+    static get default() {
+        return Object.assign({}, super.default, {
+            content: [{
+                foo: "bar"
+            }]
+        });
+    }
+}
+
+</script>

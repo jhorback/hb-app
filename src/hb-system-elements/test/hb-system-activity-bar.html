@@ -1,0 +1,88 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    <title>hb-system-activity-bar tests</title>
+
+    <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <script src="../../../bower_components/web-component-tester/browser.js"></script>
+
+    <link rel="import" href="../hb-system-activity-bar.html">
+</head>
+
+<body>
+    <test-fixture id="basic">
+        <template>
+            <hb-system-activity-bar></hb-system-activity-bar>
+        </template>
+    </test-fixture>
+
+    <script>
+        'use strict';
+
+        describe("hb-system-activity-bar", () => {
+            var hbSystemActivityBar;
+
+            beforeEach(() => {
+                hbSystemActivityBar = fixture("basic");
+            });
+
+            it("exists", () => {
+                expect(hbSystemActivityBar).to.exist;
+            });
+
+            it("is upgraded", () => {
+                expect(hbSystemActivityBar instanceof Polymer.Element).to.be.true;
+            });
+
+            it("creates progress bar when calling show activity", () => {
+                hbSystemActivityBar.showActivity();
+                const bar = document.querySelectorAll(".system-activity");
+                expect(bar.length).to.be.at.least(1);
+            });
+
+            it("shows progress bar when activity is added", () => {
+                hbSystemActivityBar.activity = [1];
+                hbSystemActivityBar.dispatchEvent(new CustomEvent("system-activity-changed", {
+                    bubbles: true
+                }));
+                const bar = document.querySelectorAll(".system-activity");
+                expect(bar.length).to.be.at.least(1);
+            });
+
+            it("hides progress bar when no activity is present", () => {
+                hbSystemActivityBar.activity = [1];
+                hbSystemActivityBar.dispatchEvent(new CustomEvent("system-activity-changed", {
+                    bubbles: true
+                }));
+                let bar = document.querySelectorAll(".system-activity");
+                expect(bar.length).to.be.at.least(1);
+
+                hbSystemActivityBar.activity = [];
+                hbSystemActivityBar.dispatchEvent(new CustomEvent("system-activity-changed", {
+                    bubbles: true
+                }));
+                bar = document.querySelectorAll(".system-activity");
+                expect(bar.length).to.be.equal(0);
+            });
+
+            it("removes progress when the element is removed", () => {
+                hbSystemActivityBar.activity = [1];
+                hbSystemActivityBar.dispatchEvent(new CustomEvent("system-activity-changed", {
+                    bubbles: true
+                }));
+                let bar = document.querySelectorAll(".system-activity");
+                expect(bar.length).to.be.at.least(1);
+
+                hbSystemActivityBar.remove();
+                bar = document.querySelectorAll(".system-activity");
+                expect(bar.length).to.be.equal(0);
+            });
+        });
+    </script>
+</body>
+
+</html>

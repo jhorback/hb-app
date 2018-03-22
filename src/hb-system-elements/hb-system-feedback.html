@@ -1,0 +1,54 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../hb-app/EventMap.html">
+<link rel="import" href="hb-system-activity-bar.html">
+<link rel="import" href="hb-system-toast.html">
+<link rel="import" href="hb-system-error.html">
+
+<dom-module id="hb-system-feedback">
+    <template>    
+        <hb-system-activity-bar activity="[[systemFeedback.activity]]"></hb-system-activity-bar>
+        <hb-system-toast toast="[[systemFeedback.toast]]"></hb-system-toast>
+        <hb-system-error error="[[systemFeedback.error]]"></hb-system-error>  
+    </template>  
+    <script>
+        /**
+         * @polymer
+         * @demo ../src/hb-app/demo/SystemFeedback.html
+         */
+         class HbSystemFeedback extends EventMap(Polymer.Element) {
+
+            static get is() { return "hb-system-feedback"; }
+
+            static get properties() {
+                return {
+                    systemFeedback: {
+                        type: Object,
+                        value: {
+                            activity: null,
+                            toast: null,
+                            error: null
+                        }
+                    }
+                };
+            }
+
+            static get eventsListenAt() {
+                return "parent";
+            };
+
+            static get events() {
+                return {
+                    "system-activity-changed": "_marshalEvent",
+                    "system-toast-changed": "_marshalEvent",
+                    "system-error-changed": "_marshalEvent"
+                };
+            }
+
+            _marshalEvent(event) {
+                this.shadowRoot.dispatchEvent(new CustomEvent(event.type));
+            }
+        }
+
+        window.customElements.define(HbSystemFeedback.is, HbSystemFeedback);
+    </script>
+</dom-module>

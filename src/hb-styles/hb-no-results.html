@@ -1,0 +1,54 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="hb-styles.html">
+<dom-module id="hb-no-results">
+    <template>
+        <style>
+            #noResults {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 20px 0 30px;
+            }
+            #noResults iron-icon {
+                width: 200px;
+                height: 200px;
+                color: var(--disabled-text-color);
+            }
+            #noResults h2 {
+                margin: 0;
+                padding: 10px 0;
+                color: var(--secondary-text-color);
+                @apply --paper-font-subhead;
+            }
+        </style>
+        <div id="noResults">
+            <iron-icon icon="[[icon]]"></iron-icon>
+            <h2>[[text]]</h2>
+        </div>
+    </template>
+<script>
+/**
+ * @customElement
+ * @polymer
+ */
+class HbNoResults extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
+    static get is() { return 'hb-no-results'; }
+
+    static get properties() {
+        return {
+            text: {
+                type: String,
+                value: "No results"
+            },
+            icon: {
+                type: String,
+                value: "hb:not-interested"
+            }
+        };
+    }
+}
+
+window.customElements.define(HbNoResults.is, HbNoResults);
+</script>

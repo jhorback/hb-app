@@ -1,0 +1,41 @@
+<link rel="import" href="hb.DomainObj.html">
+<link rel="import" href="hb.config.html">
+<script>
+/**
+ * Base class for doc documents
+ */
+hb.Doc = class extends hb.DomainObj {
+    
+    static get default() {
+        return {
+            docId: null,
+            title: "",
+            is: this.is,
+            author: {/*{userId, displayName}*/},
+            permissions: {},
+            thumb: {},
+            generatedThumb: {},
+            description: "",
+            generatedDescription: "",
+            content: []
+        };
+    }
+
+    static getUrl(docId) {
+        const route = this.docType.route;
+        const tail = docId.substring(route.length + 1, docId.length);
+        return `${route}/${tail}`;
+    }
+
+    static get docType() {
+        return hb.config.docTypes.find(dt => dt.is === this.is);
+    }
+
+    /**
+     * 
+     */
+    constructor({db = hb.db, id}) {      
+        super({db, dbPath: `docs/${id}`});
+    }
+}
+</script>

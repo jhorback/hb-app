@@ -1,0 +1,125 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../hb/hb.html">
+<link rel="import" href="../hb-app/EventMap.html">
+<script>
+/**
+ * @customElement
+ * @polymer
+ */
+class HbLogsData extends
+        Polymer.FirestoreMixin(
+        EventMap(Polymer.Element
+    )) {
+    static get is() { return 'hb-logs-data'; }
+
+    static get properties() {
+        return {
+            logs: {
+                type: Array,
+                collection: "progressLogs",
+                value: [],
+                notify: true,
+                live: true,
+                query: (q, el) => {
+                    q = q.orderBy('started', 'desc').limit(100);
+                    return q;
+                },
+            },
+            logsReady: {
+                type: Boolean,
+                observer: "_logsReadyChanged"
+            },
+            logsState: {
+                type: Object,
+                notify: true,
+                value: {
+                    isReady: false,
+                    selectedLog: null,
+                    chartCols: null,
+                    chartRows: null,
+                    adjustChartTime: false
+                }
+            }
+        };
+    }
+
+    static get eventsListenAt() {
+        return "parent";
+    }
+    
+    static get events() {
+        return {
+            "log-selected": "_logSelected",
+            "toggle-chart-time": "_toggleChartTime"
+        };
+    }
+
+    _logsReadyChanged() {
+        this.set("logsState.isReady", this.logsReady);
+    }
+
+    _logSelected(event) {
+        const {id} = event.detail;
+        const log = this.logs.find(l => l.__id__ === id);
+        this.set("logsState.selectedLog", log);
+        this._updateForSelectedLog();
+        
+    }
+
+    _updateForSelectedLog() {
+        const log = this.logsState.selectedLog;
+
+        const cols = [{
+            label: "Layer",
+            type: "string"
+        }, {
+            label: "Description",
+            type: "string"
+        }, {
+            label: "Start",
+            type: "date"
+        }, {
+            label: "End",
+            type: "date"
+        }];
+
+        const rows = log.events.map((event, index) => {
+            const row = [];
+            const {layerId, description, dateTime, type} = event;
+            const  nextEvent = log.events[index + 1];
+            const layer = log.layers[layerId];
+
+            const start = dateTime;
+            let end = nextEvent ? nextEvent.dateTime : layer.finished;
+            if (end.getTime() - start.getTime() === 0) {
+                end = new Date(start.getTime() + (this.logsState.adjustChartTime ? 500 : 5));
+            }
+
+            // const rolwLabel = `${layer.description} (${layerId}-${index})`;
+            const rowLabel = `${type} ${description} ${index}`;
+            //const rowLabel = String(index);
+            // const itemLabel = description || type;
+            const itemLabel = `${layer.description}-${layerId}`;
+            
+            row[0] = rowLabel;
+            row[1] = itemLabel;
+            row[2] = start;
+            row[3] = end;
+            return row;
+        });
+
+        this.set("logsState.chartCols", cols);
+        this.set("logsState.chartRows", rows);
+        this.dispatchEvent(new CustomEvent("selected-log-changed"));
+    }
+
+    _toggleChartTime(event) {
+        const {adjustChartTime} = this.logsState;
+        this.set("logsState.adjustChartTime", !adjustChartTime);
+        this._updateForSelectedLog();
+    }
+  
+}
+
+window.customElements.define(HbLogsData.is, HbLogsData);
+</script>

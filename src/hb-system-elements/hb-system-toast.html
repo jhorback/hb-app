@@ -1,0 +1,88 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/paper-toast/paper-toast.html">
+<link rel="import" href="../hb-app/EventMap.html">
+<link rel="import" href="../hb-styles/hb-styles.html">
+
+<script>
+   /**
+    * @polymer
+    * @demo ../src/hb-app/demo/SystemFeedback.html
+    */
+    class HbSystemToast extends EventMap(Polymer.Element) {
+        static get is() { return 'hb-system-toast'; }
+ 
+        static get properties() {
+            return {
+                /**
+                 * The toast object bound to the data element.
+                 * If the action is present, the text will be used in a button and
+                 *   the eventName will be fired when clicking the button.
+                 * If persist is true, the toast.duration will be set to 0.
+                 * If showClose is true, the toast will have a close button.
+                 * Could implement delay: true which would delay a 1/2 second before showing the toast.
+                 */
+                toast: {
+                    type: Object,
+                    value: {}
+                    /* {
+                        text,
+                        action: { text, eventName },
+                        persist,
+                        showClose
+                    } */
+                }
+            };
+        }
+ 
+        static get events() {
+            return {
+                "system-toast-changed": {
+                    listenAt: "parent",
+                    handler: "_systemToastChanged"
+                }
+            };
+        }
+ 
+        _systemToastChanged(event) {
+            const toast = document.createElement("paper-toast");
+            toast.text = this.toast.text;
+ 
+            if (this.toast.action) {
+                const { text, eventName } = this.toast.action;
+                const actionButton = document.createElement("paper-button");
+                actionButton.innerHTML = text;
+                actionButton.addEventListener("click", e => {
+                    this.dispatchEvent(new CustomEvent(eventName, {
+                        bubbles: true,
+                        composed: true
+                    }));
+                    toast.close();
+                });
+                toast.appendChild(actionButton);
+                toast.duration = 30 *1000;
+            }
+ 
+            if (this.toast.showClose) {
+                const closeButton = document.createElement("paper-icon-button");
+                closeButton.icon = "ai:close";
+                closeButton.addEventListener("click", e => toast.close());
+                toast.appendChild(closeButton);
+            }
+ 
+            if (this.toast.persist) {
+                toast.duration = 0;
+            }
+ 
+            toast.opened = true;
+ 
+            setTimeout(() => {
+                toast.remove();
+            }, toast.duration);
+ 
+            document.body.appendChild(toast);
+        }
+    }
+ 
+    window.customElements.define(HbSystemToast.is, HbSystemToast);
+</script>
+ 

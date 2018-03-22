@@ -1,12 +1,10 @@
-# &lt;ipt&gt;
+# &lt;hb&gt;
 
  * This application uses Node, Polymer, and Firebase. 
  * Install these before running tasks.
 
 ## Environments
-> Production - [iplayten.com](https://iplayten.com)
-
-> Staging - [iplayten-staging.firebase.com](https://iplayten-staging.firebaseapp.com)
+> Staging - [harbor-staging.firebase.com](https://harbor-staging.firebaseapp.com)
 
 
 
@@ -27,8 +25,7 @@
 
 ## Deploy
 * **push-staging** - Pushes the current state to the staging url. (builds, but skips the tests).
-* **deploy-staging** - Runs tests, polybuild, and firebase deploy in the staging environment. (https://iplayten-staging.firebaseapp.com)
-* **deploy-production** - Runs tests, polybuild, and firebase deploy on default (PUSHES TO PRODUCTION). (https://iplayten.com)
+* **deploy-staging** - Runs tests, polybuild, and firebase deploy in the staging 
 
 # Polymer tasks
 Notable Polymer cli commands that can be run directly.

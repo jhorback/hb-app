@@ -1,0 +1,117 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="hb-system-data.html">
+<link rel="import" href="hb-no-home-page.html">
+<link rel="import" href="hb-config.html">
+
+<dom-module id="hb-home">
+    <template>
+         <style>
+            :host {
+                display: block;
+                height: 100%;
+            }
+
+            [slot="app-toolbar"] a {
+                color: inherit;
+            }
+
+            main {
+                padding: 16px 0;
+            }
+
+            [main-title] {
+                font-size: inherit;
+                font-weight: inherit;
+            }
+
+            @media all and (min-width: 641px) {
+                main {
+                    padding: 32px 64px;
+                }
+            }
+
+            .loading-home {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: var(--primary-header-background-color);
+                color: var(--primary-header-color);
+                text-align: center;
+                padding-top: 4rem;
+                font-weight: 100;
+                font-size: 3rem;
+            }
+        </style>
+        <hb-system-data app="{{app}}" app-state="{{appState}}"></hb-system-data>
+        <div hidden$="[[appState.isReady]]">
+            <div class="loading-home">
+                <hb-config config="{{config}}"></hb-config>
+                [[config.applicationTitle]]...
+            </div>
+        </div>
+        <template is="dom-if" if="[[appState.showNoHome]]">
+            <hb-no-home-page></hb-no-home-page>
+        </template>
+    </template>
+    <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class HbHome extends Polymer.Element {
+        static get is() { return 'hb-home'; }
+    
+        static get properties() {
+            return {
+                app: {
+                    type: Object,
+                    observer: "_appChanged"
+                },
+
+                appState: {
+                    type: Object
+                },                
+    
+                route: {
+                    type: Object,
+                    observer: "_routeChanged"
+                }
+            };
+        }
+
+        /** Add/remove the home doc */
+        _appChanged() {
+            if (!this.app || !this.app.homeDoc || !this.app.homeDoc.docId) {
+                if (this.home) {
+                    this.home.remove();
+                }
+                return;
+            }
+
+            const {docId, is} = this.app.homeDoc;
+            if (this.home && this.home.docId !== docId) {
+                this.home.remove();
+            }
+
+            if (!this.home) {
+                this.home = document.createElement(is);
+                this.home.docId = docId;
+                this.home.route = this.route;
+                this.shadowRoot.appendChild(this.home);
+            }
+        }
+
+        _routeChanged() {
+            if (this.home) {
+                this.home.route = this.route;
+            }
+        }
+    
+    }
+    
+    window.customElements.define(HbHome.is, HbHome);
+    </script>
+            
+</dom-module>

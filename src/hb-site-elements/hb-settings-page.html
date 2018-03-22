@@ -1,0 +1,104 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-drawer/app-drawer.html">
+<link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
+<link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
+<link rel="import" href="../../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
+<link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+<link rel="import" href="../hb-app/hb-menu.html">
+<link rel="import" href="../hb-app/hb-config.html">
+
+<dom-module id="hb-settings-page">
+  <template>
+    <style include="hb-page-layout-shared-styles"></style>
+    <style>
+        /* why no space? and isn't this built in? */
+        [main-title][spacer] {
+            margin-left: 64px;
+        }
+        .links-container {
+            max-width:800px;
+            margin:2em auto;
+        }
+        .links-container a {
+            color: inherit;
+            text-decoration: inherit;
+            cursor: pointer;
+        }
+    </style>
+    <hb-config about="{{about}}"></hb-config>
+    <app-drawer-layout id="drawerLayout" force-narrow>
+        <app-drawer id="drawer" slot="drawer" swipe-open>
+            <hb-menu></hb-menu>
+        </app-drawer>
+        <app-header-layout>
+            <app-header slot="header" fixed condenses effects="waterfall">
+                <app-toolbar>
+                    <paper-icon-button icon="hb:menu" drawer-toggle></paper-icon-button>                    
+                </app-toolbar>
+                <app-toolbar>
+                    <div spacer main-title>Settings</div>
+                </app-toolbar>
+            </app-header>
+            <main>
+            <!-- main content -->
+            <!-- create a basic page for settings that just has links
+
+            can do doulble high toolbar header
+            include drawer and menu -->
+                <div class="links-container">
+                    <a href="[[rootPath]]/site/users" tabindex="-1">
+                        <paper-item>
+                            <paper-item-body two-line>
+                                <div class="paper-font-body2">Users</div>
+                                <div secondary>View and update users including permissions</div>
+                            </paper-item-body>
+                        </paper-item>
+                    </a>            
+                    <a href="[[rootPath]]/site/menu" tabindex="-1">
+                        <paper-item>
+                            <paper-item-body two-line>
+                                <div class="paper-font-body2">Menu</div>
+                                <div secondary>Update the menu and home page</div>
+                            </paper-item-body>
+                        </paper-item>
+                    </a>
+                    <a href="[[rootPath]]/site/logs" tabindex="-1">
+                        <paper-item>
+                            <paper-item-body two-line>
+                                <div class="paper-font-body2">Progress logs</div>
+                                <div secondary>View databse update logs</div>
+                            </paper-item-body>
+                        </paper-item>
+                    </a>
+                    <a href="[[rootPath]]/site/about" tabindex="-1">
+                        <paper-item>
+                            <paper-item-body two-line>
+                                <div class="paper-font-body2">Application version</div>
+                                <div secondary>[[about.currentVersion.version]] - [[about.currentVersion.description]]</div>
+                            </paper-item-body>
+                        </paper-item>
+                    </a>
+                </div>
+
+            </main>
+        </app-header-layout>
+    </app-drawer-layout> 
+  </template>
+
+    <script>
+    /**
+    * @customElement
+    * @polymer
+    */
+    class HbSettingsPage extends Polymer.Element {
+        static get is() { return 'hb-settings-page'; }
+    }
+
+    window.customElements.define(HbSettingsPage.is, HbSettingsPage);
+    </script>
+</dom-module>

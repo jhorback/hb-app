@@ -1,0 +1,242 @@
+<link rel="import" href="hb.html">
+<link rel="import" href="hb.DomainObj.html">
+<link rel="import" href="hb.DocumentCreator.html">
+<script>
+/**
+ * Base class for doc documents
+ */
+hb.SystemApp = class extends hb.DomainObj { 
+    static get is() { 
+        return "SystemApp";
+    }
+
+    static get default() {
+        return {
+            homeDoc: {/*                
+                docId: String,
+                is: String,
+                title: String                        
+            */},
+            menu: [/*{
+                docId: String,
+                is: String,
+                title: String,
+                url: String
+            }*/],
+
+            // move these permissions out, where? config?
+            permissions: [{
+                key: "sysAdmin",
+                name: "System Administrator",
+                description: "Can change system level settings."
+            }, {
+                key: "siteAdmin",
+                name: "Site Administrator",
+                description: "Can change site settings."
+            }, {
+                key: "author",
+                name: "Author",
+                description: "Can create documents and upload content."
+            }]
+        };
+    }
+
+    static get events() {
+        return {		
+            "title-changed": {
+                "homeDoc": "_homeDocTitleChanged",
+                "menuItem": "_menuItemTitleChanged"
+            }
+	    };
+	}
+
+    constructor({db}) {
+        super({db, dbPath: "system/app"})
+    }
+
+    /**
+     * Creates the document and adds it as the System.App.homeDoc.
+     * @returns {app, docId, doc}
+     */
+    async createHomePage({is, title, progressTracker}) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+
+        try {     
+            const docCreator = new hb.DocumentCreator();
+
+            // create the document
+            const { docId, doc } = await docCreator.createDocument(is, title, progressTracker);
+            const app = await this.update(app => {
+                progressLayer.next("Saving");
+                this._setHomePage(app, doc);
+                return app;            
+            }, progressTracker);
+            progressLayer.done("Home page created");
+            return {app, docId, doc};
+
+        } catch (error) {
+            progressLayer.error(error);
+        }
+    }
+
+
+    async setHomePage({doc, progressTracker}) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+
+        try {
+            const app = await this.update(app => {
+                progressLayer.next("Saving");
+                if (app.homeDoc.docId) {
+                    const dobj = new hb[app.homeDoc.is]({id: app.homeDoc.docId});
+                    this.removeDomainEventListener(dobj.dbPath, "title-changed", "homeDoc");
+                }
+                this._setHomePage(app, doc);
+                return app;            
+            }, progressTracker);
+            progressLayer.done("Home page created");
+            return app;
+        } catch(error) {
+            progressLayer.error(error);
+        }
+    }
+
+    _setHomePage(app, doc) {
+        app.homeDoc = {
+            docId: doc.docId,
+            is: doc.is,
+            title: doc.title
+        };
+        this.addDomainEventListener(`docs/${doc.docId}`, doc.is, "title-changed", "homeDoc");
+    }
+
+    /**
+     * Removes the home page
+     * @returns app
+     */
+    async removeHomePage(progressTracker) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+
+        try {
+            const app = await this.update(app => {
+                if (app.homeDoc && app.homeDoc.docId) {
+                    progressLayer.next("Saving");
+                    const dobj = new hb[app.homeDoc.is]({id: app.homeDoc.docId});
+                    this.removeDomainEventListener(dobj.dbPath, "title-changed", "homeDoc");
+                    app.homeDoc = {};
+                    return app;
+                }
+                progressLayer.next("No need to save");
+            }, progressTracker);
+            progressLayer.done("Home page removed");
+            return app;
+
+        } catch (error) {
+            progressLayer.error(error);
+        }
+    }
+
+    async createMenuPage({is, title, progressTracker}) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+
+        try {     
+            const docCreator = new hb.DocumentCreator();
+
+            // create the document
+            const { docId, doc } = await docCreator.createDocument(is, title, progressTracker);
+            const app = await this.update(app => {
+                progressLayer.next("Saving");
+                this._addMenuItem(app, doc);
+                return app;            
+            }, progressTracker);
+            progressLayer.done("Home page created");
+            return {app, docId, doc};
+
+        } catch (error) {
+            progressLayer.error(error);
+        }
+    }
+
+    async addMenuItem({doc, progressTracker}) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+
+        try {
+            const app = await this.update(app => {
+                progressLayer.next("Saving");
+                this._addMenuItem(app, doc);
+                return app;            
+            }, progressTracker);
+            progressLayer.done("Menu item added");
+            return app;
+
+        } catch (error) {
+            progressLayer.error(error);
+        }
+    }
+
+    async removeMenuItem({docId, progressTracker}) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+
+        try {
+            const app = await this.update(app => {
+                progressLayer.next("Saving");                
+                const itemIndex = app.menu.findIndex(i => i.docId === docId);
+                const deletedItem = app.menu.splice(itemIndex, 1)[0];
+                const dobj = new hb[deletedItem.is]({id: deletedItem.docId});
+                this.removeDomainEventListener(dobj.dbPath, "title-changed", "menuItem");                 
+                return app;
+            }, progressTracker);
+            progressLayer.done("Menu item removed");
+            return app;
+
+        } catch (error) {
+            progressLayer.error(error);
+        }
+    }
+
+    async moveMenuItem({docId, up, down, progressTracker}) {
+        const progressLayer = progressTracker.addLayer("Updating application", 3);
+        progressLayer.next("Updating");
+
+        try {
+            const app = await this.update(app => {
+                progressLayer.next("Saving");                
+                const itemIndex = app.menu.findIndex(i => i.docId === docId);
+                const item = app.menu.splice(itemIndex, 1)[0];
+                const newIndex = up ? itemIndex - 1 : itemIndex + 1;
+                app.menu.splice(newIndex, 0, item);
+                return app;
+            }, progressTracker);
+            progressLayer.done("Menu item moved");
+            return app;
+
+        } catch (error) {
+            progressLayer.error(error);
+        }
+    }
+
+    _addMenuItem(app, doc) {
+        app.menu = app.menu || [];
+        app.menu.push({
+            docId: doc.docId,
+            is: doc.is,
+            title: doc.title,
+            url: hb[doc.is].getUrl(doc.docId)
+        });
+        this.addDomainEventListener(`docs/${doc.docId}`, doc.is, "title-changed", "menuItem");        
+    }
+
+    _homeDocTitleChanged(doc, refDoc) {
+        throw new Error("Not implemented");
+    }
+
+    _menuItemTitleChanged(doc, refDoc) {
+        throw new Error("Not implemented");
+    }
+}
+</script>
