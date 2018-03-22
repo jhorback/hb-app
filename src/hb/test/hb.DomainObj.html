@@ -41,7 +41,8 @@
               return Promise.resolve({
                 data: () => {
                   return this.snapshotData(path);
-                }
+                },
+                exists: true
               });
             },
             update: (doc) => {
@@ -140,7 +141,7 @@
                 "somedb/path": {
                   "is":"test-object",
                   "events":{
-                    "":["test-event"]
+                    "": ["test-event", "test-event2"]
                   }
                 }
               }
@@ -155,6 +156,7 @@
             it("can add a listener", () => {
               const obj = new hb.DomainObj({db});
               obj.addDomainEventListener("somedb/path", "test-object", "test-event");
+              obj.addDomainEventListener("somedb/path", "test-object", "test-event2");
               const newObj = obj._updateReferences({});
               expect(newObj).to.deep.equal(testDoc);
             });
@@ -193,16 +195,16 @@
 
             it("can remove a listner", () => {
               const obj = new hb.DomainObj({db});
-              obj.removeDomainEventListener("somedb/path", "test-evet");
-              expect(testDoc.references["somedb/path"].events[""].length).to.be.equal(1);              
+              obj.removeDomainEventListener("somedb/path", "test-event");
+              expect(testDoc.references["somedb/path"].events[""].length).to.be.equal(2);              
               const newObj = obj._updateReferences(testDoc);
-              expect(newObj.references["somedb/path"].events[""].length).to.be.equal(0);
+              expect(newObj.references["somedb/path"]).to.be.undefined;
             });
             
             it("removes the reference if no event", () => {
               const obj = new hb.DomainObj({db});
               obj.removeDomainEventListener("somedb/path");
-              expect(testDoc.references["somedb/path"].events[""].length).to.be.equal(1);              
+              expect(testDoc.references["somedb/path"].events[""].length).to.be.equal(2);              
               const newObj = obj._updateReferences(testDoc);
               expect(newObj.references["somedb/path"]).to.be.undefined;
             });
@@ -213,8 +215,9 @@
               testDoc.references["somedb/path"].events["scoped"] = ["some-event"];
               expect(testDoc.references["somedb/path"].events["scoped"].length).to.be.equal(1);              
               const newObj = obj._updateReferences(testDoc);
-              expect(newObj.references["somedb/path"].events["scoped"].length).to.be.equal(0);
+              expect(newObj.references["somedb/path"]).to.be.undefined;
             });
+
 
             // not a real use case?
             // it("removes all listener from a scope", () => {
@@ -225,8 +228,7 @@
             //   const newObj = obj._updateReferences(testDoc);
             //   expect(newObj.references["somedb/path"].events).to.be.undefined;
             // });
-          });
-          
+          });       
 
         });
 
@@ -321,7 +323,7 @@
             const someEventSpy = sinon.spy(hb.TestHandleEvent.prototype, "_someEvent");
             const notcalledEventSpy = sinon.spy(hb.TestHandleEvent.prototype, "_notCalledEvent");
 
-            await doc.doSomethingThatDispatchesAnEvent();            
+            await doc.doSomethingThatDispatchesAnEvent();
             expect(someEventSpy.calledOnce).to.be.true;
             expect(notcalledEventSpy.notCalled).to.be.true;
             someEventSpy.restore();
