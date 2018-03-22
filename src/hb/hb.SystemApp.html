@@ -187,7 +187,7 @@ hb.SystemApp = class extends hb.DomainObj {
                 progressLayer.next("Saving");                
                 const itemIndex = app.menu.findIndex(i => i.docId === docId);
                 const deletedItem = app.menu.splice(itemIndex, 1)[0];
-                const dobj = new hb[app.deletedItem.is](deletedItem.docId)                
+                const dobj = new hb[deletedItem.is]({id: deletedItem.docId});
                 this.removeDomainEventListener(dobj.dbPath, "title-changed", "menuItem");                 
                 return app;
             }, progressTracker);

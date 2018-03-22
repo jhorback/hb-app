@@ -34,7 +34,7 @@ hb.Doc = class extends hb.DomainObj {
     /**
      * 
      */
-    constructor({db, id}) {      
+    constructor({db = hb.db, id}) {      
         super({db, dbPath: `docs/${id}`});
     }
 }

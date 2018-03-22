@@ -51,7 +51,7 @@ hb.DomainObj  = class {
      * @param update
      * A method that recieves its document which can make changes to
      * and return the document.
-     * The method can make calls to dispatchEvent, addEventListener, and  removeEventListener.
+     * The method can make calls to dispatchEvent, addEventListener, and  removeDomainEventListener.
      * If the return value is falsy, no updates will occur.
      * @param progressTracker
      * An optional ProgressTracker to listen for the progress of the update.
@@ -104,7 +104,7 @@ hb.DomainObj  = class {
      * The document to update.
      * @returns Object - The updated doc.
      */
-        _updateReferences(doc) {
+    _updateReferences(doc) {
         // _listenersToHandle: [{add: true, event, dbPath, is, scope}]
         // references: {
         //     "docs/gallery-1": {
@@ -202,7 +202,19 @@ hb.DomainObj  = class {
             if (scoped) {
                 scoped.splice(scoped.indexOf(event), 1);
             }
+
+
+            // remove the dbPath listener if no events
+            const events = Object.keys(reference.events).find(key => {
+                const events = reference.events[key] || [];
+                return events.length > 0 ? true : false;
+            });
+
+            if (!events) {
+                delete doc[property][dbPath];
+            }
         }
+
         return doc;
     }
 
@@ -233,12 +245,19 @@ hb.DomainObj  = class {
             }
 
             const domainObj = new hb[reference.is]({db: this.db, dbPath});
-            await domainObj._handleEvents({
+            const exists = await domainObj._handleEvents({
                 eventHandlers,
                 eventsToHandle,
                 refDoc: doc,
                 progressTracker
             });
+
+            // // if the document does not exist, remove it
+            // // where? is this still needed
+            // // cleans up dead references...
+            // if (exists === false) {
+                
+            // }
         });
 
         await Promise.all(promises);
@@ -267,7 +286,7 @@ hb.DomainObj  = class {
 	 *   "artwork": ["thumbnail-changed"]
 	 * }
      * @param refDoc the document that triggered the events.
-     * @returns async undefined
+     * @returns async true if the doc exists, false otherwise
      */
     async _handleEvents({eventHandlers, eventsToHandle, refDoc, progressTracker}) {
 
@@ -302,7 +321,11 @@ hb.DomainObj  = class {
         const progressLayer = progressTracker.addLayer(`Handling events for ${this.dbPath}`, 4);
         progressLayer.next("Loading document");
         const snapshot = await this.docRef.get();
-        let doc = snapshot.data();
+        if (!snapshot.exists) {
+            return false;
+        }
+
+        let doc = snapshot.data();        
         const needUpdate = methodsToCall.reduce((needUpdate, method) => {
             const newDoc = this[method](doc, refDoc);
             if (newDoc) {
@@ -325,6 +348,7 @@ hb.DomainObj  = class {
         progressLayer.next("Dispatching events");
         await this._dispatchEvents(doc, progressTracker);
         progressLayer.done("Finished handling events");
+        return true;
     }
 }
 </script>
