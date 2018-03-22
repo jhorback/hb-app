@@ -22,8 +22,8 @@ hb.Doc = class extends hb.DomainObj {
     }
 
     static getUrl(docId) {
-        const route = this.docType.route;
-        const tail = docId.substring(route.length + 1, docId.length);
+        const {dbPrefix, route} = this.docType;
+        const tail = docId.substring(dbPrefix.length + 1, docId.length);
         return `${route}/${tail}`;
     }
 

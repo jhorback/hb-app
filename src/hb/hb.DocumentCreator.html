@@ -10,8 +10,8 @@ hb.DocumentCreator = class {
         this.currentAuthor = currentAuthor;
     }
 
-    static getDocumentId(route, title) {
-        return `${route}-${encodeURIComponent(title.split(" ").join("-").replace(/[^a-z0-9]/gi, "-").toLowerCase())}`;
+    static getDocumentId(dbPrefix, title) {
+        return `${dbPrefix}-${encodeURIComponent(title.split(" ").join("-").replace(/[^a-z0-9]/gi, "-").toLowerCase())}`;
     }
 
     async _getDocId(docId, progressTracker) {
@@ -35,7 +35,7 @@ hb.DocumentCreator = class {
         progressLayer.next("Getting id");
         try {
             const docId = await this._getDocId(
-                hb.DocumentCreator.getDocumentId(docType.route, title),
+                hb.DocumentCreator.getDocumentId(docType.dbPrefix, title),
                 progressTracker);
             progressLayer.next("Creating document");
             const {uid, photoURL, displayName} = this.currentAuthor;
