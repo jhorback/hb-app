@@ -103,14 +103,16 @@
                             <span class="paper-font-body2">[[menuItem.title]]</span>
                         </paper-icon-item>
                     </a>
-                </template>                
-                <hr class="divider"/>
-                <a href="[[rootPath]]/site/settings" tabindex="-1">
-                    <paper-icon-item>
-                        <iron-icon icon="hb:settings" item-icon slot="item-icon"></iron-icon>
-                        <span class="paper-font-body2">Settings</span>
-                    </paper-icon-item>
-                </a>
+                </template>
+                <div hidden$="[[_settingsHidden(user)]]">
+                    <hr class="divider"/>
+                    <a href="[[rootPath]]/site/settings" tabindex="-1">
+                        <paper-icon-item>
+                            <iron-icon icon="hb:settings" item-icon slot="item-icon"></iron-icon>
+                            <span class="paper-font-body2">Settings</span>
+                        </paper-icon-item>
+                    </a>
+                </div>
             </div>
             <div class="bottom-bar">
                 <hr class="divider"/>
@@ -168,6 +170,9 @@
             this.shadowRoot.dispatchEvent(new CustomEvent("user-sign-in"));
         }
 
+        _settingsHidden(user) {
+            return !(user.permissions && user.permissions.isSiteAdmin);
+        }
         // _goToProfile(event) {
         //     var profile = document.createElement("hb-user-profile-page");
         //     profile.uid = this.user.uid;
