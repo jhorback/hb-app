@@ -11,6 +11,18 @@ hb.User = class extends hb.DomainObj {
         super({db, dbPath: `users/${uid}`})
     }
 
+    static get default() {
+        return {
+            uid: null,
+            displayName: null,
+            providerDisplayName: null,
+            email: null,
+            firstLogin: null,
+            lastLogin: null,
+            permissions: null
+        };
+    }
+
     static getPermissionsDescription(user) {
         if (!user || !user.permissions) {
             return "";
@@ -42,6 +54,7 @@ hb.User = class extends hb.DomainObj {
     async recordLogin({authUser}) {
        const progress = new ProgressTracker("Login");
        const user = await this.update(user => {
+           user = user || hb.User.default;
            user.uid = authUser.uid;
            if (user.displayName === user.providerDisplayName) {
                user.displayName = authUser.displayName;

@@ -91,6 +91,9 @@ class HbUsersData extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
     _selectUser(event) {
         const {uid} = event.detail;
         const user = this.users.find(u => u.uid === uid);
+        if (!user.permissions) {
+            user.permissions = {};
+        }
         this.set("usersState.selectedUser", user);
     }
 

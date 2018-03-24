@@ -16,7 +16,7 @@ hb["hb-doc"] = class extends hb.Doc {
     }
 
     static get default() {
-        return Object.assign({}, super.default, {
+        return Object.assign({}, hb["hb-doc"].default, {
             content: [{
                 foo: "bar"
             }]
