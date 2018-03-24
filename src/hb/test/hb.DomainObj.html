@@ -28,10 +28,10 @@
 
 
       class MockDb{
-        constructor({snapshotData = null, update = null}) {
+        constructor({snapshotData = null, setMethod = null}) {
           const noop = () => {};
           this.snapshotData = snapshotData || noop;
-          this.update = update || noop;
+          this.setMethod = setMethod || noop;
         }
 
         // returns a docRef
@@ -45,8 +45,8 @@
                 exists: true
               });
             },
-            update: (doc) => {
-              return Promise.resolve(this.update(path, doc));
+            set: (doc, options) => {
+              return Promise.resolve(this.setMethod(path, doc));
             }
           };
         }
@@ -107,7 +107,7 @@
                   return testHandleEventData;
                 }
               },
-              update: (path, doc) => {}
+              setMethod: (path, doc) => {}
             });
           })
 
@@ -230,7 +230,7 @@
               snapshotData: (dbPath) => {
                 return {foo: "bar"};
               },
-              update: (dbPath, doc) => {}
+              setMethod: (dbPath, doc) => {}
             });
             const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});
             
@@ -249,7 +249,7 @@
               snapshotData: (dbPath) => {
                 return {foo: "bar"};
               },
-              update: (dbPath, doc) => {}
+              setMethod: (dbPath, doc) => {}
             });
             const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});
             
@@ -268,14 +268,14 @@
           it ("adds references with addEventListener", (done) => {
             const db = new MockDb({
               snapshotData: dbPath => { return {}; },
-              update: (dbPath, doc) => {
+              setMethod: (dbPath, doc) => {
                 if (dbPath === "docs/testDoc") {
                   expect(doc.references["docs/testRefDoc"].events[""][0]).to.be.equal("test-event");
                   done();
                 }
               }
             });
-
+            
             const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});            
             testDoc.update(doc => {
               testDoc.addDomainEventListener("docs/testRefDoc", "testRefDoc", "test-event");
@@ -286,14 +286,14 @@
           it ("adds referencedBy with addEventListener", (done) => {
             const db = new MockDb({
               snapshotData: dbPath => { return {}; },
-              update: (dbPath, doc) => {
+              setMethod: (dbPath, doc) => {
                 if (dbPath === "docs/testRefDoc") {
                   expect(doc.referencedBy["docs/testDoc"].events[""][0]).to.be.equal("test-event");
                   done();
                 }
               }
             });
-
+            
             const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});            
             testDoc.update(doc => {
               testDoc.addDomainEventListener("docs/testRefDoc", "testRefDoc", "test-event");
@@ -322,26 +322,26 @@
           it ("updates the referenced doc if the event handler returns a doc", async () => {
             const dbPath = "docs/TestDispatchEvent";
             const doc = new hb.TestDispatchEvent({db, dbPath});
-            const updateSpy = sinon.spy(db, "update");
+            const setSpy = sinon.spy(db, "setMethod");
 
             await doc.doSomethingThatDispatchesAnEvent();            
-            expect(updateSpy.calledTwice).to.be.true;
-            expect(updateSpy.getCall(0).args[0]).to.be.equal("docs/TestDispatchEvent");
-            expect(updateSpy.getCall(1).args[0]).to.be.equal("docs/TestHandleEvent");
+            expect(setSpy.calledTwice).to.be.true;
+            expect(setSpy.getCall(0).args[0]).to.be.equal("docs/TestDispatchEvent");
+            expect(setSpy.getCall(1).args[0]).to.be.equal("docs/TestHandleEvent");
           });
 
           // if _someEvent returns a doc update is called          
           it ("does not update the referenced doc if the event handler does not return a doc", async () => {
             const dbPath = "docs/TestDispatchEvent";
             const doc = new hb.TestDispatchEvent({db, dbPath});
-            const updateSpy = sinon.spy(db, "update");
+            const setSpy = sinon.spy(db, "setMethod");
             const someEventStub = sinon.stub(hb.TestHandleEvent.prototype, "_someEvent", (doc, docRef) => {
               return null;
             });            
 
             await doc.doSomethingThatDispatchesAnEvent();            
-            expect(updateSpy.calledOnce).to.be.true;
-            expect(updateSpy.getCall(0).args[0]).to.be.equal("docs/TestDispatchEvent");
+            expect(setSpy.calledOnce).to.be.true;
+            expect(setSpy.getCall(0).args[0]).to.be.equal("docs/TestDispatchEvent");
             someEventStub.restore();
           });
         });

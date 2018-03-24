@@ -73,7 +73,7 @@ hb.DomainObj  = class {
             this._updateReferences(newDoc);
             
             // update the doc
-            await this.docRef.update(newDoc);
+            await this.docRef.set(newDoc, {merge: true});
             progressLayer.next("Updating references");
             await this._updateReferencedBy(newDoc, progressTracker);
             progressLayer.next("Dispatching events");
@@ -150,7 +150,7 @@ hb.DomainObj  = class {
             let doc = snapshot.data();
             doc = hb.DomainObj.__updateDocListeners({doc, property: "referencedBy", listeners});
             progressLayer.next("Updating references");
-            doc = await docRef.update(doc);
+            doc = await docRef.set(doc, {merge: true});
             progressLayer.done("References updated");
             return doc;            
         });        
@@ -342,7 +342,7 @@ hb.DomainObj  = class {
         
         // we need to update the doc
         progressLayer.next("Updating document");
-        await this.docRef.update(doc);
+        await this.docRef.set(doc, {merge: true});
 
         // handle any additional events
         progressLayer.next("Dispatching events");
