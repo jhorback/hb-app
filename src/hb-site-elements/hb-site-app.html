@@ -38,7 +38,7 @@
         data="{{profileRouteData}}"
         active="{{profileRouteActive}}">
     </app-route>
-    <template is="dom-if" if="[[_hasPermission(user, profileRouteActive)]]" restamp>
+    <template is="dom-if" if="[[_hasProfilePermission(user, profileRouteActive)]]" restamp>
         <hb-user-profile-page uid="[[profileRouteData.id]]"></hb-user-profile-page>
     </template>
 
@@ -89,12 +89,21 @@
                 },
                 user: {
                     type: Object
+                },
+                profileRouteData: {
+                    type: Object
                 }
             };
         }
 
         _hasPermission(user, routeActive) {
             return routeActive && this.user.permissions.isSiteAdmin;
+        }
+
+        _hasProfilePermission(user, routeActive) {
+            return routeActive &&
+                (this.user.permissions.isSiteAdmin ||
+                hb.currentUser.uid === this.profileRouteData.id);
         }
     }
 
