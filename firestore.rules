@@ -1,7 +1,30 @@
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write;
+
+    match /docs/{doc} {
+      allow read;
+      allow create: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.isAuthor == true;
+      allow update: if request.auth.uid == resource.data.author.uid;
+      allow delete: if request.auth.uid == resource.data.author.uid;
+    }
+
+    match /progressLogs/{log} {
+      allow read, write: if request.auth.uid != null;
+    }
+
+    match /system/app {
+      allow read;
+      allow write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.isSiteAdmin == true;
+    }
+
+   match /users/{user} {
+      allow read;
+      allow create:
+        if request.resource.data.permissions == null;
+      allow update:
+        if (request.auth.uid == resource.data.uid &&
+        	request.resource.data.permissions == resource.data.permissions) ||         
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.isSiteAdmin == true;
     }
   }
 }
