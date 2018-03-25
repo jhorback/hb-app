@@ -225,23 +225,71 @@
 
         describe("update", () => {
 
-          it ("calls the update callback with an updated document", (done) => {
+          it ("calls the update callback with an updated document", async () => {
             const db = new MockDb({
               snapshotData: (dbPath) => {
                 return {foo: "bar"};
               },
               setMethod: (dbPath, doc) => {}
             });
-            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});
-            
-            testDoc.update(doc => {
+
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});    
+            const doc = await testDoc.update(doc => {
               doc.foo = "baz";
-            }).then(doc => {
-              expect(doc.foo).to.be.equal("baz");
-              done();
+            });
+            expect(doc.foo).to.be.equal("baz");
+          });
+
+          it("dispatches a chnaged event if a property changes", async () => {
+            const db = new MockDb({
+              snapshotData: (dbPath) => {
+                return {foo: "bar"};
+              },
+              setMethod: (dbPath, doc) => {
+                const events = testDoc._eventsToHandle;
+                expect(events[0]).to.be.equal("foo-changed");
+              }
+            });
+
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});    
+            const doc = await testDoc.update(doc => {
+              doc.foo = "baz";
             });
           });
 
+          it("dispatches an added event if a property is added", async () => {
+            const db = new MockDb({
+              snapshotData: (dbPath) => {
+                return {foo: "bar"};
+              },
+              setMethod: (dbPath, doc) => {
+                const events = testDoc._eventsToHandle;
+                expect(events[0]).to.be.equal("newFoo-added");
+              }
+            });
+
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});    
+            const doc = await testDoc.update(doc => {
+              doc.newFoo = "bar";
+            });
+          });
+
+          it("dispatches a deleted event if a property is deleted", async () => {
+            const db = new MockDb({
+              snapshotData: (dbPath) => {
+                return {foo: "bar"};
+              },
+              setMethod: (dbPath, doc) => {
+                const events = testDoc._eventsToHandle;
+                expect(events[0]).to.be.equal("foo-deleted");
+              }
+            });
+
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});    
+            const doc = await testDoc.update(doc => {
+              delete doc.foo;
+            });
+          });
 
           it ("does not update the document if returning false from the update method", async () => {
             const db = new MockDb({
@@ -316,6 +364,8 @@
             someEventSpy.restore();
             notcalledEventSpy.restore();
           });
+
+          //	○ if a change occurs, set is called with property-changed event firing
           
           it ("updates the referenced doc if the event handler returns a doc", async () => {
             const dbPath = "docs/TestDispatchEvent";
@@ -353,15 +403,6 @@
             expect(doc.progressTracker.stepsDescription).to.be.equal("Update: Loading document, Update: Updating, Update: Updating references, Update: Dispatching events, Handling events for docs/TestHandleEvent: Loading document, Handling events for docs/TestHandleEvent: Updating document, Handling events for docs/TestHandleEvent: Dispatching events, Handling events for docs/TestHandleEvent: Finished handling events, Update: Document updated");
           });
         });
-
-
-/*
-tests to add
-* if return value is false, set is not called
-* if a change occurs, set is called
-* if return value is true, set is called even if no changes occur
-* if a document is new update is called
-*/
 
       });
     </script>

@@ -49,19 +49,20 @@ hb.DomainObj  = class {
     /**
      * Supports api method updates
      * @param update
-     * A method that recieves its document which can make changes to.
+     * A method that recieves its document which it can make changes to.
      * A boolean is passed as the second argument which is false if the document does not exist.
-     * To fill out this do an Object.assign(doc, default); to preserve the doc pointer.
+     * Can define new documents by doing Object.assign(doc, default).
      *
-     * The method can make calls to dispatchDomainEvent, addDomianEventListener, and  removeDomainEventListener.
+     * The method can make calls to dispatchDomainEvent, addDomianEventListener,
+     * and  removeDomainEventListener.
      *
      * If the return value is false, no updates will occur in any condition.
      * If the document is new or if changed an update will occur.
      * If the return value is true, an update will be forced.
      *
-     * For existing documents, events will be dispatched for every root property
-     * that has changed suffixed by "-changed".
-     * So a title property that has changed will dispatch "title-changed"
+     * For existing documents, events will be dispatched for every property
+     * that has changed, been added, or deleted.
+     * The event will be "property-changed", "property-added", or "property-deleted".
      * @param progressTracker
      * An optional ProgressTracker to listen for the progress of the update.
      * @returns Object the updated (or not) document
@@ -117,7 +118,7 @@ hb.DomainObj  = class {
             } else if (!newDoc[key]) {
                 hasChanged = true;
                 this.dispatchDomainEvent(`${key}-deleted`);
-            } else if(JSON.stringify(doc[key] !== JSON.stringify(newDoc[key]))) {
+            } else if(JSON.stringify(doc[key]) !== JSON.stringify(newDoc[key])) {
                 hasChanged = true;
                 this.dispatchDomainEvent(`${key}-changed`);               
             }
