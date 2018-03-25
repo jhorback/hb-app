@@ -1,9 +1,18 @@
 service cloud.firestore {
+
+  function isSiteAdmin() {
+    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.isSiteAdmin == true;
+  }
+
+  function isAuthor() {
+    get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.isAuthor == true;
+  }
+
   match /databases/{database}/documents {
 
     match /docs/{doc} {
       allow read;
-      allow create: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.isAuthor == true;
+      allow create: if isAuthor();
       allow update: if request.auth.uid == resource.data.author.uid;
       allow delete: if request.auth.uid == resource.data.author.uid;
     }
@@ -14,17 +23,17 @@ service cloud.firestore {
 
     match /system/app {
       allow read;
-      allow write: if get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.isSiteAdmin == true;
+      allow write: if isSiteAdmin();
     }
 
-   match /users/{user} {
+    match /users/{user} {
       allow read;
       allow create:
         if request.resource.data.permissions == null;
       allow update:
         if (request.auth.uid == resource.data.uid &&
         	request.resource.data.permissions == resource.data.permissions) ||         
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.permissions.isSiteAdmin == true;
+          isSiteAdmin();
     }
   }
 }
