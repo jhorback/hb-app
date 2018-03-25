@@ -24,6 +24,11 @@
  *		// return the new doc or falsy if nothing was done
  *	}
  * ```
+ *
+ * Event handlers are similar to the update method in that you can
+ * return true or false to say wether an update is needed. Changes
+ * to the root properties are tracked and dispatched. The only
+ * difference is that you cannot add event listeners.
  */
 hb.DomainObj  = class {
     static get is() { 
@@ -77,10 +82,10 @@ hb.DomainObj  = class {
             const doc = snapshot.data();
             const newDoc = Object.assign({}, doc);
             const save = update(newDoc, snapshot.exists);
-            const hasChanged = snapshot.exists ?
+            const hasChanges = snapshot.exists ?
                 this._dispatchDocChanges(doc, newDoc) : true;
 
-            if (save === false || (save !== true && hasChanged === false)) {
+            if (save === false || (save !== true && hasChanges === false)) {
                 progressLayer.done("No updates needed");
                 return doc;
             }
@@ -192,7 +197,7 @@ hb.DomainObj  = class {
             let doc = snapshot.data();
             doc = hb.DomainObj.__updateDocListeners({doc, property: "referencedBy", listeners});
             progressLayer.next("Updating references");
-            doc = await docRef.set(doc, {merge: true});
+            doc = await docRef.set(doc);
             progressLayer.done("References updated");
             return doc;            
         });        
@@ -367,15 +372,31 @@ hb.DomainObj  = class {
             return false;
         }
 
-        let doc = snapshot.data();
-        
-        // NEED TO DISPATCH CHANGES HERE TOO!!! 
+        const doc = snapshot.data();
+        const newDoc = Object.assign({}, doc);
         const needUpdate = methodsToCall.reduce((needUpdate, method) => {
-            const newDoc = this[method](doc, refDoc);
-            if (newDoc) {
-                doc = newDoc;
+            
+            // create a new doc so changes can be thrown away
+            // if the event handler returns false
+            const handlerDoc = Object.assign({}, newDoc);
+
+             // call the event handler
+            const save = this[method](handlerDoc, refDoc);
+            
+            if (save === false) {
+                return needUpdate;
+            } else if (save === true) {
                 needUpdate = true;
             }
+
+            // assign changes from the handlerDoc to the newDoc
+            Object.assign(newDoc, handlerDoc);
+
+            const hasChanges = this._dispatchDocChanges(doc, newDoc);
+            if (hasChanges) {
+                needUpdate = true;
+            }
+
             return needUpdate;            
         }, false);
         
@@ -386,7 +407,7 @@ hb.DomainObj  = class {
         
         // we need to update the doc
         progressLayer.next("Updating document");
-        await this.docRef.set(doc, {merge: true});
+        await this.docRef.set(doc);
 
         // handle any additional events
         progressLayer.next("Dispatching events");

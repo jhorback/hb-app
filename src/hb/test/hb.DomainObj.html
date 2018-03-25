@@ -92,8 +92,8 @@
                 "notcalled-event": "_notCalledEvent"
               }
             }
-            _someEvent(doc, refDoc) {
-              return doc;
+            _someEvent(doc, refDoc) {              
+              doc.title = "Updated title";
             }
             _notCalledEvent(doc, refDoc) {}
           }
@@ -372,7 +372,7 @@
             const doc = new hb.TestDispatchEvent({db, dbPath});
             const setSpy = sinon.spy(db, "setMethod");
 
-            await doc.doSomethingThatDispatchesAnEvent();            
+            await doc.doSomethingThatDispatchesAnEvent();
             expect(setSpy.calledTwice).to.be.true;
             expect(setSpy.getCall(0).args[0]).to.be.equal("docs/TestDispatchEvent");
             expect(setSpy.getCall(1).args[0]).to.be.equal("docs/TestHandleEvent");
