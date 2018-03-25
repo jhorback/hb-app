@@ -54,8 +54,7 @@ hb.SystemApp = class extends hb.DomainObj {
             const { docId, doc } = await docCreator.createDocument(is, title, progressTracker);
             const app = await this.update(app => {
                 progressLayer.next("Saving");
-                this._setHomePage(app, doc);
-                return app;            
+                this._setHomePage(app, doc);           
             }, progressTracker);
             progressLayer.done("Home page created");
             return {app, docId, doc};
@@ -77,8 +76,7 @@ hb.SystemApp = class extends hb.DomainObj {
                     const dobj = new hb[app.homeDoc.is]({id: app.homeDoc.docId});
                     this.removeDomainEventListener(dobj.dbPath, "title-changed", "homeDoc");
                 }
-                this._setHomePage(app, doc);
-                return app;            
+                this._setHomePage(app, doc);           
             }, progressTracker);
             progressLayer.done("Home page created");
             return app;
@@ -111,7 +109,6 @@ hb.SystemApp = class extends hb.DomainObj {
                     const dobj = new hb[app.homeDoc.is]({id: app.homeDoc.docId});
                     this.removeDomainEventListener(dobj.dbPath, "title-changed", "homeDoc");
                     app.homeDoc = {};
-                    return app;
                 }
                 progressLayer.next("No need to save");
             }, progressTracker);
@@ -134,8 +131,7 @@ hb.SystemApp = class extends hb.DomainObj {
             const { docId, doc } = await docCreator.createDocument(is, title, progressTracker);
             const app = await this.update(app => {
                 progressLayer.next("Saving");
-                this._addMenuItem(app, doc);
-                return app;            
+                this._addMenuItem(app, doc);          
             }, progressTracker);
             progressLayer.done("Home page created");
             return {app, docId, doc};
@@ -152,8 +148,7 @@ hb.SystemApp = class extends hb.DomainObj {
         try {
             const app = await this.update(app => {
                 progressLayer.next("Saving");
-                this._addMenuItem(app, doc);
-                return app;            
+                this._addMenuItem(app, doc);           
             }, progressTracker);
             progressLayer.done("Menu item added");
             return app;
@@ -169,12 +164,13 @@ hb.SystemApp = class extends hb.DomainObj {
 
         try {
             const app = await this.update(app => {
-                progressLayer.next("Saving");                
-                const itemIndex = app.menu.findIndex(i => i.docId === docId);
-                const deletedItem = app.menu.splice(itemIndex, 1)[0];
+                progressLayer.next("Saving");
+                const menu = [...app.menu];
+                const itemIndex = menu.findIndex(i => i.docId === docId);
+                const deletedItem = menu.splice(itemIndex, 1)[0];
                 const dobj = new hb[deletedItem.is]({id: deletedItem.docId});
-                this.removeDomainEventListener(dobj.dbPath, "title-changed", "menuItem");                 
-                return app;
+                this.removeDomainEventListener(dobj.dbPath, "title-changed", "menuItem");
+                app.menu = menu;
             }, progressTracker);
             progressLayer.done("Menu item removed");
             return app;
@@ -190,12 +186,13 @@ hb.SystemApp = class extends hb.DomainObj {
 
         try {
             const app = await this.update(app => {
-                progressLayer.next("Saving");                
-                const itemIndex = app.menu.findIndex(i => i.docId === docId);
-                const item = app.menu.splice(itemIndex, 1)[0];
+                progressLayer.next("Saving");
+                const menu = [...app.menu];
+                const itemIndex = menu.findIndex(i => i.docId === docId);
+                const item = menu.splice(itemIndex, 1)[0];
                 const newIndex = up ? itemIndex - 1 : itemIndex + 1;
-                app.menu.splice(newIndex, 0, item);
-                return app;
+                menu.splice(newIndex, 0, item);
+                app.menu = menu;
             }, progressTracker);
             progressLayer.done("Menu item moved");
             return app;
@@ -206,13 +203,14 @@ hb.SystemApp = class extends hb.DomainObj {
     }
 
     _addMenuItem(app, doc) {
-        app.menu = app.menu || [];
-        app.menu.push({
+        const menu = [...app.menu || []];
+        menu.push({
             docId: doc.docId,
             is: doc.is,
             title: doc.title,
             url: hb[doc.is].getUrl(doc.docId)
         });
+        app.menu = menu;
         this.addDomainEventListener(`docs/${doc.docId}`, doc.is, "title-changed", "menuItem");        
     }
 

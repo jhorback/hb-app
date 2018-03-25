@@ -79,7 +79,7 @@
               this.progressTracker = new ProgressTracker();
               return this.update(doc => {
                 this.dispatchDomainEvent("some-event");
-                return doc;
+                return true;
               }, this.progressTracker);
             }
           }
@@ -92,8 +92,8 @@
                 "notcalled-event": "_notCalledEvent"
               }
             }
-            _someEvent(doc, refDoc) {
-              return doc;
+            _someEvent(doc, refDoc) {              
+              doc.title = "Updated title";
             }
             _notCalledEvent(doc, refDoc) {}
           }
@@ -225,41 +225,87 @@
 
         describe("update", () => {
 
-          it ("calls the update callback with an updated document", (done) => {
+          it ("calls the update callback with an updated document", async () => {
             const db = new MockDb({
               snapshotData: (dbPath) => {
                 return {foo: "bar"};
               },
               setMethod: (dbPath, doc) => {}
             });
-            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});
-            
-            testDoc.update(doc => {
+
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});    
+            const doc = await testDoc.update(doc => {
               doc.foo = "baz";
-              return doc;
-            }).then(doc => {
-              expect(doc.foo).to.be.equal("baz");
-              done();
+            });
+            expect(doc.foo).to.be.equal("baz");
+          });
+
+          it("dispatches a chnaged event if a property changes", async () => {
+            const db = new MockDb({
+              snapshotData: (dbPath) => {
+                return {foo: "bar"};
+              },
+              setMethod: (dbPath, doc) => {
+                const events = testDoc._eventsToHandle;
+                expect(events[0]).to.be.equal("foo-changed");
+              }
+            });
+
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});    
+            const doc = await testDoc.update(doc => {
+              doc.foo = "baz";
             });
           });
 
+          it("dispatches an added event if a property is added", async () => {
+            const db = new MockDb({
+              snapshotData: (dbPath) => {
+                return {foo: "bar"};
+              },
+              setMethod: (dbPath, doc) => {
+                const events = testDoc._eventsToHandle;
+                expect(events[0]).to.be.equal("newFoo-added");
+              }
+            });
 
-          it ("calls the update callback with an undefined document if not updated", (done) => {
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});    
+            const doc = await testDoc.update(doc => {
+              doc.newFoo = "bar";
+            });
+          });
+
+          it("dispatches a deleted event if a property is deleted", async () => {
+            const db = new MockDb({
+              snapshotData: (dbPath) => {
+                return {foo: "bar"};
+              },
+              setMethod: (dbPath, doc) => {
+                const events = testDoc._eventsToHandle;
+                expect(events[0]).to.be.equal("foo-deleted");
+              }
+            });
+
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});    
+            const doc = await testDoc.update(doc => {
+              delete doc.foo;
+            });
+          });
+
+          it ("does not update the document if returning false from the update method", async () => {
             const db = new MockDb({
               snapshotData: (dbPath) => {
                 return {foo: "bar"};
               },
               setMethod: (dbPath, doc) => {}
             });
-            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});
-            
-            testDoc.update(doc => {
+
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});        
+            const doc = await testDoc.update(doc => {
               doc.foo = "baz";
-              // no return statement here
-            }).then(doc => {
-              expect(doc).to.be.undefined;
-              done();
+              return false;
             });
+
+            expect(doc.foo).to.be.equal("bar");
           });
         });
 
@@ -279,7 +325,7 @@
             const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});            
             testDoc.update(doc => {
               testDoc.addDomainEventListener("docs/testRefDoc", "testRefDoc", "test-event");
-              return doc;
+              return true;
             });
           });
 
@@ -297,7 +343,7 @@
             const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});            
             testDoc.update(doc => {
               testDoc.addDomainEventListener("docs/testRefDoc", "testRefDoc", "test-event");
-              return doc;
+              return true;
             });
           });
         });
@@ -318,13 +364,15 @@
             someEventSpy.restore();
             notcalledEventSpy.restore();
           });
+
+          //	○ if a change occurs, set is called with property-changed event firing
           
           it ("updates the referenced doc if the event handler returns a doc", async () => {
             const dbPath = "docs/TestDispatchEvent";
             const doc = new hb.TestDispatchEvent({db, dbPath});
             const setSpy = sinon.spy(db, "setMethod");
 
-            await doc.doSomethingThatDispatchesAnEvent();            
+            await doc.doSomethingThatDispatchesAnEvent();
             expect(setSpy.calledTwice).to.be.true;
             expect(setSpy.getCall(0).args[0]).to.be.equal("docs/TestDispatchEvent");
             expect(setSpy.getCall(1).args[0]).to.be.equal("docs/TestHandleEvent");
@@ -355,6 +403,7 @@
             expect(doc.progressTracker.stepsDescription).to.be.equal("Update: Loading document, Update: Updating, Update: Updating references, Update: Dispatching events, Handling events for docs/TestHandleEvent: Loading document, Handling events for docs/TestHandleEvent: Updating document, Handling events for docs/TestHandleEvent: Dispatching events, Handling events for docs/TestHandleEvent: Finished handling events, Update: Document updated");
           });
         });
+
       });
     </script>
   </body>
