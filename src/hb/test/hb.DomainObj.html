@@ -79,7 +79,7 @@
               this.progressTracker = new ProgressTracker();
               return this.update(doc => {
                 this.dispatchDomainEvent("some-event");
-                return doc;
+                return true;
               }, this.progressTracker);
             }
           }
@@ -236,7 +236,6 @@
             
             testDoc.update(doc => {
               doc.foo = "baz";
-              return doc;
             }).then(doc => {
               expect(doc.foo).to.be.equal("baz");
               done();
@@ -244,22 +243,21 @@
           });
 
 
-          it ("calls the update callback with an undefined document if not updated", (done) => {
+          it ("does not update the document if returning false from the update method", async () => {
             const db = new MockDb({
               snapshotData: (dbPath) => {
                 return {foo: "bar"};
               },
               setMethod: (dbPath, doc) => {}
             });
-            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});
-            
-            testDoc.update(doc => {
+
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});        
+            const doc = await testDoc.update(doc => {
               doc.foo = "baz";
-              // no return statement here
-            }).then(doc => {
-              expect(doc).to.be.undefined;
-              done();
+              return false;
             });
+
+            expect(doc.foo).to.be.equal("bar");
           });
         });
 
@@ -279,7 +277,7 @@
             const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});            
             testDoc.update(doc => {
               testDoc.addDomainEventListener("docs/testRefDoc", "testRefDoc", "test-event");
-              return doc;
+              return true;
             });
           });
 
@@ -297,7 +295,7 @@
             const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});            
             testDoc.update(doc => {
               testDoc.addDomainEventListener("docs/testRefDoc", "testRefDoc", "test-event");
-              return doc;
+              return true;
             });
           });
         });
