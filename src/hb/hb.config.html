@@ -5,18 +5,38 @@ hb.config = {
         {
             is: "hb-doc",
             route: "docs",
+            dbPrefix: "doc",
             name: "Document",
             description: "Text and links to other documents."
         }, {
             is: "hb-art-gallery-doc",
             route: "art-gallery",
+            dbPrefix: "art-gallery",
             name: "Art Gallery",
             description: "A collection of artwork."
         }, {
             is: "hb-art-doc",
             route: "art",
+            dbPrefix: "art",
             name: "Artwork",
             description: "Images and description of artwork."
+        }
+    ],
+
+    // these are not used anywhere, they are hard coded
+    // in the users page
+    permissions: [{
+            key: "sysAdmin",
+            name: "System Administrator",
+            description: "Can change system level settings."
+        }, {
+            key: "siteAdmin",
+            name: "Site Administrator",
+            description: "Can change site settings."
+        }, {
+            key: "author",
+            name: "Author",
+            description: "Can create documents and upload content."
         }
     ],
 

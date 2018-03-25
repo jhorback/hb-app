@@ -24,6 +24,11 @@
  *		// return the new doc or falsy if nothing was done
  *	}
  * ```
+ *
+ * Event handlers are similar to the update method in that you can
+ * return true or false to say wether an update is needed. Changes
+ * to the root properties are tracked and dispatched. The only
+ * difference is that you cannot add event listeners.
  */
 hb.DomainObj  = class {
     static get is() { 
@@ -49,10 +54,25 @@ hb.DomainObj  = class {
     /**
      * Supports api method updates
      * @param update
-     * A method that recieves its document which can make changes to
-     * and return the document.
-     * The method can make calls to dispatchEvent, addEventListener, and  removeDomainEventListener.
-     * If the return value is falsy, no updates will occur.
+     * A method that recieves its document which it can make changes to.
+     * A boolean is passed as the second argument which is false if the document does not exist.
+     * Can define new documents by doing Object.assign(doc, default).
+     *
+     * The method can make calls to dispatchDomainEvent, addDomianEventListener,
+     * and  removeDomainEventListener.
+     *
+     * If the return value is false, no updates will occur in any condition.
+     * If the document is new or if changed an update will occur.
+     * If the return value is true, an update will be forced.
+     *
+     * For existing documents, events will be dispatched for every property
+     * that has changed, been added, or deleted.
+     * The event will be "property-changed", "property-added", or "property-deleted".
+     *
+     * Since the document to change is a clone/immutable changes to sub objects/arrays
+     * need to be cloned and reassigned for changes to be picked up.
+     * For objects use Objects.assign(), for arrays use [...array];
+     *
      * @param progressTracker
      * An optional ProgressTracker to listen for the progress of the update.
      * @returns Object the updated (or not) document
@@ -64,16 +84,21 @@ hb.DomainObj  = class {
         try {
             const snapshot = await this.docRef.get();
             progressLayer.next("Updating");
-            let doc = snapshot.data();
-            let newDoc = update(doc);           
-            if (!newDoc) {
+            const doc = snapshot.data();
+            const newDoc = Object.assign({}, doc);
+            const save = update(newDoc, snapshot.exists);
+            const hasChanges = snapshot.exists ?
+                this._dispatchDocChanges(doc, newDoc) : true;
+
+            if (save === false || (save !== true && hasChanges === false)) {
                 progressLayer.done("No updates needed");
-                return newDoc;
+                return doc;
             }
+
             this._updateReferences(newDoc);
             
             // update the doc
-            await this.docRef.update(newDoc);
+            await this.docRef.set(newDoc);
             progressLayer.next("Updating references");
             await this._updateReferencedBy(newDoc, progressTracker);
             progressLayer.next("Dispatching events");
@@ -83,6 +108,33 @@ hb.DomainObj  = class {
         } catch(error) {
             progressLayer.error(error);
         }
+    }
+
+    /**
+     * Loops through every property of each doc.
+     * Dispatches a domain event for added, deleted, and changed properties.
+     * Returns true if any property has changed.
+     */
+    _dispatchDocChanges(doc, newDoc) {
+
+        // get a unique array of all keys from both documents
+        const allKeys = [...new Set(Object.keys(doc).concat(Object.keys(newDoc)))];
+
+        let hasChanged = false;
+        allKeys.forEach(key => {
+            if (!doc[key]) {
+                hasChanged = true;
+                this.dispatchDomainEvent(`${key}-added`);
+            } else if (!newDoc[key]) {
+                hasChanged = true;
+                this.dispatchDomainEvent(`${key}-deleted`);
+            } else if(JSON.stringify(doc[key]) !== JSON.stringify(newDoc[key])) {
+                hasChanged = true;
+                this.dispatchDomainEvent(`${key}-changed`);               
+            }
+        });
+
+        return hasChanged;
     }
 
     dispatchDomainEvent(event) {
@@ -150,7 +202,7 @@ hb.DomainObj  = class {
             let doc = snapshot.data();
             doc = hb.DomainObj.__updateDocListeners({doc, property: "referencedBy", listeners});
             progressLayer.next("Updating references");
-            doc = await docRef.update(doc);
+            doc = await docRef.set(doc);
             progressLayer.done("References updated");
             return doc;            
         });        
@@ -325,13 +377,31 @@ hb.DomainObj  = class {
             return false;
         }
 
-        let doc = snapshot.data();        
+        const doc = snapshot.data();
+        const newDoc = Object.assign({}, doc);
         const needUpdate = methodsToCall.reduce((needUpdate, method) => {
-            const newDoc = this[method](doc, refDoc);
-            if (newDoc) {
-                doc = newDoc;
+            
+            // create a new doc so changes can be thrown away
+            // if the event handler returns false
+            const handlerDoc = Object.assign({}, newDoc);
+
+             // call the event handler
+            const save = this[method](handlerDoc, refDoc);
+            
+            if (save === false) {
+                return needUpdate;
+            } else if (save === true) {
                 needUpdate = true;
             }
+
+            // assign changes from the handlerDoc to the newDoc
+            Object.assign(newDoc, handlerDoc);
+
+            const hasChanges = this._dispatchDocChanges(doc, newDoc);
+            if (hasChanges) {
+                needUpdate = true;
+            }
+
             return needUpdate;            
         }, false);
         
@@ -342,7 +412,7 @@ hb.DomainObj  = class {
         
         // we need to update the doc
         progressLayer.next("Updating document");
-        await this.docRef.update(doc);
+        await this.docRef.set(doc);
 
         // handle any additional events
         progressLayer.next("Dispatching events");

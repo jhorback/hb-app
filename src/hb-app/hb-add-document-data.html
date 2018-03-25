@@ -120,7 +120,7 @@
 
         _documentTitleChanged(event) {
             const {documentTitle} = event.detail;
-            const docId =  hb.DocumentCreator.getDocumentId(this.docData.selectedDocType.route, documentTitle);
+            const docId =  hb.DocumentCreator.getDocumentId(this.docData.selectedDocType.dbPrefix, documentTitle);
             this.set("docData.docId", docId); 
         }
 
