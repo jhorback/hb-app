@@ -68,6 +68,11 @@ hb.DomainObj  = class {
      * For existing documents, events will be dispatched for every property
      * that has changed, been added, or deleted.
      * The event will be "property-changed", "property-added", or "property-deleted".
+     *
+     * Since the document to change is a clone/immutable changes to sub objects/arrays
+     * need to be cloned and reassigned for changes to be picked up.
+     * For objects use Objects.assign(), for arrays use [...array];
+     *
      * @param progressTracker
      * An optional ProgressTracker to listen for the progress of the update.
      * @returns Object the updated (or not) document
