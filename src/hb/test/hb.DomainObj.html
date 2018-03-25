@@ -355,6 +355,16 @@
             expect(doc.progressTracker.stepsDescription).to.be.equal("Update: Loading document, Update: Updating, Update: Updating references, Update: Dispatching events, Handling events for docs/TestHandleEvent: Loading document, Handling events for docs/TestHandleEvent: Updating document, Handling events for docs/TestHandleEvent: Dispatching events, Handling events for docs/TestHandleEvent: Finished handling events, Update: Document updated");
           });
         });
+
+
+/*
+tests to add
+* if return value is false, set is not called
+* if a change occurs, set is called
+* if return value is true, set is called even if no changes occur
+* if a document is new update is called
+*/
+
       });
     </script>
   </body>

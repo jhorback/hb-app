@@ -53,8 +53,11 @@ hb.User = class extends hb.DomainObj {
 
     async recordLogin({authUser}) {
        const progress = new ProgressTracker("Login");
-       const user = await this.update(user => {
-           user = user || hb.User.default;
+       const user = await this.update((user, exists) => {
+           if (!exists) {
+               Object.assign(user, hb.User.default);
+           }
+
            user.uid = authUser.uid;
            if (user.displayName === user.providerDisplayName) {
                user.displayName = authUser.displayName;
@@ -66,7 +69,6 @@ hb.User = class extends hb.DomainObj {
                user.firstLogin = new Date();
            }
            user.lastLogin = new Date();
-           return user;
        }, progress);
        progress.save({dbPath: `users/${authUser.uid}`});
        return user;
@@ -86,7 +88,6 @@ hb.User = class extends hb.DomainObj {
                 isSiteAdmin,
                 isAuthor
             };
-            return user;
         }, progress);
        progress.save({dbPath: this.dbPath});
        return user;
