@@ -8,6 +8,7 @@
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../hb-app/hb-menu.html">
+<link rel="import" href="../hb-doc/hb-doc-menu.html">
 <link rel="import" href="../hb/hb.hb-doc.html">
 <link rel="import" href="hb-doc-data.html">
 
@@ -27,7 +28,11 @@
                 <app-toolbar>
                     <paper-icon-button icon="hb:menu" drawer-toggle></paper-icon-button>
                     <div main-title>[[doc.title]]</div>
-                    <hb-doc-menu doc="[[doc]]"></hb-doc-menu>
+                    <hb-doc-menu doc="[[doc]]"
+                        on-delete-document="_deleteDocument"
+                        on-edit-document="_editDocument"
+                        on-show-document-settings="_showDocumentSettings"
+                    ></hb-doc-menu>
                 </app-toolbar>
             </app-header>
             <main>
@@ -59,6 +64,22 @@
                     type: Object
                 }
             };
+        }
+
+        static get eventsListenAt() {
+            return "parent";
+        }
+
+        _deleteDocument(event) {
+            alert("delete from element... need a base class");
+        }
+
+        _editDocument(event) {
+            alert("edit from element... need a base class");
+        }
+
+        _showDocumentSettings(event) {
+            alert("show settings from element... need a base class");
         }
 
         // connectedCallback() {
