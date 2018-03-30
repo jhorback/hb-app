@@ -9,6 +9,7 @@
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../hb-app/hb-menu.html">
 <link rel="import" href="../hb-doc/hb-doc-menu.html">
+<link rel="import" href="../hb-doc/hb-doc-element.html">
 <link rel="import" href="../hb/hb.hb-doc.html">
 <link rel="import" href="hb-doc-data.html">
 
@@ -51,47 +52,14 @@
     * @customElement
     * @polymer
     */
-    class HbDoc extends Polymer.Element {
+    class HbDoc extends HbDocElement {
         static get is() { return 'hb-doc'; }
         
         static get properties() {
-            return {
-                docId: {
-                    type: String,
-                    reflectToAttribute: true
-                },
-                doc: {                
-                    type: Object
-                }
-            };
+
         }
 
-        static get eventsListenAt() {
-            return "parent";
-        }
 
-        _deleteDocument(event) {
-            alert("delete from element... need a base class");
-        }
-
-        _editDocument(event) {
-            alert("edit from element... need a base class");
-        }
-
-        _showDocumentSettings(event) {
-            alert("show settings from element... need a base class");
-        }
-
-        // connectedCallback() {
-        //     super.connectedCallback();
-        //     // this.dispatchEvent(new CustomEvent("request-art", {
-        //     //     bubbles: true,
-        //     //     composed: true,
-        //     //     detail: {
-        //     //         uid: this.uid
-        //     //     }
-        //     // }));
-        // }
     }
 
     window.customElements.define(HbDoc.is, HbDoc);

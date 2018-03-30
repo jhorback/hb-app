@@ -1,0 +1,32 @@
+<link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<script>
+/**
+* @customElement
+* @polymer
+*/
+class HbDocElement extends Polymer.Element {    
+    static get properties() {
+        return {
+            docId: {
+                type: String,
+                reflectToAttribute: true
+            },
+            doc: {                
+                type: Object
+            }
+        };
+    }
+
+    deleteDocument(event) {
+        alert("delete from element... from base class");
+    }
+
+    _editDocument(event) {
+        alert("edit from element... from base class");
+    }
+
+    _showDocumentSettings(event) {
+        alert("show settings from element... from base class");
+    }
+}
+</script>
