@@ -1,12 +1,12 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
-<link rel="import" href="../hb-doc/hb-doc-data-element.html">
+<link rel="import" href="../hb/hb.html">
+<link rel="import" href="../hb-app/EventMap.html">
 <script>
 /**
     * @customElement
     * @polymer
     */
-class HbDocData extends HbDocDataElement {
-    static get is() { return 'hb-doc-data'; }
+class HbDocDataElement extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
 
     static get properties() {
         return {
@@ -19,6 +19,10 @@ class HbDocData extends HbDocDataElement {
                 notify: true,
                 doc: "docs/{docId}",
                 live: true
+            },
+
+            docElementState: {
+
             }
         };
     }
@@ -33,10 +37,9 @@ class HbDocData extends HbDocDataElement {
         };
     }
 
-    constructor() {
-        super("hb-doc");
+    constructor(is) {
+        super();
+        this.domain = new hb[is]({db: hb.db, id: this.docId});
     }
 }
-
-window.customElements.define(HbDocData.is, HbDocData);
 </script>
