@@ -11,11 +11,15 @@
     <style>
         paper-item {
             cursor: default;
+
         }
     </style>
-     <paper-menu-button hidden$="[[!canShow(doc)]]" dynamic-align close-on-activate>
+     <paper-menu-button hidden$="[[!canShow(doc)]]"
+        dynamic-align
+        close-on-activate
+        on-opened-changed="_menuButtonOpenedChanged">
         <paper-icon-button icon="hb:more-vert" slot="dropdown-trigger"></paper-icon-button>
-        <paper-listbox slot="dropdown-content">
+        <paper-listbox id="listbox" slot="dropdown-content">
           <paper-item on-tap="_editDocument">Edit document</paper-item>
           <paper-item on-tap="_deleteDocument">Delete document</paper-item>
           <paper-item on-tap="_settings">Settings</paper-item>
@@ -54,6 +58,10 @@
 
         _settings(event) {
             this.dispatchEvent(new CustomEvent("show-document-settings"));
+        }
+
+        _menuButtonOpenedChanged(event) {
+            this.$.listbox.selected = null;
         }
     }
 
