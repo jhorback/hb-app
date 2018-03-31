@@ -43,9 +43,8 @@
         }
 
         canShow(doc) {
-            // return true if the author.doc is the current user
-            // or if the current user isAuthor in doc.permissions
-            return true;
+            const permission = hb.Doc.permissions.IS_AUTHOR;            
+            return hb.Doc.hasPermission({doc, permission});
         }
 
         _editDocument(event) {

@@ -30,6 +30,23 @@ hb.Doc = class extends hb.DomainObj {
         return hb.config.docTypes.find(dt => dt.is === this.is);
     }
 
+    static get permissions() {
+        return {
+            IS_AUTHOR: "isAuthor"
+        };
+    }
+
+    static hasPermission({doc, permission, user}) {
+        user = user || hb.currentUser;
+        if (!doc || !user) {
+            return false;
+        }
+        
+        return (doc.author.uid === user.uid) ||
+            (doc.permissions && doc.permissions[uid] && doc.permissions[uid][permission]) ?
+            true : false;
+    }
+
     /**
      * 
      */
