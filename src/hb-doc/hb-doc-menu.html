@@ -48,15 +48,24 @@
         }
 
         _editDocument(event) {
-            this.dispatchEvent(new CustomEvent("edit-document"));
+            this.dispatchEvent(new CustomEvent("edit-document", {
+                bubbles: true,
+                composed: true
+            }));
         }
 
         _deleteDocument(event) {
-            this.dispatchEvent(new CustomEvent("delete-document"));
+            this.dispatchEvent(new CustomEvent("delete-document", {
+                bubbles: true,
+                composed: true
+            }));
         }
 
         _settings(event) {
-            this.dispatchEvent(new CustomEvent("show-document-settings"));
+            this.dispatchEvent(new CustomEvent("show-document-settings", {
+                bubbles: true,
+                composed: true
+            }));
         }
 
         _menuButtonOpenedChanged(event) {

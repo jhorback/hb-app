@@ -1,10 +1,11 @@
 <link rel="import" href="../../bower_components/polymer/polymer-element.html">
+<link rel="import" href="../hb-app/EventMap.html">
 <script>
 /**
 * @customElement
 * @polymer
 */
-class HbDocElement extends Polymer.Element {    
+class HbDocElement extends EventMap(Polymer.Element) {    
     static get properties() {
         return {
             docId: {
@@ -14,6 +15,18 @@ class HbDocElement extends Polymer.Element {
             doc: {                
                 type: Object
             }
+        };
+    }
+
+    static get eventsListenAt() {
+        return "parent";
+    }
+
+    static get events() {
+        return {
+            "delete-document": "_deleteDocument",
+            "edit-document": "_editDocument",
+            "show-document-settings": "_showDocumentSettings"
         };
     }
 
