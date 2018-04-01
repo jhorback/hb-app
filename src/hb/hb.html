@@ -30,5 +30,28 @@ const hb = class {
             }, wait);
         }
     }
+
+    /**
+     * @returns object
+     * {
+     *   hasParentDoc,
+     *   parentUrl
+     * }
+     * hasParentDoc is true if a close button should be shown
+     *   instead of a back button.
+     * parentUrl will either be its' parent or the root url if none.
+     */
+     static get urlInfo() {
+        const {href} = window.location;
+        const {rootPath} = Polymer;
+        const pathParts = href.substring(rootPath.length + 1, href.length).split("/");
+        const segmentCount = pathParts.length;
+        const hasParentDoc = segmentCount > 2;
+        pathParts.splice(pathParts.length - 2, 2);
+        const parentUrl = hasParentDoc ?
+            `${rootPath}${pathParts.join("/")}` :
+            rootPath;
+        return {hasParentDoc, parentUrl};
+    }
 }
 </script>
