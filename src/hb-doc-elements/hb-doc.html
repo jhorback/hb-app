@@ -11,16 +11,19 @@
 <link rel="import" href="../hb/hb.hb-doc.html">
 <link rel="import" href="../hb-doc/hb-doc-menu.html">
 <link rel="import" href="../hb-doc/hb-doc-element.html">
+<link rel="import" href="../hb-doc/hb-doc-settings-page.html">
 <link rel="import" href="hb-doc-data.html">
 
 <dom-module id="hb-doc">
-
   <template>
     <style include="hb-page-layout-shared-styles"></style>
     <style>
     </style>
     <hb-doc-data doc="{{doc}}" doc-id="[[docId]]"></hb-doc-data>
-    <app-drawer-layout id="drawerLayout" force-narrow>
+    <template is="dom-if" if="[[showSettings]]" restamp>
+        <hb-doc-settings-page doc="[[doc]]"></hb-doc-settings-page>
+    </template>
+    <app-drawer-layout id="drawerLayout" force-narrow hidden$="[[showSettings]]">
         <app-drawer id="drawer" slot="drawer" swipe-open>
             <hb-menu></hb-menu>
         </app-drawer>

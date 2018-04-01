@@ -14,6 +14,10 @@ class HbDocElement extends EventMap(Polymer.Element) {
             },
             doc: {                
                 type: Object
+            },
+            showSettings: {
+                type: Boolean,
+                value: false
             }
         };
     }
@@ -26,7 +30,8 @@ class HbDocElement extends EventMap(Polymer.Element) {
         return {
             "delete-document": "_deleteDocument",
             "edit-document": "_editDocument",
-            "show-document-settings": "_showDocumentSettings"
+            "show-document-settings": "_showDocumentSettings",
+            "hide-document-settings": "_hideDocumentSettings"
         };
     }
 
@@ -39,7 +44,13 @@ class HbDocElement extends EventMap(Polymer.Element) {
     }
 
     _showDocumentSettings(event) {
-        alert("show settings from element... from base class");
+        this.showSettings = true;
+        const settingsPage = this.shadowRoot.querySelector("hb-doc-settings-page");
+        settingsPage && settingsPage.resetLayout();
+    }
+
+    _hideDocumentSettings(event) {
+        this.showSettings = false;
     }
 }
 </script>
