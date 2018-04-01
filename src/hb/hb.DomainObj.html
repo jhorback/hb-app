@@ -420,5 +420,11 @@ hb.DomainObj  = class {
         progressLayer.done("Finished handling events");
         return true;
     }
+
+    delete() {
+        // would need to load up every document in referencedBy
+        // then remove the event listener to this db path on each
+        // then delete the document
+    }
 }
 </script>
