@@ -3,13 +3,50 @@
 <link rel="import" href="../../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../../bower_components/paper-input/paper-textarea.html">
+<link rel="import" href="../../bower_components/paper-card/paper-card.html">
 <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../../bower_components/paper-toggle-button/paper-toggle-button.html">
+<link rel="import" href="../../bower_components/paper-item/paper-icon-item.html">
+<link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
+
 
 <dom-module id="hb-doc-settings-page">
 
   <template>
     <style include="hb-page-layout-shared-styles"></style>
     <style>
+        #cards {
+            max-width: 800px;
+            margin: 1em auto;
+        }
+        #cards paper-card {
+            width: 100%;
+            margin-bottom: 1em;
+        }
+        .card-header {
+            @apply --paper-font-headline;
+        }
+        .card-header paper-toggle-button {
+            float: right;
+        }
+        .subhead {
+            @apply --paper-font-body2;
+            line-height: 48px;
+            padding-left: 16px;
+        }
+        .quiet {
+            @apply --paper-font-caption;
+        }
+        .avatar {
+            display: inline-block;
+            box-sizing: border-box;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-size: contain;
+        }
     </style>
     <app-header-layout id="layout">
         <app-header slot="header" fixed effects="waterfall">
@@ -20,7 +57,59 @@
         </app-header>
         <main>
         <!-- main content -->
-            Doc settings
+            <div id="cards">
+                <paper-card>
+                    <div class="card-content">
+                        <div class="card-header">
+                            Page title
+                        </div>                    
+                        <paper-input value="[[doc.title]]" readonly></paper-input>
+                        <div class="quiet">
+                            Page path: [[getPageId(doc)]]
+                        </div>
+                    </div>
+                </paper-card>
+                <paper-card>
+                    <div class="card-content">
+                        <div class="card-header">
+                            Description
+                            <paper-toggle-button
+                                title="Use custom description"
+                                disabled>
+                            </paper-toggle-button>
+                        </div>                    
+                        <paper-textarea value="[[doc.description]]" readonly></paper-textarea>
+                    </div>
+                </paper-card>
+                <paper-card>
+                    <div class="card-content">
+                        <div class="card-header">
+                            Thumbnail
+                            <paper-toggle-button
+                                title="Use custom thumbnail"
+                                disabled>
+                            </paper-toggle-button>
+                        </div>                    
+                        <div style="padding-top:2em;">
+                            Add thumbnail support
+                        </div>
+                    </div>
+                </paper-card>
+                <paper-card>
+                    <div class="card-content">
+                        <div class="card-header">Permissions</div>                    
+                        <div class="subhead">Author</div>
+                        <paper-icon-item>
+                            <div class="avatar" slot="item-icon"
+                                style="background-image:url([[doc.author.photoURL]])">                                
+                            </div>
+                            <paper-item-body>
+                                [[doc.author.displayName]]
+                            </paper-item-body>
+                        </paper-icon-item>
+                    </div>
+                </paper-card>
+            </div>
         </main>
     </app-header-layout>
   </template>
@@ -42,6 +131,11 @@
 
         resetLayout() {
             this.$.layout.resetLayout();
+        }
+
+        getPageId(doc) {
+            const dobj = hb[doc.is];
+            return dobj.getUrl(doc.docId);
         }
 
         close() {
