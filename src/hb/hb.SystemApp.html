@@ -31,6 +31,10 @@ hb.SystemApp = class extends hb.DomainObj {
             "title-changed": {
                 "homeDoc": "_homeDocTitleChanged",
                 "menuItem": "_menuItemTitleChanged"
+            },
+            "document-deleted": {
+                "homeDoc": "_homeDocDeleted",
+                "menuItem": "_menuItemDocDeleted"
             }
 	    };
 	}
@@ -219,6 +223,14 @@ hb.SystemApp = class extends hb.DomainObj {
     }
 
     _menuItemTitleChanged(doc, refDoc) {
+        throw new Error("Not implemented");
+    }
+
+    _homeDocDeleted(doc, refDoc) {
+        throw new Error("Not implemented");
+    }
+
+    _menuItemDocDeleted(doc, refDoc) {
         throw new Error("Not implemented");
     }
 }
