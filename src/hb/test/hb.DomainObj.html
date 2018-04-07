@@ -28,10 +28,11 @@
 
 
       class MockDb{
-        constructor({snapshotData = null, setMethod = null}) {
+        constructor({snapshotData = null, setMethod = null, deleteMethod = null}) {
           const noop = () => {};
           this.snapshotData = snapshotData || noop;
           this.setMethod = setMethod || noop;
+          this.deleteMethod = deleteMethod || noop;
         }
 
         // returns a docRef
@@ -47,6 +48,9 @@
             },
             set: (doc, options) => {
               return Promise.resolve(this.setMethod(path, doc));
+            },
+            delete: () => {
+              return Promise.resolve(this.deleteMethod());
             }
           };
         }
@@ -404,6 +408,30 @@
           });
         });
 
+
+        describe("delete", () => {
+          it("adds the delete-document reference when adding an event listener", () => {
+              const obj = new hb.DomainObj({db});
+              obj.addDomainEventListener("somedb/path", "test-object", "test-event");
+              const newObj = obj._updateReferences({});
+              expect(newObj.references["somedb/path"].events[""][0]).to.be.equal("delete-document");
+          });
+
+          it ("deletes the document", (done) => {
+            const db = new MockDb({
+              snapshotData: (dbPath) => {
+                return {foo: "bar"};
+              },
+              deleteMethod: () => {
+                expect(true).to.be.true;
+                done();
+              }
+            });
+
+            const testDoc = new hb.testDoc({db, dbPath: "docs/testDoc"});          
+            testDoc.delete();
+          });
+        });
       });
     </script>
   </body>

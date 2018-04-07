@@ -433,7 +433,7 @@ hb.DomainObj  = class {
         progressLayer.next("Notifying references");
         const doc = snapshot.data();
         this.dispatchDomainEvent("delete-document");        
-        await _dispatchEvents(doc, progressTracker);
+        await this._dispatchEvents(doc, progressTracker);
         await this.docRef.delete();
         progressLayer.done("Document deleted");        
     }
