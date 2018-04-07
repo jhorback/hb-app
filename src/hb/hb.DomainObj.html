@@ -142,6 +142,7 @@ hb.DomainObj  = class {
     }
 
     addDomainEventListener(dbPath, is, event, scope) {
+        this._listenersToHandle.push({add: true, event: "delete-document", dbPath, is, scope});        
         this._listenersToHandle.push({add: true, event, dbPath, is, scope});
     }
 
@@ -421,10 +422,20 @@ hb.DomainObj  = class {
         return true;
     }
 
-    delete() {
-        // would need to load up every document in referencedBy
-        // then remove the event listener to this db path on each
-        // then delete the document
+    /**
+     * Notifies all references of the "delete-document" event
+     * then deletes the document.
+     */
+    async delete(progressTracker = new ProgressTracker()) {
+        const progressLayer = progressTracker.addLayer("Delete", 3);
+        progressLayer.next("Loading document");        
+        const snapshot = await this.docRef.get();
+        progressLayer.next("Notifying references");
+        const doc = snapshot.data();
+        this.dispatchDomainEvent("delete-document");        
+        await _dispatchEvents(doc, progressTracker);
+        await this.docRef.delete();
+        progressLayer.done("Document deleted");        
     }
 }
 </script>
