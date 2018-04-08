@@ -28,15 +28,24 @@ class HbDocElement extends EventMap(Polymer.Element) {
 
     static get events() {
         return {
-            "delete-document": "_deleteDocument",
+            "confirm-delete-document": "_confirmDeleteDocument",
+            "document-deleted": "_documentDeleted",
             "edit-document": "_editDocument",
             "show-document-settings": "_showDocumentSettings",
             "hide-document-settings": "_hideDocumentSettings"
         };
     }
 
-    _deleteDocument(event) {
-        alert("delete from element... from base class");
+    _confirmDeleteDocument(event) {
+        if(confirm("Are you sure you want to delete this document?")) {
+            this.shadowRoot.dispatchEvent(new CustomEvent("delete-document"));
+        }
+    }
+
+    async _documentDeleted(event) {
+        const {parentUrl} = hb.urlInfo;
+        window.history.pushState({}, null, parentUrl);
+        window.dispatchEvent(new CustomEvent("location-changed"));
     }
 
     _editDocument(event) {

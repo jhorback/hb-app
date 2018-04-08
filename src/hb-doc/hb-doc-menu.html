@@ -55,7 +55,7 @@
         }
 
         _deleteDocument(event) {
-            this.dispatchEvent(new CustomEvent("delete-document", {
+            this.dispatchEvent(new CustomEvent("confirm-delete-document", {
                 bubbles: true,
                 composed: true
             }));
