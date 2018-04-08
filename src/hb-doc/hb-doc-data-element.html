@@ -33,13 +33,20 @@ class HbDocDataElement extends Polymer.FirestoreMixin(EventMap(Polymer.Element))
     
     static get events() {
         return {
-            
+            "delete-document": "_deleteDocument"
         };
     }
 
-    constructor(is) {
-        super();
-        this.domain = new hb[is]({db: hb.db, id: this.docId});
+    get domain() {
+        return new hb[this.doc.is]({db: hb.db, id: this.docId});
+    }
+
+    async _deleteDocument() {
+        await this.domain.delete();
+        this.dispatchEvent(new CustomEvent("document-deleted", {
+            bubbles: true,
+            composed: true
+        }));
     }
 }
 </script>
