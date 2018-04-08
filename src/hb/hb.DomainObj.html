@@ -142,7 +142,7 @@ hb.DomainObj  = class {
     }
 
     addDomainEventListener(dbPath, is, event, scope) {
-        this._listenersToHandle.push({add: true, event: "delete-document", dbPath, is, scope});        
+        this._listenersToHandle.push({add: true, event: "document-deleted", dbPath, is, scope});        
         this._listenersToHandle.push({add: true, event, dbPath, is, scope});
     }
 
@@ -187,8 +187,9 @@ hb.DomainObj  = class {
         //     }
         // }
         const thisDbPath = this.dbPath;
+        const is = this.constructor.is;
         const byDbPath = [...this._listenersToHandle].reduce((byDbPath, listener) => {
-            const {dbPath, add, remove, event, is, scope} = listener;
+            const {dbPath, add, remove, event, scope} = listener;
             byDbPath[dbPath] = byDbPath[dbPath] || [];
             byDbPath[dbPath].push({add, remove, event, is, scope, dbPath: thisDbPath});
             return byDbPath;
@@ -423,16 +424,17 @@ hb.DomainObj  = class {
     }
 
     /**
-     * Notifies all references of the "delete-document" event
+     * Notifies all references of the "document-deleted" event
      * then deletes the document.
      */
     async delete(progressTracker = new ProgressTracker()) {
+        debugger;
         const progressLayer = progressTracker.addLayer("Delete", 3);
         progressLayer.next("Loading document");        
         const snapshot = await this.docRef.get();
         progressLayer.next("Notifying references");
         const doc = snapshot.data();
-        this.dispatchDomainEvent("delete-document");        
+        this.dispatchDomainEvent("document-deleted");        
         await this._dispatchEvents(doc, progressTracker);
         await this.docRef.delete();
         progressLayer.done("Document deleted");        

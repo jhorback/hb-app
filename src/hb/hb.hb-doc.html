@@ -19,7 +19,8 @@ hb["hb-doc"] = class extends hb.Doc {
         return Object.assign({}, hb.Doc.default, {
             is: hb["hb-doc"].is,
             content: [{
-                foo: "bar"
+                is: "hb-text-content",
+                data: ""
             }]
         });
     }

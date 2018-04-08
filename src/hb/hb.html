@@ -50,7 +50,7 @@ const hb = class {
         pathParts.splice(pathParts.length - 2, 2);
         const parentUrl = hasParentDoc ?
             `${rootPath}${pathParts.join("/")}` :
-            rootPath;
+            `${rootPath}/`;
         return {hasParentDoc, parentUrl};
     }
 }

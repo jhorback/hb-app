@@ -145,7 +145,7 @@
                 "somedb/path": {
                   "is":"test-object",
                   "events":{
-                    "": ["delete-document", "test-event", "test-event2"]
+                    "": ["document-deleted", "test-event", "test-event2"]
                   }
                 }
               }
@@ -177,7 +177,7 @@
               const obj = new hb.DomainObj({db});
               obj.addDomainEventListener("somedb/path", "test-object", "test-event2");             
               const expected = clone(testDoc);
-              expected.references["somedb/path"].events[""] = ["delete-document", "test-event", "test-event2"];
+              expected.references["somedb/path"].events[""] = ["document-deleted", "test-event", "test-event2"];
               const newObj = obj._updateReferences(testDoc);
               expect(newObj).to.deep.equal(expected);
             });
@@ -186,7 +186,7 @@
               const obj = new hb.DomainObj({db});
               obj.addDomainEventListener("somedb/path", "test-object", "test-scoped-event", "testScope");
               const expected = clone(testDoc);
-              expected.references["somedb/path"].events["testScope"] = ["delete-document", "test-scoped-event"];
+              expected.references["somedb/path"].events["testScope"] = ["document-deleted", "test-scoped-event"];
               const newObj = obj._updateReferences(testDoc);
               expect(newObj).to.deep.equal(expected);
             });
@@ -414,7 +414,7 @@
               const obj = new hb.DomainObj({db});
               obj.addDomainEventListener("somedb/path", "test-object", "test-event");
               const newObj = obj._updateReferences({});
-              expect(newObj.references["somedb/path"].events[""][0]).to.be.equal("delete-document");
+              expect(newObj.references["somedb/path"].events[""][0]).to.be.equal("document-deleted");
           });
 
           it ("deletes the document", (done) => {
