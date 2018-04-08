@@ -39,7 +39,9 @@
             <!-- main content -->
                 <div style="text-align:center;margin:2em;">
                     Author: [[doc.author.displayName]]<br>
-                    <img src="[[doc.author.photoURL]]" width="100">
+                    <template is="dom-if" if="[[doc.author.photoURL]]">
+                        <img src="[[doc.author.photoURL]]" width="100">
+                    </template>
                 </div>
             </main>
         </app-header-layout>
