@@ -414,11 +414,11 @@ hb.DomainObj  = class {
         
         // we need to update the doc
         progressLayer.next("Updating document");
-        await this.docRef.set(doc);
+        await this.docRef.set(newDoc);
 
         // handle any additional events
         progressLayer.next("Dispatching events");
-        await this._dispatchEvents(doc, progressTracker);
+        await this._dispatchEvents(newDoc, progressTracker);
         progressLayer.done("Finished handling events");
         return true;
     }
@@ -427,17 +427,20 @@ hb.DomainObj  = class {
      * Notifies all references of the "document-deleted" event
      * then deletes the document.
      */
-    async delete(progressTracker = new ProgressTracker()) {
-        debugger;
+    async delete(progressTracker = new ProgressTracker()) {        
         const progressLayer = progressTracker.addLayer("Delete", 3);
-        progressLayer.next("Loading document");        
-        const snapshot = await this.docRef.get();
-        progressLayer.next("Notifying references");
-        const doc = snapshot.data();
-        this.dispatchDomainEvent("document-deleted");        
-        await this._dispatchEvents(doc, progressTracker);
-        await this.docRef.delete();
-        progressLayer.done("Document deleted");        
+        try {
+            progressLayer.next("Loading document");        
+            const snapshot = await this.docRef.get();
+            progressLayer.next("Notifying references");
+            const doc = snapshot.data();
+            this.dispatchDomainEvent("document-deleted");        
+            await this._dispatchEvents(doc, progressTracker);
+            await this.docRef.delete();
+            progressLayer.done("Document deleted");
+        } catch (error) {
+            progressLayer.error(error);
+        }    
     }
 }
 </script>

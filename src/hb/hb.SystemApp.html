@@ -231,7 +231,6 @@ hb.SystemApp = class extends hb.DomainObj {
     }
 
     _menuItemDocDeleted(doc, refDoc) {
-        debugger;
         this.removeDomainEventListener(`docs/${refDoc.docId}`);
         const {menu} = doc;
         const menuSet = new Set(menu);

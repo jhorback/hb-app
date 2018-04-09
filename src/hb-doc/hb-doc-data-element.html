@@ -42,11 +42,13 @@ class HbDocDataElement extends Polymer.FirestoreMixin(EventMap(Polymer.Element))
     }
 
     async _deleteDocument() {
-        await this.domain.delete();
+        const progressTracker = new ProgressTracker("Deleting document");
+        await this.domain.delete(progressTracker);
         this.dispatchEvent(new CustomEvent("document-deleted", {
             bubbles: true,
             composed: true
         }));
+        progressTracker.save({dbPath: this.domain.dbPath});        
     }
 }
 </script>
