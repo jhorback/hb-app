@@ -6,7 +6,10 @@
  * @customElement
  * @polymer
  */
-class HbDocDataElement extends Polymer.FirestoreMixin(EventMap(Polymer.Element)) {
+class HbDocDataElement extends
+    Polymer.FirestoreMixin(
+    SystemFeedback(
+    EventMap(Polymer.Element))) {
 
     static get properties() {
         return {
@@ -38,7 +41,10 @@ class HbDocDataElement extends Polymer.FirestoreMixin(EventMap(Polymer.Element))
     }
 
     get domain() {
-        return new hb[this.doc.is]({db: hb.db, id: this.docId});
+        if (!this._domain) {
+            this._domain = new hb[this.doc.is]({db: hb.db, id: this.docId});
+        }
+        return this._domain;
     }
 
     async _deleteDocument() {
