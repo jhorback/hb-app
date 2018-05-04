@@ -102,7 +102,7 @@ hb.DomainObj  = class {
             progressLayer.next("Updating references");
             await this._updateReferencedBy(newDoc, progressTracker);
             progressLayer.next("Dispatching events");
-            await this._dispatchEvents(newDoc, progressTracker);
+            await this._dispatchEvents({doc: newDoc, dbPath:this.dbPath}, progressTracker);
             progressLayer.done("Document updated");
             return newDoc;
         } catch(error) {
@@ -278,7 +278,9 @@ hb.DomainObj  = class {
      * @param doc the data for this domainObj
      * @returns async doc
      */
-    async _dispatchEvents(doc, progressTracker) {
+    async _dispatchEvents(docMetaData, progressTracker) {
+        const {doc, dbPath} = docMetaData;
+
         if (!doc.referencedBy) {
             return Promise.resolve();
         }
@@ -302,7 +304,7 @@ hb.DomainObj  = class {
             const exists = await domainObj._handleEvents({
                 eventHandlers,
                 eventsToHandle,
-                refDoc: doc,
+                refDocMetaData: docMetaData,
                 progressTracker
             });
 
@@ -342,26 +344,27 @@ hb.DomainObj  = class {
      * @param refDoc the document that triggered the events.
      * @returns async true if the doc exists, false otherwise
      */
-    async _handleEvents({eventHandlers, eventsToHandle, refDoc, progressTracker}) {
-
+    async _handleEvents({eventHandlers, eventsToHandle, refDocMetaData, progressTracker}) {
+        const {doc:refDoc, dpPath:refDocDbPath} = refDocMetaData;
+        
         const methodsToCall = Object.keys(eventsToHandle).reduce((methods, scope) => {
             const events = eventsToHandle[scope];
             events.forEach(eventName => {
-                const handler = eventHandlers[eventName];
-                if (!handler) {
+                const methodHandler = eventHandlers[eventName];
+                if (!methodHandler) {
                     return;
                 }
 
-                let method = null;
+                let handler = null;
                 if (scope === "" && typeof handler === "string") {
-                    method = handler;
-                } else if (handler[scope]) {
-                   method = handler[scope];
+                    handler = methodHandler;
+                } else if (methodHandler[scope]) {
+                   handler = methodHandler[scope];
                 }
                 
                 // only add the method to call if it exists on this domainObj
-                if (method && this[method]) {
-                    methods.push(method);
+                if (handler && this[handler]) {
+                    methods.push({handler, eventName});
                 }
             });
             return methods;
@@ -388,7 +391,11 @@ hb.DomainObj  = class {
             const handlerDoc = Object.assign({}, newDoc);
 
              // call the event handler
-            const save = this[method](handlerDoc, refDoc);
+            const save = this[method.handler](handlerDoc, refDoc);
+            if (method.eventName === "document-deleted") {
+                save = true;
+                this.__removeListener(doc, "references", {refDocDbPath});
+            }
             
             if (save === false) {
                 return needUpdate;
@@ -418,7 +425,7 @@ hb.DomainObj  = class {
 
         // handle any additional events
         progressLayer.next("Dispatching events");
-        await this._dispatchEvents(newDoc, progressTracker);
+        await this._dispatchEvents({doc: newDoc, dbPath: this.dbPath}, progressTracker);
         progressLayer.done("Finished handling events");
         return true;
     }
@@ -435,7 +442,7 @@ hb.DomainObj  = class {
             progressLayer.next("Notifying references");
             const doc = snapshot.data();
             this.dispatchDomainEvent("document-deleted");        
-            await this._dispatchEvents(doc, progressTracker);
+            await this._dispatchEvents({doc, dbPath: this.dbPath}, progressTracker);
             await this.docRef.delete();
             progressLayer.done("Document deleted");
         } catch (error) {

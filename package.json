@@ -2,14 +2,13 @@
   "name": "hb-app",
   "version": "0.1.0",
   "scripts": {
-      "polybuild": "polymer build",
-      "polyserve": "polymer serve -o",
-      "fireserve": "npm run polybuild && firebase use harbor-staging && firebase serve",      
-      "polytest": "polymer test",
-      "polydoc": "polymer analyze --input .\\src\\hb-app\\hb-app.html > analysis.json",
-      "push-staging": "npm run polybuild && firebase deploy -P harbor-staging",
-      "deploy-staging": "npm run polytest && npm run polybuild && firebase deploy -P harbor-staging",
-      "deploy-production": "npm run polytest && npm run polybuild && firebase deploy -P default"
-  },
-  "devDependencies": {}
+    "polybuild": "polymer build",
+    "polyserve": "polymer serve -o",
+    "fireserve": "npm run polybuild && firebase use harbor-staging && firebase serve",
+    "polytest": "polymer test",
+    "polydoc": "polymer analyze --input .\\src\\hb-app\\hb-app.html > analysis.json",
+    "push-staging": "npm run polybuild && firebase deploy -P harbor-staging",
+    "deploy-staging": "npm run polytest && npm run polybuild && firebase deploy -P harbor-staging",
+    "deploy-production": "npm run polytest && npm run polybuild && firebase deploy -P default"
+  }
 }

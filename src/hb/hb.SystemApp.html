@@ -227,11 +227,10 @@ hb.SystemApp = class extends hb.DomainObj {
     }
 
     _homeDocDeleted(doc, refDoc) {
-        throw new Error("Not implemented");
+        doc.homeDoc = {};
     }
 
     _menuItemDocDeleted(doc, refDoc) {
-        this.removeDomainEventListener(`docs/${refDoc.docId}`);
         const {menu} = doc;
         const menuSet = new Set(menu);
         const toDelete = menu.find(i => i.docId === refDoc.docId);
